@@ -3,15 +3,14 @@
 
 <!-- Plugin description -->
 This plugin provides PyCharm with both real-time and on-demand scanning capabilities using an external MyPy tool.\
-It is the rework of [Roberto Leinardi](#acknowledgements)'s [mypy-pycharm](https://github.com/leinardi/mypy-pycharm) plugin.[ Click here](#differences-from-the-original-plugin) to see differences.
+It is the rework of [Roberto Leinardi](https://github.com/szabope/mypy-pycharm-plugin?tab=readme-ov-file#acknowledgements)'s [mypy-pycharm](https://github.com/leinardi/mypy-pycharm) plugin.[ Click here](https://github.com/szabope/mypy-pycharm-plugin?tab=readme-ov-file#differences-from-the-original-plugin) to see differences.
 
 [MyPy](https://github.com/python/mypy), as described by its authors:
-
 >Mypy is a static type checker for Python.
-> 
+>
 >Type checkers help ensure that you're using variables and functions in your code correctly. With mypy, add type hints (PEP 484) to your Python programs, and mypy will warn you when you use those types incorrectly.
 
-![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/results.png)
+![low_res_mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/146a7eaccf3ad32a127dbdcef7bf4042e943411a/art/results_lowres.png)
 <!-- Plugin description end -->
 
 ## Installation steps
@@ -46,6 +45,8 @@ action is available within MyPy toolwindow. It clears the results and runs mypy 
 and currently focused in the Editor.
 
 ![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/menu.png)
+
+![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/results.png)
 
 ## FAQ
 ### Scan fails with: `Mypy executable has thrown an error.`
