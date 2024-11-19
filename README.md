@@ -11,7 +11,7 @@ It is the rework of [Roberto Leinardi](#acknowledgements)'s [mypy-pycharm](https
 > 
 >Type checkers help ensure that you're using variables and functions in your code correctly. With mypy, add type hints (PEP 484) to your Python programs, and mypy will warn you when you use those types incorrectly.
 
-![mypy plugin screenshot](https://github.com/szabope/mypy-pycharm-plugin/blob/master/art/results.png)
+![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/results.png)
 <!-- Plugin description end -->
 
 ## Installation steps
@@ -27,25 +27,25 @@ If such configuration was not found, the plugin tries to detect the executable b
 ### Manual configuration
 You can modify settings at [Tools](https://www.jetbrains.com/help/pycharm/settings-tools.html#Settings_Tools.topic) / **Mypy**.
 
-![mypy plugin screenshot](https://github.com/szabope/mypy-pycharm-plugin/blob/master/art/settings.png)
+![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/settings.png)
 
 ### Inspection severity
 MyPy severity level is set to `Error` by default. You can change this in [inspection settings](https://www.jetbrains.com/help/pycharm/inspections-settings.html#Inspections_Settings.topic).
 
 ## Usage
 
-**Scan with Mypy** ![](https://github.com/szabope/mypy-pycharm-plugin/blob/master/art/mypyScanAction.svg) 
+**Scan with Mypy** ![](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/mypyScanAction.svg) 
 action is available in right-click menus for the Python file loaded into the editor, its tab, 
 and Python files and directories in the project and changes views. You may select multiple targets, 
 but all of them has to be either a Python file or a directory.\
-**Rescan Latest** ![](https://github.com/szabope/mypy-pycharm-plugin/blob/master/art/refresh.svg) 
+**Rescan Latest** ![](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/refresh.svg) 
 action is available within MyPy toolwindow. It clears the results and re-runs mypy for the latest target. 
 Mypy configuration is not retained from the previous run.\
-**Scan Editor** ![](https://github.com/szabope/mypy-pycharm-plugin/blob/master/art/execute.svg) 
+**Scan Editor** ![](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/execute.svg) 
 action is available within MyPy toolwindow. It clears the results and runs mypy for the one file that is open 
 and currently focused in the Editor.
 
-![mypy plugin screenshot](https://github.com/szabope/mypy-pycharm-plugin/blob/master/art/menu.png)
+![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/menu.png)
 
 ## FAQ
 ### Scan fails with: `Mypy executable has thrown an error.`
