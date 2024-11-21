@@ -5,7 +5,7 @@ import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import com.intellij.refactoring.suggested.startOffset
+import com.intellij.psi.util.startOffset
 import com.jetbrains.python.ast.impl.PyUtilCore
 import com.jetbrains.python.psi.PyUtil.StringNodeInfo
 import com.jetbrains.python.psi.impl.PyPsiUtils

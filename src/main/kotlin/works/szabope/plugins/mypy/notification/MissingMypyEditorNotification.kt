@@ -8,7 +8,7 @@ import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotificationProvider
 import com.jetbrains.python.pyi.PyiFileType
 import works.szabope.plugins.mypy.MyBundle
-import works.szabope.plugins.mypy.services.MypyInstallerService
+import works.szabope.plugins.mypy.services.MypyPackageManagerService
 import works.szabope.plugins.mypy.services.MypyService.Companion.SUPPORTED_FILE_TYPES
 import works.szabope.plugins.mypy.services.MypySettings
 import java.util.function.Function
@@ -41,7 +41,7 @@ internal class MypyEditorNotificationProvider : EditorNotificationProvider {
         PyiFileType.INSTANCE
         return Function {
             if (isSdkSet(project) && !isSettingsInitialized(project) && file.fileType in SUPPORTED_FILE_TYPES) {
-                val isMypyInstalled = MypyInstallerService.getInstance(project).isMypyInstalled()
+                val isMypyInstalled = MypyPackageManagerService.getInstance(project).isInstalled()
                 return@Function MissingMypyEditorNotificationPanel(it, isMypyInstalled)
             }
             return@Function null

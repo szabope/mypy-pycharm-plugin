@@ -3,7 +3,6 @@ package works.szabope.plugins.mypy.toolWindow
 import com.intellij.ide.ActivityTracker
 import com.intellij.ide.DefaultTreeExpander
 import com.intellij.openapi.actionSystem.*
-import com.intellij.openapi.actionSystem.PlatformCoreDataKeys.BGT_DATA_PROVIDER
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
@@ -40,17 +39,14 @@ class MypyToolWindowPanel(private val project: Project, private val tree: Tree =
         TreeUIHelper.getInstance().installSmartExpander(tree)
     }
 
-    override fun getData(dataId: String): Any? {
-        if (MYPY_PANEL_DATA_KEY.`is`(dataId)) {
-            return this
+    override fun uiDataSnapshot(sink: DataSink) {
+        sink[MYPY_PANEL_DATA_KEY] = this
+        sink.lazy(CommonDataKeys.NAVIGATABLE) {
+            val userObject = TreeUtil.getLastUserObject(tree.selectionPath) as? IssueNodeUserObject? ?: return@lazy null
+            val file = VfsUtil.findFile(Path(userObject.file), true) ?: return@lazy null
+            OpenFileDescriptor(project, file, userObject.line, userObject.column)
         }
-        if (BGT_DATA_PROVIDER.`is`(dataId)) {
-            val userObject = TreeUtil.getLastUserObject(tree.selectionPath) as? IssueNodeUserObject? ?: return null
-            val superProvider = super.getData(dataId) as DataProvider?
-            return CompositeDataProvider.compose({ slowId -> getSlowData(slowId, userObject) }, superProvider)
-        }
-
-        return super.getData(dataId)
+        super.uiDataSnapshot(sink)
     }
 
     fun expandAll() = treeExpander.expandAll()
@@ -105,14 +101,6 @@ class MypyToolWindowPanel(private val project: Project, private val tree: Tree =
         val toolBarBox = Box.createHorizontalBox()
         toolBarBox.add(mainToolbar.component)
         add(toolBarBox, BorderLayout.WEST)
-    }
-
-    private fun getSlowData(slowId: String, userObject: IssueNodeUserObject): Any? {
-        if (CommonDataKeys.NAVIGATABLE.`is`(slowId)) {
-            val file = VfsUtil.findFile(Path(userObject.file), true) ?: return null
-            return OpenFileDescriptor(project, file, userObject.line, userObject.column)
-        }
-        return null
     }
 
     companion object {
