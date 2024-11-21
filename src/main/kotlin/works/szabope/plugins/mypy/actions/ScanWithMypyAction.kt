@@ -18,9 +18,10 @@ open class ScanWithMypyAction : DumbAwareAction() {
         val targets = listTargets(event)?.map { it.path } ?: return
         val project = event.project ?: return
         val runConfiguration = MypySettings.getInstance(project).toRunConfiguration()
-        event.getData(MypyToolWindowPanel.MYPY_PANEL_DATA_KEY)?.initializeResultTree(targets)
+        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(MypyToolWindowPanel.ID) ?: return
+        (toolWindow.contentManager.getContent(0)?.component as MypyToolWindowPanel?)?.initializeResultTree(targets)
         MypyService.getInstance(project).scanAsync(targets, runConfiguration)
-        ToolWindowManager.getInstance(project).getToolWindow(MypyToolWindowPanel.ID)?.show()
+        toolWindow.show()
     }
 
     override fun update(event: AnActionEvent) {
