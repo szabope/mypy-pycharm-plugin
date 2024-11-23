@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.serialization) // Gradle Kotlin Serialization Plugin
 }
 
+
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
