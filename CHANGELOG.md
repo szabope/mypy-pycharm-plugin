@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.0.2] - 2024-11-23
+
+- Make Terminal plugin a mandatory dependency by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/16
+- @github-actions made their first contribution in https://github.com/szabope/mypy-pycharm-plugin/pull/9
+
 ## [1.0.1] - 2024-11-23
 
 Fix Naming collisions with old plugin
@@ -24,6 +29,7 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm/compare/v1.0.0...HEAD
-[1.0.1]: https://github.com/szabope/mypy-pycharm/commits/v1.0.1
+[Unreleased]: https://github.com/szabope/mypy-pycharm/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/szabope/mypy-pycharm/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/szabope/mypy-pycharm/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/szabope/mypy-pycharm/commits/v1.0.0
