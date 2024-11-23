@@ -19,7 +19,7 @@ class MissingMypyEditorNotificationPanel(fileEditor: FileEditor, isMypyInstalled
 
     init {
         createActionLabel(
-            MyBundle.message("mypy.intention.fix_executable.open_settings.text"), "MypyOpenSettingsAction"
+            MyBundle.message("mypy.intention.fix_executable.open_settings.text"), "MyPyOpenSettingsAction"
         )
         if (!isMypyInstalled) {
             @Suppress("DialogTitleCapitalization") createActionLabel(

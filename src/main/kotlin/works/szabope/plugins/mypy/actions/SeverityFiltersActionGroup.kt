@@ -19,8 +19,8 @@ class SeverityFiltersActionGroup : DumbAware, ActionGroup() {
         return when (severity) {
             "ERROR" -> SeverityFilterActionConfig(
                 severity,
-                MyBundle.message("action.MypyDisplayErrorsAction.text"),
-                MyBundle.message("action.MypyDisplayErrorsAction.description"),
+                MyBundle.message("action.MyPyDisplayErrorsAction.text"),
+                MyBundle.message("action.MyPyDisplayErrorsAction.description"),
                 AllIcons.General.Error
             )
 
