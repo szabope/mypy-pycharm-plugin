@@ -41,14 +41,14 @@
                     class="works.szabope.plugins.mypy.actions.ScanCurrentlyFocusedOneInEditorAction"
                     icon="AllIcons.Actions.Execute"/>
             <separator/>
-            <action id="MypyScrollToSourceAction"
+            <action id="MyPyScrollToSourceAction"
                     class="works.szabope.plugins.mypy.actions.ScrollToSourceDummyAction"
                     icon="AllIcons.General.AutoscrollToSource"/>
             <separator/>
-            <action id="MypyExpandAllAction"
+            <action id="MyPyExpandAllAction"
                     class="works.szabope.plugins.mypy.actions.ExpandAllAction"
                     icon="AllIcons.Actions.Expandall"/>
-            <action id="MypyCollapseAllAction"
+            <action id="MyPyCollapseAllAction"
                     class="works.szabope.plugins.mypy.actions.CollapseAllAction"
                     icon="AllIcons.Actions.Collapseall"/>
             <separator/>
@@ -59,7 +59,7 @@
             <!--            class="works.szabope.plugins.mypy.actions.SeverityFiltersActionGroup"/>-->
             <!-- </group>-->
             <!-- <separator/>-->
-            <action id="MypyOpenSettingsAction"
+            <action id="MyPyOpenSettingsAction"
                     class="works.szabope.plugins.mypy.actions.OpenSettingsAction"
                     icon="AllIcons.General.GearPlain"/>
         </group>

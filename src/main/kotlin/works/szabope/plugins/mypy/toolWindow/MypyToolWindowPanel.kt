@@ -91,7 +91,7 @@ class MypyToolWindowPanel(private val project: Project, private val tree: Tree =
         }
         autoScrollToSourceHandler.install(tree)
         val actionManager = ActionManager.getInstance()
-        actionManager.replaceAction("MypyScrollToSourceAction", autoScrollToSourceHandler.createToggleAction())
+        actionManager.replaceAction("MyPyScrollToSourceAction", autoScrollToSourceHandler.createToggleAction())
         val mainActionGroup = actionManager.getAction(MAIN_ACTION_GROUP) as ActionGroup
 
         val mainToolbar = ActionManager.getInstance().createActionToolbar(
