@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.0.1] - 2024-11-23
+
+Fix Naming collisions with old plugin
+
 ## [1.0.0] - 2024-11-22
 
 ### MVP
@@ -21,4 +25,5 @@
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
 [Unreleased]: https://github.com/szabope/mypy-pycharm/compare/v1.0.0...HEAD
+[1.0.1]: https://github.com/szabope/mypy-pycharm/commits/v1.0.1
 [1.0.0]: https://github.com/szabope/mypy-pycharm/commits/v1.0.0
