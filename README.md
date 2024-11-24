@@ -1,5 +1,5 @@
 # mypy-pycharm
-[![GitHub license](https://img.shields.io/github/license/leinardi/mypy-pycharm.svg?style=plastic)](https://github.com/leinardi/mypy-pycharm/blob/master/LICENSE)
+[![Apache-2.0 license](https://img.shields.io/github/license/szabope/mypy-pycharm-plugin.svg?style=plastic)](https://github.com/szabope/mypy-pycharm-plugin/blob/master/LICENSE)
 
 <!-- Plugin description -->
 This plugin provides PyCharm with both real-time and on-demand scanning capabilities using an external MyPy tool.\
