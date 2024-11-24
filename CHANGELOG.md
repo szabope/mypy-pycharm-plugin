@@ -29,7 +29,7 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm/compare/v1.0.2...HEAD
-[1.0.2]: https://github.com/szabope/mypy-pycharm/compare/v1.0.1...v1.0.2
-[1.0.1]: https://github.com/szabope/mypy-pycharm/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/szabope/mypy-pycharm/commits/v1.0.0
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/szabope/mypy-pycharm-plugin/commits/v1.0.0
