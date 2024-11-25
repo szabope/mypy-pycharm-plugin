@@ -47,8 +47,8 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                             return@validationOnInput warning(MyBundle.message("mypy.settings.path_to_executable.empty_warning"))
                         }
                         try {
-                            settings.validateMypyExecutable(it.text.trimToNull())
-                        } catch (e: MypySettings.MypyConfigurationValidationException) {
+                            settings.validateExecutable(it.text.trimToNull())
+                        } catch (e: MypySettings.ConfigurationValidationException) {
                             return@validationOnInput error(e.message ?: "N/A")
                         }
                         null
@@ -67,7 +67,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     ).validationOnInput {
                         try {
                             settings.validateConfigFile(it.text.trimToNull())
-                        } catch (e: MypySettings.MypyConfigurationValidationException) {
+                        } catch (e: MypySettings.ConfigurationValidationException) {
                             return@validationOnInput error(e.message ?: "N/A")
                         }
                         null
