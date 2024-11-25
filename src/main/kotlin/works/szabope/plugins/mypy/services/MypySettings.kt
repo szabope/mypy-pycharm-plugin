@@ -9,7 +9,6 @@ import com.intellij.util.text.SemVer
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
-import works.szabope.plugins.mypy.activity.MypySettingsInitializationActivity
 import works.szabope.plugins.mypy.services.cli.PyVirtualEnvCli
 import java.io.File
 
@@ -29,7 +28,7 @@ class MypySettings(internal val project: Project) :
     var mypyExecutable
         get() = state.mypyExecutable
         set(value) {
-            validateMypyExecutable(value)
+            validateExecutable(value)
             state.mypyExecutable = value
         }
 
@@ -55,17 +54,21 @@ class MypySettings(internal val project: Project) :
         return state.mypyExecutable != null
     }
 
-    class MypyConfigurationValidationException(message: String) : Exception(message)
+    class ConfigurationValidationException(message: String) : Exception(message)
 
-    suspend fun initSettings(defaultMypyPath: String?, defaultConfigFilePath: String?, defaultArguments: String?) {
+    suspend fun initSettings(
+        defaultExecutablePath: String?,
+        defaultConfigFilePath: String?,
+        defaultArguments: String?
+    ) {
         if (ProjectRootManager.getInstance(project).projectSdk == null) {
             return
         }
         if (mypyExecutable == null) {
             try {
-                mypyExecutable = defaultMypyPath ?: autodetectMypyExecutable(project)
-            } catch (e: MypyConfigurationValidationException) {
-                logger<MypySettingsInitializationActivity>().info("Mypy not found")
+                mypyExecutable = defaultExecutablePath ?: autodetectExecutable(project)
+            } catch (e: ConfigurationValidationException) {
+                logger<MypySettings>().info("Mypy not found")
             }
         }
         if (configFilePath == null) {
@@ -76,8 +79,8 @@ class MypySettings(internal val project: Project) :
         }
     }
 
-    @Throws(MypyConfigurationValidationException::class)
-    fun validateMypyExecutable(path: String?) {
+    @Throws(ConfigurationValidationException::class)
+    fun validateExecutable(path: String?) {
         if (path == null) {
             return
         }
@@ -108,7 +111,7 @@ class MypySettings(internal val project: Project) :
         }
     }
 
-    @Throws(MypyConfigurationValidationException::class)
+    @Throws(ConfigurationValidationException::class)
     fun validateConfigFile(path: String?) {
         if (path == null) {
             return
@@ -123,7 +126,7 @@ class MypySettings(internal val project: Project) :
         }
     }
 
-    private suspend fun autodetectMypyExecutable(project: Project): String? {
+    private suspend fun autodetectExecutable(project: Project): String? {
         val locateCommand = if (SystemInfo.isWindows) "where mypy.exe" else "which mypy"
         val stdout = StringBuilder()
         PyVirtualEnvCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
@@ -131,7 +134,7 @@ class MypySettings(internal val project: Project) :
     }
 
     private fun fail(key: String, vararg args: String) {
-        throw MypyConfigurationValidationException(MyBundle.message(key, args.asList()))
+        throw ConfigurationValidationException(MyBundle.message(key, args.asList()))
     }
 
     companion object {
