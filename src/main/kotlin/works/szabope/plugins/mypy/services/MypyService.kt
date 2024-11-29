@@ -32,6 +32,8 @@ import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 @Service(Service.Level.PROJECT)
 class MypyService(private val project: Project, private val cs: CoroutineScope) {
 
+    private val logger = logger<MypyService>()
+
     private var manualScanJob: Job? = null
 
     val scanInProgress: Boolean
@@ -41,18 +43,14 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         val mypyExecutable: String, val configFilePath: String? = null, val arguments: String? = null
     )
 
-    class MypyServiceException(message: String) : RuntimeException(message)
-
     @Suppress("UnstableApiUsage")
     fun scan(filePath: String, runConfiguration: RunConfiguration): List<MypyOutput> {
         val command = buildCommand(runConfiguration, listOf(filePath))
         val handler = CollectingMypyOutputHandler()
-        runBlockingCancellable {
+        val result = runBlockingCancellable {
             PyVirtualEnvCli(project).execute(command) { handler.handle(it) }
         }
-        if (handler.getError().isNotEmpty()) {
-            logger<MypyService>().error("Failing command: $command", MypyServiceException(handler.getError()))
-        }
+        handleAnyFailures(command, result, handler.getError())
         return handler.getResults()
     }
 
@@ -60,15 +58,34 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         val command = buildCommand(runConfiguration, scanPaths)
         val handler = PublishingMypyOutputHandler(project)
         manualScanJob = cs.launch {
-            PyVirtualEnvCli(project).execute(command) { handler.handle(it) }
-            if (handler.getError().isNotEmpty()) {
-                logger<MypyService>().error("Failing command: $command", MypyServiceException(handler.getError()))
-                ToolWindowManager.getInstance(project).notifyByBalloon(
-                    MypyToolWindowPanel.ID,
-                    MessageType.ERROR,
-                    "Mypy executable has thrown an error. For details see notifications."
-                )
-            }
+            val result = PyVirtualEnvCli(project).execute(command) { handler.handle(it) }
+            logger.debug("${handler.resultCount} issues found")
+            handleAnyFailures(command, result, handler.getError())
+        }
+    }
+
+    private class MypyExecutionFailedException private constructor(message: String) : RuntimeException(message) {
+        constructor(command: String, executableError: String) : this(
+            MyBundle.message("mypy.error.stdout", command, executableError)
+        )
+
+        constructor(command: String, resultCode: Int, executableError: String) : this(
+            MyBundle.message("mypy.error.stderr", command, resultCode, executableError)
+        )
+    }
+
+    private fun handleAnyFailures(command: String, processResult: PyVirtualEnvCli.Status, handlerError: String) {
+        // can't rely on mypy status code https://github.com/python/mypy/issues/6003
+        if (processResult.stderr.isNotEmpty()) {
+            logger.error(MypyExecutionFailedException(command, processResult.resultCode, processResult.stderr))
+        }
+        if (handlerError.isNotEmpty()) {
+            logger.error(MypyExecutionFailedException(command, handlerError))
+        }
+        if (processResult.stderr.isNotEmpty() || handlerError.isNotEmpty()) {
+            ToolWindowManager.getInstance(project).notifyByBalloon(
+                MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error")
+            )
         }
     }
 

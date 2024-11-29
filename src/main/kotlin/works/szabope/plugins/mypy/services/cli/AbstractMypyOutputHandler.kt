@@ -1,36 +1,46 @@
 package works.szabope.plugins.mypy.services.cli
 
+import com.intellij.openapi.diagnostic.logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 abstract class AbstractMypyOutputHandler {
-    abstract suspend fun handleResult(result: MypyOutput)
+    private val logger = logger<AbstractMypyOutputHandler>()
+    private val errorBuilder = StringBuilder()
 
-    abstract suspend fun reportError(error: String)
+    abstract suspend fun handleResult(result: MypyOutput)
 
     // tricky error handling here:
     // - can't rely on mypy status != 0; https://github.com/python/mypy/issues/6003
-    // - stderr is not written by mypy, see `parse`
-    // so if parsing output fails (normal output is json), we report the rest of the lines as error lines
+    // - stderr is not _always_ written by mypy, see `parse`
+    // so if parsing output fails (normal output is json), we consider the rest of output as error from mypy
     suspend fun handle(flow: Flow<String>) {
         var hasFailed = false
         flow.filter { it.isNotBlank() }.collect {
             try {
                 if (!hasFailed) {
-                    handleResult(parse(it))
+                    val result = parse(it)
+                    handleResult(result)
                 } else {
                     reportError(it)
                 }
             } catch (ignored: SerializationException) {
+                logger.error(ignored)
                 hasFailed = true
                 reportError(it)
             }
         }
     }
 
-    // mypy prints its own errors to stdout, mixing them into normal output, in which case even `-O json` is ignored
+    fun getError() = errorBuilder.toString()
+
+    private fun reportError(error: String) {
+        errorBuilder.appendLine(error)
+    }
+
+    // mypy _sometimes_ prints its own errors to stdout, mixing them into normal output, in which case even `-O json` is ignored
     @Throws(SerializationException::class)
     private fun parse(json: String): MypyOutput {
         val result = Json.decodeFromString(MypyOutput.serializer(), json)

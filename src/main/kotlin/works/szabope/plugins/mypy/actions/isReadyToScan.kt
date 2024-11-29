@@ -5,5 +5,5 @@ import works.szabope.plugins.mypy.services.MypyService
 import works.szabope.plugins.mypy.services.MypySettings
 
 fun isReadyToScan(project: Project): Boolean {
-    return MypySettings.getInstance(project).isInitialized() && !MypyService.getInstance(project).scanInProgress
+    return MypySettings.getInstance(project).ensureValidOrUninitialized() && !MypyService.getInstance(project).scanInProgress
 }

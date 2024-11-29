@@ -1,11 +1,12 @@
 package works.szabope.plugins.mypy.toolWindow
 
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.ui.treeStructure.Tree
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.cli.MypyOutput
 
 class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<String>) {
-    
+    private val logger = logger<MypyTreeModelManager>()
     private val issues = mutableSetOf<MypyOutput>()
     private val model = MypyTreeModel(MyBundle.message("mypy.toolwindow.name.empty"))
 
@@ -13,6 +14,7 @@ class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<Strin
         issues.add(issue)
         if (isDisplayed(issue)) {
             addToTree(issue)
+            logger.debug("Issue added to tree: $issue")
         }
     }
 
@@ -51,7 +53,11 @@ class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<Strin
     }
 
     private fun isDisplayed(issue: MypyOutput): Boolean {
-        return displayedSeverityLevels.contains(issue.severity)
+        val result = displayedSeverityLevels.contains(issue.severity)
+        if (!result) { // severity filters are turned off since mypy reporting everything as error makes them useless
+            logger.warn("Received issue with severity ${issue.severity} which isn't supported.")
+        }
+        return result
     }
 
     private fun findOrAddFileNode(file: String): StringNode {

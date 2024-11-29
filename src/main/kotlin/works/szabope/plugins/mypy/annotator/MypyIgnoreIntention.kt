@@ -46,9 +46,9 @@ class MypyIgnoreIntention(private val line: Int) : PsiElementBaseIntentionAction
     /** mypy does not support `#type: ignore` on multiline triple quoted elements */
     private fun isTripleQuotedMultilineString(element: PsiElement): Boolean {
         try {
-            val stringNode = element.context?.let { StringNodeInfo(it) } ?: return false
-            return stringNode.isTripleQuoted && stringNode.content.contains('\n')
-        } catch (e: IllegalArgumentException) {
+            val stringNode = element.context?.let { StringNodeInfo(it) }
+            return stringNode != null && stringNode.isTripleQuoted && stringNode.content.contains('\n')
+        } catch (ignored: IllegalArgumentException) {
             return false
         }
     }

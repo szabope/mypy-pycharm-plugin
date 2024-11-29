@@ -55,6 +55,13 @@ This indicates that the external mypy tool has exited with an error. The plugin 
 ### How can I prevent the code inspection from running on a specific folder?
 [Exclude it](https://www.jetbrains.com/help/pycharm/configuring-folders-within-a-content-root.html#mark) from the project.
 
+## Debug
+Open `Help > Diagnostic Tools > Debug Log Settings...`\
+Enter `works.szabope.plugins.mypy:trace`\
+Hit `[Ok]`\
+Then you can see debug logs in idea.log (`Help > Open Log in Editor`)\
+**_Keep in mind that the log may contain sensitive information._**
+
 ## Differences from the original plugin
 - Toolbar actions were simplified:
   - Close toolbar: **removed**

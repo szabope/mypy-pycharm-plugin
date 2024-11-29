@@ -24,10 +24,10 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
 
     private val fileChooserDescriptor = FileChooserDescriptor(true, false, false, false, false, false).withFileFilter(
         FileFilter(
-            * if (SystemInfo.isWindows) {
-                arrayOf("mypy.exe", "mypyc.exe")
+            if (SystemInfo.isWindows) {
+                listOf("mypy.exe", "mypyc.exe")
             } else {
-                arrayOf("mypy", "mypyc")
+                listOf("mypy", "mypyc")
             }
         )
     )
@@ -44,7 +44,8 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         setter = { settings.mypyExecutable = it.trimToNull() },
                     ).validationOnInput {
                         if (it.text.isBlank()) {
-                            return@validationOnInput warning(MyBundle.message("mypy.settings.path_to_executable.empty_warning"))
+                            val message = MyBundle.message("mypy.settings.path_to_executable.empty_warning")
+                            return@validationOnInput warning(message)
                         }
                         try {
                             settings.validateExecutable(it.text.trimToNull())
@@ -92,8 +93,6 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
 
     @ApiStatus.Internal
     class FileFilter(private val fileNames: List<String>) : Condition<VirtualFile> {
-        constructor(vararg fileNames: String) : this(fileNames.toList())
-
         override fun value(t: VirtualFile?): Boolean {
             return fileNames.contains(t?.name ?: return false)
         }

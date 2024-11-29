@@ -16,6 +16,7 @@ import java.io.File
 @State(name = "MypySettings", storages = [Storage("MypyPlugin.xml")], category = SettingsCategory.PLUGINS)
 class MypySettings(internal val project: Project) :
     SimplePersistentStateComponent<MypySettings.MypyState>(MypyState()) {
+    private val logger = logger<MypySettings>()
 
     @ApiStatus.Internal
     class MypyState : BaseState() {
@@ -50,29 +51,40 @@ class MypySettings(internal val project: Project) :
             state.autoScrollToSource = value
         }
 
-    fun isInitialized(): Boolean {
-        return state.mypyExecutable != null
+    /**
+     * @return true if configuration is initialized and valid (ready to be used), false otherwise
+     */
+    fun ensureValidOrUninitialized(): Boolean {
+        try {
+            if (state.mypyExecutable != null) {
+                validateExecutable(state.mypyExecutable)
+            }
+        } catch (e: ConfigurationValidationException) {
+            logger.error(MyBundle.message("mypy.settings.path_to_executable.invalid", state.mypyExecutable ?: ""), e)
+            mypyExecutable = null
+        }
+        try {
+            if (state.configFilePath != null) {
+                validateConfigFile(state.configFilePath)
+            }
+        } catch (e: ConfigurationValidationException) {
+            logger.error(MyBundle.message("mypy.settings.path_to_config_file.invalid", state.configFilePath ?: ""), e)
+            configFilePath = null
+        }
+        return mypyExecutable != null
     }
 
     class ConfigurationValidationException(message: String) : Exception(message)
 
-    suspend fun initSettings(
-        defaultExecutablePath: String?,
-        defaultConfigFilePath: String?,
-        defaultArguments: String?
-    ) {
+    suspend fun initSettings(defaultExecutable: String?, defaultConfigFile: String?, defaultArguments: String?) {
         if (ProjectRootManager.getInstance(project).projectSdk == null) {
             return
         }
         if (mypyExecutable == null) {
-            try {
-                mypyExecutable = defaultExecutablePath ?: autodetectExecutable(project)
-            } catch (e: ConfigurationValidationException) {
-                logger<MypySettings>().info("Mypy not found")
-            }
+            mypyExecutable = defaultExecutable ?: autodetectExecutable(project)
         }
         if (configFilePath == null) {
-            configFilePath = defaultConfigFilePath
+            configFilePath = defaultConfigFile
         }
         if (arguments == null) {
             arguments = defaultArguments ?: MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
@@ -97,8 +109,16 @@ class MypySettings(internal val project: Project) :
         }
 
         val stdout = StringBuilder()
-        runBlocking {
+        val processResult = runBlocking {
             PyVirtualEnvCli(project).execute("$path -V") { it.collect(stdout::appendLine) }
+        }
+        if (processResult.resultCode != 0) {
+            fail(
+                "mypy.settings.path_to_executable.exited_with_error",
+                path,
+                processResult.resultCode,
+                processResult.stderr
+            )
         }
         val minimumMypyVersionText = MyBundle.message("mypy.minimumVersion")
         val minimumMypyVersion = SemVer.parseFromText(minimumMypyVersionText)!!
@@ -129,11 +149,24 @@ class MypySettings(internal val project: Project) :
     private suspend fun autodetectExecutable(project: Project): String? {
         val locateCommand = if (SystemInfo.isWindows) "where mypy.exe" else "which mypy"
         val stdout = StringBuilder()
-        PyVirtualEnvCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
+        val processResult = PyVirtualEnvCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
+        if (processResult.resultCode != 0) {
+            logger.warn(
+                ConfigurationValidationException(
+                    MyBundle.message(
+                        "mypy.settings.path_to_executable.exited_with_error",
+                        locateCommand,
+                        processResult.resultCode,
+                        processResult.stderr
+                    )
+                )
+            )
+            return null
+        }
         return stdout.toString().lines().first().trim().ifBlank { null }
     }
 
-    private fun fail(key: String, vararg args: String) {
+    private fun fail(key: String, vararg args: Any) {
         throw ConfigurationValidationException(MyBundle.message(key, args.asList()))
     }
 
