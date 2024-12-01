@@ -50,10 +50,14 @@ and currently focused in the Editor.
 
 ## FAQ
 ### Scan fails with: `External tool failed with error.` or `External tool returned unexpected output.`
-This indicates that the external mypy tool has exited with an error. The plugin can't fix these.\
-Details may contain something like this:\
-`mypy: "mypy/typeshed/stubs/mypy-extensions/mypy_extensions.pyi" shadows library module "mypy_extensions"`\
-If this case you may want to add `--exclude \.pyi$` to arguments in mypy settings. Another switch `--explicit-package-bases` may also work.
+This indicates that the external mypy tool has exited with an error. The plugin can't fix these.
+#### Details may contain something like this: `mypy: "mypy/typeshed/stubs/mypy-extensions/mypy_extensions.pyi" shadows library module "mypy_extensions"`
+In this case you may want to add `--exclude \.pyi$` to the arguments in mypy settings. 
+Another switch `--explicit-package-bases` may also work.
+#### Or details may be like `Duplicate module named "a"`
+You can exclude containing directory:
+ - make sure that `Settings > Tools > Mypy > Exclude non-project files` is checked, so all directories that are marked as excluded will also be excluded from mypy scan.
+ - `Mark Directory as > Excluded`
 
 For more mypy configuration options, please see `mypy -h`
 
