@@ -87,6 +87,12 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         "mypy.settings.arguments.hint_recommended", MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
                     ), maxLineLength = MAX_LINE_LENGTH_WORD_WRAP
                 ).layout(RowLayout.PARENT_GRID)
+                row {
+                    checkBox("Exclude non-project files").bindSelected(
+                        getter = { settings.isExcludeNonProjectFiles },
+                        setter = { settings.isExcludeNonProjectFiles = it }
+                    )
+                }.layout(RowLayout.PARENT_GRID)
             }
         }
     }

@@ -24,6 +24,8 @@ class MypySettings(internal val project: Project) :
         var configFilePath by string()
         var arguments by string()
         var autoScrollToSource by property(false)
+        var excludeNonProjectFiles by property(true)
+        val customExclusions by list<String>()
     }
 
     var mypyExecutable
@@ -50,6 +52,28 @@ class MypySettings(internal val project: Project) :
         set(value) {
             state.autoScrollToSource = value
         }
+
+    var isExcludeNonProjectFiles
+        get() = state.excludeNonProjectFiles
+        set(value) {
+            state.excludeNonProjectFiles = value
+        }
+
+    val customExclusions
+        get() = state.customExclusions
+
+    fun addExclusion(exclusion: String) {
+        require(exclusion.isNotBlank())
+        if (!state.customExclusions.contains(exclusion)) {
+            state.customExclusions.add(exclusion)
+        }
+    }
+
+    fun removeExclusion(exclusion: String) {
+        if (state.customExclusions.contains(exclusion)) {
+            state.customExclusions.remove(exclusion)
+        }
+    }
 
     fun isInitialized(): Boolean = state.mypyExecutable != null
 
