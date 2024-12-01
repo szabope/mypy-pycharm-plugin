@@ -1,22 +1,23 @@
 package works.szabope.plugins.mypy.services
 
 import com.intellij.openapi.components.*
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.util.text.SemVer
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.cli.PyVirtualEnvCli
+import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import java.io.File
 
 @Service(Service.Level.PROJECT)
 @State(name = "MypySettings", storages = [Storage("MypyPlugin.xml")], category = SettingsCategory.PLUGINS)
 class MypySettings(internal val project: Project) :
     SimplePersistentStateComponent<MypySettings.MypyState>(MypyState()) {
-    private val logger = logger<MypySettings>()
 
     @ApiStatus.Internal
     class MypyState : BaseState() {
@@ -187,15 +188,12 @@ class MypySettings(internal val project: Project) :
         val stdout = StringBuilder()
         val processResult = PyVirtualEnvCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
         if (processResult.resultCode != 0) {
-            logger.error(
-                SettingsValidationException(
+            ToolWindowManager.getInstance(project).notifyByBalloon(
+                MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message(
+                    "mypy.settings.path_to_executable.exited_with_error",
                     locateCommand,
-                    MyBundle.message(
-                        "mypy.settings.path_to_executable.exited_with_error",
-                        locateCommand,
-                        processResult.resultCode,
-                        processResult.stderr
-                    )
+                    processResult.resultCode,
+                    processResult.stderr
                 )
             )
             return null
