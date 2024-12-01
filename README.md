@@ -49,11 +49,26 @@ and currently focused in the Editor.
 ![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/results.png)
 
 ## FAQ
-### Scan fails with: `Mypy executable has thrown an error.`
-This indicates that the external mypy tool has exited with an error. The plugin can't fix these. You can do research on the causes, or you can try to run mypy on a subset of targets.
+### Scan fails with: `External tool failed with error.` or `External tool returned unexpected output.`
+This indicates that the external mypy tool has exited with an error. The plugin can't fix these.
+#### Details may contain something like this: `mypy: "mypy/typeshed/stubs/mypy-extensions/mypy_extensions.pyi" shadows library module "mypy_extensions"`
+In this case you may want to add `--exclude \.pyi$` to the arguments in mypy settings. 
+Another switch `--explicit-package-bases` may also work.
+#### Or details may be like `Duplicate module named "a"`
+You can exclude containing directory:
+ - make sure that `Settings > Tools > Mypy > Exclude non-project files` is checked, so all directories that are marked as excluded will also be excluded from mypy scan.
+ - `Mark Directory as > Excluded`
 
-### How can I prevent the code inspection from running on a specific folder?
-[Exclude it](https://www.jetbrains.com/help/pycharm/configuring-folders-within-a-content-root.html#mark) from the project.
+For more mypy configuration options, please see `mypy -h`
+
+You may get more insight into the plugin here: [Debug](https://github.com/szabope/mypy-pycharm-plugin?tab=readme-ov-file#debug) 
+
+## Debug
+Open `Help > Diagnostic Tools > Debug Log Settings...`\
+Enter `works.szabope.plugins.mypy:trace`\
+Hit `[Ok]`\
+Then you can see debug logs in idea.log (`Help > Open Log in Editor`)\
+**_Keep in mind that the log may contain sensitive information._**
 
 ## Differences from the original plugin
 - Toolbar actions were simplified:

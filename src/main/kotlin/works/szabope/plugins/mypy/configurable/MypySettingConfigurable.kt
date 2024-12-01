@@ -24,10 +24,10 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
 
     private val fileChooserDescriptor = FileChooserDescriptor(true, false, false, false, false, false).withFileFilter(
         FileFilter(
-            * if (SystemInfo.isWindows) {
-                arrayOf("mypy.exe", "mypyc.exe")
+            if (SystemInfo.isWindows) {
+                listOf("mypy.exe", "mypyc.exe")
             } else {
-                arrayOf("mypy", "mypyc")
+                listOf("mypy", "mypyc")
             }
         )
     )
@@ -44,11 +44,12 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         setter = { settings.mypyExecutable = it.trimToNull() },
                     ).validationOnInput {
                         if (it.text.isBlank()) {
-                            return@validationOnInput warning(MyBundle.message("mypy.settings.path_to_executable.empty_warning"))
+                            val message = MyBundle.message("mypy.settings.path_to_executable.empty_warning")
+                            return@validationOnInput warning(message)
                         }
                         try {
                             settings.validateExecutable(it.text.trimToNull())
-                        } catch (e: MypySettings.ConfigurationValidationException) {
+                        } catch (e: MypySettings.ExecutableValidationException) {
                             return@validationOnInput error(e.message ?: "N/A")
                         }
                         null
@@ -67,7 +68,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     ).validationOnInput {
                         try {
                             settings.validateConfigFile(it.text.trimToNull())
-                        } catch (e: MypySettings.ConfigurationValidationException) {
+                        } catch (e: MypySettings.ConfigFileValidationException) {
                             return@validationOnInput error(e.message ?: "N/A")
                         }
                         null
@@ -86,14 +87,18 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         "mypy.settings.arguments.hint_recommended", MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
                     ), maxLineLength = MAX_LINE_LENGTH_WORD_WRAP
                 ).layout(RowLayout.PARENT_GRID)
+                row {
+                    checkBox("Exclude non-project files").bindSelected(
+                        getter = { settings.isExcludeNonProjectFiles },
+                        setter = { settings.isExcludeNonProjectFiles = it }
+                    )
+                }.layout(RowLayout.PARENT_GRID)
             }
         }
     }
 
     @ApiStatus.Internal
     class FileFilter(private val fileNames: List<String>) : Condition<VirtualFile> {
-        constructor(vararg fileNames: String) : this(fileNames.toList())
-
         override fun value(t: VirtualFile?): Boolean {
             return fileNames.contains(t?.name ?: return false)
         }

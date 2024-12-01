@@ -1,6 +1,7 @@
 package works.szabope.plugins.mypy
 
 import com.intellij.openapi.actionSystem.ActionPlaces
+import com.intellij.openapi.actionSystem.ActionUiKind
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.ex.ActionUtil
@@ -9,8 +10,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiFile
 import com.intellij.testFramework.TestDataPath
+import com.intellij.testFramework.common.waitUntil
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.intellij.testFramework.waitUntil
 import com.intellij.toolWindow.ToolWindowHeadlessManagerImpl
 import com.intellij.ui.tree.TreeTestUtil
 import com.intellij.ui.treeStructure.Tree
@@ -44,27 +45,25 @@ class MypyManualScanTest : BasePlatformTestCase() {
         waitUntil {
             try {
                 util.assertStructure("+Found 1 issue(s) in 1 file(s)\n")
-            } catch (e: AssertionError) {
+            } catch (ignored: AssertionError) {
                 return@waitUntil false
             }
             true
         }.also {
             util.expandAll()
             util.assertStructure(
-                "-Found 1 issue(s) in 1 file(s)\n" +
-                        " -/src/manualScan.py\n" +
-                        "  Bracketed expression \"[...]\" is not valid as a type [valid-type] (0:-1) Did you mean \"List[...]\"?\n"
+                "-Found 1 issue(s) in 1 file(s)\n" + " -/src/manualScan.py\n" + "  Bracketed expression \"[...]\" " +
+                        "is not valid as a type [valid-type] (0:-1) " + "Did you mean \"List[...]\"?\n"
             )
         }
     }
 
     @Suppress("UnstableApiUsage")
     private fun scan(file: PsiFile) {
-        val action = ActionUtil.getAction(ScanWithMypyAction.ID)!!
-        val dataContext = SimpleDataContext.builder()
-            .add(CommonDataKeys.PROJECT, myFixture.project)
+        val action = ActionUtil.getAction(ScanWithMypyAction.ID)!! as ScanWithMypyAction
+        val dataContext = SimpleDataContext.builder().add(CommonDataKeys.PROJECT, myFixture.project)
             .add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(file.virtualFile)).build()
-        val actionEvent = AnActionEvent.createFromDataContext(ActionPlaces.EDITOR_TAB, null, dataContext)
+        val actionEvent = AnActionEvent.createEvent(dataContext, null, ActionPlaces.EDITOR_TAB, ActionUiKind.NONE, null)
         action.update(actionEvent)
         Assert.assertTrue(actionEvent.presentation.isEnabled)
         action.actionPerformed(actionEvent)

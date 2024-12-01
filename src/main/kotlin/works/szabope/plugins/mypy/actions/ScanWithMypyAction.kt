@@ -3,7 +3,6 @@ package works.szabope.plugins.mypy.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindowManager
 import works.szabope.plugins.mypy.services.MypyService
@@ -12,7 +11,7 @@ import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.toRunConfiguration
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 
-open class ScanWithMypyAction : DumbAwareAction() {
+open class ScanWithMypyAction : AbstractScanAction() {
 
     override fun actionPerformed(event: AnActionEvent) {
         val targets = listTargets(event)?.map { it.path } ?: return
