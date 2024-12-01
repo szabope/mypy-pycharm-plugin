@@ -49,7 +49,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         }
                         try {
                             settings.validateExecutable(it.text.trimToNull())
-                        } catch (e: MypySettings.ConfigurationValidationException) {
+                        } catch (e: MypySettings.ExecutableValidationException) {
                             return@validationOnInput error(e.message ?: "N/A")
                         }
                         null
@@ -68,7 +68,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     ).validationOnInput {
                         try {
                             settings.validateConfigFile(it.text.trimToNull())
-                        } catch (e: MypySettings.ConfigurationValidationException) {
+                        } catch (e: MypySettings.ConfigFileValidationException) {
                             return@validationOnInput error(e.message ?: "N/A")
                         }
                         null

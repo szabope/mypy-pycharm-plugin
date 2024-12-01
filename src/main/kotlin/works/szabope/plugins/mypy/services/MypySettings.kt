@@ -51,30 +51,31 @@ class MypySettings(internal val project: Project) :
             state.autoScrollToSource = value
         }
 
-    /**
-     * @return true if configuration is initialized and valid (ready to be used), false otherwise
-     */
-    fun ensureValidOrUninitialized(): Boolean {
+    fun isInitialized(): Boolean = state.mypyExecutable != null
+
+    @Throws(SettingsValidationException::class)
+    fun ensureValid() {
         try {
             if (state.mypyExecutable != null) {
                 validateExecutable(state.mypyExecutable)
             }
-        } catch (e: ConfigurationValidationException) {
-            logger.error(MyBundle.message("mypy.settings.path_to_executable.invalid", state.mypyExecutable ?: ""), e)
+        } catch (e: ExecutableValidationException) {
             mypyExecutable = null
+            throw e
         }
         try {
             if (state.configFilePath != null) {
                 validateConfigFile(state.configFilePath)
             }
-        } catch (e: ConfigurationValidationException) {
-            logger.error(MyBundle.message("mypy.settings.path_to_config_file.invalid", state.configFilePath ?: ""), e)
+        } catch (e: SettingsValidationException) {
             configFilePath = null
+            throw e
         }
-        return mypyExecutable != null
     }
 
-    class ConfigurationValidationException(message: String) : Exception(message)
+    open class SettingsValidationException(val blame: String, message: String) : Exception(message)
+    class ExecutableValidationException(blame: String, message: String) : SettingsValidationException(blame, message)
+    class ConfigFileValidationException(blame: String, message: String) : SettingsValidationException(blame, message)
 
     suspend fun initSettings(defaultExecutable: String?, defaultConfigFile: String?, defaultArguments: String?) {
         if (ProjectRootManager.getInstance(project).projectSdk == null) {
@@ -91,7 +92,7 @@ class MypySettings(internal val project: Project) :
         }
     }
 
-    @Throws(ConfigurationValidationException::class)
+    @Throws(ExecutableValidationException::class)
     fun validateExecutable(path: String?) {
         if (path == null) {
             return
@@ -99,13 +100,15 @@ class MypySettings(internal val project: Project) :
         require(path.isNotBlank())
         val file = File(path)
         if (!file.exists()) {
-            fail("mypy.settings.path_to_executable.not_exists")
+            throw ExecutableValidationException(path, MyBundle.message("mypy.settings.path_to_executable.not_exists"))
         }
         if (file.isDirectory) {
-            fail("mypy.settings.path_to_executable.is_directory")
+            throw ExecutableValidationException(path, MyBundle.message("mypy.settings.path_to_executable.is_directory"))
         }
         if (!file.canExecute()) {
-            fail("mypy.settings.path_to_executable.not_executable")
+            throw ExecutableValidationException(
+                path, MyBundle.message("mypy.settings.path_to_executable.not_executable")
+            )
         }
 
         val stdout = StringBuilder()
@@ -113,25 +116,31 @@ class MypySettings(internal val project: Project) :
             PyVirtualEnvCli(project).execute("$path -V") { it.collect(stdout::appendLine) }
         }
         if (processResult.resultCode != 0) {
-            fail(
-                "mypy.settings.path_to_executable.exited_with_error",
-                path,
-                processResult.resultCode,
-                processResult.stderr
+            throw ExecutableValidationException(
+                path, MyBundle.message(
+                    "mypy.settings.path_to_executable.exited_with_error",
+                    path,
+                    processResult.resultCode,
+                    processResult.stderr
+                )
             )
         }
         val minimumMypyVersionText = MyBundle.message("mypy.minimumVersion")
         val minimumMypyVersion = SemVer.parseFromText(minimumMypyVersionText)!!
         val mypyVersion = "(\\d+.\\d+.\\d+)".toRegex().find(stdout)?.let { SemVer.parseFromText(it.value) }
         if (mypyVersion == null) {
-            fail("mypy.settings.path_to_executable.unknown_version")
+            throw ExecutableValidationException(
+                path, MyBundle.message("mypy.settings.path_to_executable.unknown_version")
+            )
         }
-        if (!mypyVersion!!.isGreaterOrEqualThan(minimumMypyVersion)) {
-            fail("mypy.settings.mypy_invalid_version", stdout.toString(), minimumMypyVersionText)
+        if (!mypyVersion.isGreaterOrEqualThan(minimumMypyVersion)) {
+            throw ExecutableValidationException(
+                path, MyBundle.message("mypy.settings.mypy_invalid_version", stdout.toString(), minimumMypyVersionText)
+            )
         }
     }
 
-    @Throws(ConfigurationValidationException::class)
+    @Throws(ConfigFileValidationException::class)
     fun validateConfigFile(path: String?) {
         if (path == null) {
             return
@@ -139,10 +148,13 @@ class MypySettings(internal val project: Project) :
         require(path.isNotBlank())
         val file = File(path)
         if (!file.exists()) {
-            fail("mypy.settings.path_to_config_file.not_exists")
+            throw ConfigFileValidationException(path, MyBundle.message("mypy.settings.path_to_config_file.not_exists"))
         }
         if (file.isDirectory) {
-            fail("mypy.settings.path_to_config_file.is_directory")
+            throw ConfigFileValidationException(
+                path,
+                MyBundle.message("mypy.settings.path_to_config_file.is_directory")
+            )
         }
     }
 
@@ -151,8 +163,9 @@ class MypySettings(internal val project: Project) :
         val stdout = StringBuilder()
         val processResult = PyVirtualEnvCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
         if (processResult.resultCode != 0) {
-            logger.warn(
-                ConfigurationValidationException(
+            logger.error(
+                SettingsValidationException(
+                    locateCommand,
                     MyBundle.message(
                         "mypy.settings.path_to_executable.exited_with_error",
                         locateCommand,
@@ -164,10 +177,6 @@ class MypySettings(internal val project: Project) :
             return null
         }
         return stdout.toString().lines().first().trim().ifBlank { null }
-    }
-
-    private fun fail(key: String, vararg args: Any) {
-        throw ConfigurationValidationException(MyBundle.message(key, args.asList()))
     }
 
     companion object {

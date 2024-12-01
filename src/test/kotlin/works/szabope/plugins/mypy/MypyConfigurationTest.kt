@@ -13,7 +13,7 @@ class MypyConfigurationTest : BasePlatformTestCase() {
 
     fun testObsoleteVersion() {
         val pathToObsoleteMypy = Paths.get(myFixture.testDataPath).resolve("mypy_obsolete").absolutePathString()
-        assertThrows(MypySettings.ConfigurationValidationException::class.java) {
+        assertThrows(MypySettings.SettingsValidationException::class.java) {
             MypySettings.getInstance(myFixture.project).mypyExecutable = pathToObsoleteMypy
         }
     }

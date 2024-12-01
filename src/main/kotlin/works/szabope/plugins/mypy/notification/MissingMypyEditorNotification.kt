@@ -49,6 +49,5 @@ internal class MypyEditorNotificationProvider : EditorNotificationProvider {
     }
 
     private fun isSdkSet(project: Project): Boolean = ProjectRootManager.getInstance(project).projectSdk != null
-    private fun isSettingsInitialized(project: Project): Boolean =
-        MypySettings.getInstance(project).ensureValidOrUninitialized()
+    private fun isSettingsInitialized(project: Project) = MypySettings.getInstance(project).isInitialized()
 }

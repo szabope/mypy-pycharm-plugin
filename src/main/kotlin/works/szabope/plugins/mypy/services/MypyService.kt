@@ -64,27 +64,18 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         }
     }
 
-    private class MypyExecutionFailedException private constructor(message: String) : RuntimeException(message) {
-        constructor(command: String, executableError: String) : this(
-            MyBundle.message("mypy.error.stdout", command, executableError)
-        )
-
-        constructor(command: String, resultCode: Int, executableError: String) : this(
-            MyBundle.message("mypy.error.stderr", command, resultCode, executableError)
-        )
-    }
-
     private fun handleAnyFailures(command: String, processResult: PyVirtualEnvCli.Status, handlerError: String) {
         // can't rely on mypy status code https://github.com/python/mypy/issues/6003
         if (processResult.stderr.isNotEmpty()) {
-            logger.error(MypyExecutionFailedException(command, processResult.resultCode, processResult.stderr))
+            ToolWindowManager.getInstance(project).notifyByBalloon(
+                MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message(
+                    "mypy.error.stderr", command, processResult.resultCode, processResult.stderr
+                )
+            )
         }
         if (handlerError.isNotEmpty()) {
-            logger.error(MypyExecutionFailedException(command, handlerError))
-        }
-        if (processResult.stderr.isNotEmpty() || handlerError.isNotEmpty()) {
             ToolWindowManager.getInstance(project).notifyByBalloon(
-                MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error")
+                MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.error.stdout", command, handlerError)
             )
         }
     }

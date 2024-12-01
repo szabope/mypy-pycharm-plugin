@@ -7,16 +7,20 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.util.io.toCanonicalPath
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiFile
 import com.intellij.util.io.delete
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.MypyService
 import works.szabope.plugins.mypy.services.MypySettings
+import works.szabope.plugins.mypy.services.MypySettings.SettingsValidationException
 import works.szabope.plugins.mypy.services.cli.MypyOutput
 import works.szabope.plugins.mypy.services.cli.PyVirtualEnvCli
 import works.szabope.plugins.mypy.toRunConfiguration
+import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createTempFile
 import kotlin.io.path.fileSize
@@ -33,7 +37,17 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
     }
 
     override fun doAnnotate(info: MypyAnnotatorInfo): List<MypyOutput> {
-        if (!MypySettings.getInstance(info.project).ensureValidOrUninitialized()) {
+        val settings = MypySettings.getInstance(info.project)
+        try {
+            settings.ensureValid()
+        } catch (e: SettingsValidationException) {
+            ToolWindowManager.getInstance(info.project).notifyByBalloon(
+                MypyToolWindowPanel.ID,
+                MessageType.WARNING,
+                MyBundle.message("mypy.toolwindow.balloon.error", e.message!!, e.blame)
+            )
+        }
+        if (!settings.isInitialized()) {
             return emptyList()
         }
         val service = MypyService.getInstance(info.project)
@@ -47,8 +61,9 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
         val tempFile = createTempFile("mypy-pycharm-plugin-editor-scan", ".py")
         try {
             tempFile.writeText(content)
-            logger.debug("File ${info.file.path} found in cache: content of ${tempFile.fileSize()} " +
-                    "bytes were written to ${tempFile.toCanonicalPath()}")
+            logger.debug(
+                "File ${info.file.path} found in cache: content of ${tempFile.fileSize()} " + "bytes were written to ${tempFile.toCanonicalPath()}"
+            )
             return scan(tempFile.absolutePathString())
         } finally {
             tempFile.delete()

@@ -49,11 +49,15 @@ and currently focused in the Editor.
 ![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/results.png)
 
 ## FAQ
-### Scan fails with: `Mypy executable has thrown an error.`
-This indicates that the external mypy tool has exited with an error. The plugin can't fix these. You can do research on the causes, or you can try to run mypy on a subset of targets.
+### Scan fails with: `External tool failed with error.` or `External tool returned unexpected output.`
+This indicates that the external mypy tool has exited with an error. The plugin can't fix these.\
+Details may contain something like this:\
+`mypy: "mypy/typeshed/stubs/mypy-extensions/mypy_extensions.pyi" shadows library module "mypy_extensions"`\
+If this case you may want to add `--exclude \.pyi$` to arguments in mypy settings. Another switch `--explicit-package-bases` may also work.
 
-### How can I prevent the code inspection from running on a specific folder?
-[Exclude it](https://www.jetbrains.com/help/pycharm/configuring-folders-within-a-content-root.html#mark) from the project.
+For more mypy configuration options, please see `mypy -h`
+
+You may get more insight into the plugin here: [Debug](https://github.com/szabope/mypy-pycharm-plugin?tab=readme-ov-file#debug) 
 
 ## Debug
 Open `Help > Diagnostic Tools > Debug Log Settings...`\
