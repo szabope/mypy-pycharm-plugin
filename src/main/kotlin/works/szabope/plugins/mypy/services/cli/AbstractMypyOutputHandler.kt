@@ -26,8 +26,8 @@ abstract class AbstractMypyOutputHandler {
                 } else {
                     reportError(it)
                 }
-            } catch (ignored: SerializationException) {
-                logger.error(ignored)
+            } catch (e: SerializationException) {
+                logger.debug(e)
                 hasFailed = true
                 reportError(it)
             }
