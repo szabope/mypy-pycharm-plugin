@@ -30,7 +30,7 @@ abstract class AbstractScanAction : DumbAwareAction() {
         if (error.isNotBlank()) {
             ToolWindowManager.getInstance(project).notifyByBalloon(
                 MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message(
-                    "mypy.error.stderr", command, status ?: 0, error
+                    "mypy.executable.error", command, status ?: 0, error
                 )
             )
         }

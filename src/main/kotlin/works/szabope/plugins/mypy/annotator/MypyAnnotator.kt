@@ -62,7 +62,7 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
         val service = MypyService.getInstance(info.project)
         val runConfiguration = MypySettings.getInstance(info.project).toRunConfiguration()
         return service.scan(info.file.path, runConfiguration) { command, status, error ->
-            logger.warn(MyBundle.message("mypy.error.stderr", command, status ?: 0, error))
+            logger.warn(MyBundle.message("mypy.executable.error", command, status ?: 0, error))
         }
     }
 
