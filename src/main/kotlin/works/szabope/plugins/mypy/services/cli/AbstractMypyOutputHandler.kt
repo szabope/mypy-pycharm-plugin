@@ -12,23 +12,19 @@ abstract class AbstractMypyOutputHandler {
 
     abstract suspend fun handleResult(result: MypyOutput)
 
-    // tricky error handling here:
+    // tricky error handling here (we expect json output):
     // - can't rely on mypy status != 0; https://github.com/python/mypy/issues/6003
     // - stderr is not _always_ written by mypy, see `parse`
-    // so if parsing output fails (normal output is json), we consider the rest of output as error from mypy
-    suspend fun handle(flow: Flow<String>) {
-        var hasFailed = false
+    // - sometimes errors and warnings are mixed into json output
+    // - and sometimes after a warning comes valuable json output
+    // so if parsing output fails, we consider it an as error from mypy, but keep going
+    open suspend fun handle(flow: Flow<String>) {
         flow.filter { it.isNotBlank() }.collect {
             try {
-                if (!hasFailed) {
-                    val result = parse(it)
-                    handleResult(result)
-                } else {
-                    reportError(it)
-                }
+                val result = parse(it)
+                handleResult(result)
             } catch (e: SerializationException) {
                 logger.debug(e)
-                hasFailed = true
                 reportError(it)
             }
         }

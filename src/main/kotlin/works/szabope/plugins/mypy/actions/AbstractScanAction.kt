@@ -24,4 +24,15 @@ abstract class AbstractScanAction : DumbAwareAction() {
         }
         return settings.isInitialized() && !MypyService.getInstance(project).scanInProgress
     }
+
+    protected fun getScanFailureHandler(project: Project) = fun(command: String, status: Int?, error: String) {
+        // can't rely on mypy status code https://github.com/python/mypy/issues/6003
+        if (error.isNotBlank()) {
+            ToolWindowManager.getInstance(project).notifyByBalloon(
+                MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message(
+                    "mypy.executable.error", command, status ?: 0, error
+                )
+            )
+        }
+    }
 }
