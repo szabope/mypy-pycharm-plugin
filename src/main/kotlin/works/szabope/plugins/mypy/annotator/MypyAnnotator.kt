@@ -2,17 +2,13 @@ package works.szabope.plugins.mypy.annotator
 
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
-import com.intellij.openapi.application.readAction
+import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.MessageType
-import com.intellij.openapi.util.io.toCanonicalPath
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiFile
-import com.intellij.util.io.delete
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.MypyService
 import works.szabope.plugins.mypy.services.MypySettings
@@ -20,11 +16,6 @@ import works.szabope.plugins.mypy.services.MypySettings.SettingsValidationExcept
 import works.szabope.plugins.mypy.services.cli.MypyOutput
 import works.szabope.plugins.mypy.services.cli.PyVirtualEnvCli
 import works.szabope.plugins.mypy.toRunConfiguration
-import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.createTempFile
-import kotlin.io.path.fileSize
-import kotlin.io.path.writeText
 
 internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo, List<MypyOutput>>() {
 
@@ -36,37 +27,31 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
         return MypyAnnotatorInfo(file.virtualFile, file.project)
     }
 
+    @Suppress("UnstableApiUsage")
     override fun doAnnotate(info: MypyAnnotatorInfo): List<MypyOutput> {
         val settings = MypySettings.getInstance(info.project)
         try {
             settings.ensureValid()
         } catch (e: SettingsValidationException) {
-            ToolWindowManager.getInstance(info.project).notifyByBalloon(
-                MypyToolWindowPanel.ID,
-                MessageType.WARNING,
-                MyBundle.message("mypy.toolwindow.balloon.error", e.message!!, e.blame)
-            )
+            logger.warn(MyBundle.message("mypy.toolwindow.balloon.error", e.message!!, e.blame))
         }
         if (!settings.isInitialized()) {
             return emptyList()
         }
+
+        val fileDocumentManager = FileDocumentManager.getInstance()
+        val document = fileDocumentManager.getCachedDocument(info.file)
+        if (document != null) {
+            runBlockingCancellable {
+                writeAction {
+                    fileDocumentManager.saveDocument(document)
+                }
+            }
+        }
         val service = MypyService.getInstance(info.project)
         val runConfiguration = MypySettings.getInstance(info.project).toRunConfiguration()
-        val scan = fun(absolutePath: String): List<MypyOutput> = service.scan(absolutePath, runConfiguration)
-        val content = getCachedContent(info.file)
-        if (content == null) {
-            logger.debug("File was not cached, running scan for ${info.file.path}")
-            return scan(info.file.path)
-        }
-        val tempFile = createTempFile("mypy-pycharm-plugin-editor-scan", ".py")
-        try {
-            tempFile.writeText(content)
-            logger.debug(
-                "File ${info.file.path} found in cache: content of ${tempFile.fileSize()} " + "bytes were written to ${tempFile.toCanonicalPath()}"
-            )
-            return scan(tempFile.absolutePathString())
-        } finally {
-            tempFile.delete()
+        return service.scan(info.file.path, runConfiguration) { command, status, error ->
+            logger.warn(MyBundle.message("mypy.error.stderr", command, status ?: 0, error))
         }
     }
 
@@ -77,15 +62,5 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
 
     override fun getPairedBatchInspectionShortName(): String {
         return MyBundle.message("mypy.inspection.id")
-    }
-
-    @Suppress("UnstableApiUsage")
-    private fun getCachedContent(file: VirtualFile): String? {
-        return runBlockingCancellable {
-            readAction {
-                // we don't want to load the file into memory, but if it's already there we need that version
-                FileDocumentManager.getInstance().getCachedDocument(file)?.text
-            }
-        }
     }
 }

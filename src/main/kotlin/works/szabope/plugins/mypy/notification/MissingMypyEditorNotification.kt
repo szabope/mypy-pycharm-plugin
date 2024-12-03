@@ -38,7 +38,6 @@ internal class MypyEditorNotificationProvider : EditorNotificationProvider {
     override fun collectNotificationData(
         project: Project, file: VirtualFile
     ): Function<in FileEditor, out JComponent?> {
-        PyiFileType.INSTANCE
         return Function {
             if (isSdkSet(project) && !isSettingsInitialized(project) && file.fileType in SUPPORTED_FILE_TYPES) {
                 val isMypyInstalled = MypyPackageManagerService.getInstance(project).isInstalled()

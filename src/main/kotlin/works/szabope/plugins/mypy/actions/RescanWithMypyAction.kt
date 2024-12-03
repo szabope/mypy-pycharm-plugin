@@ -14,7 +14,7 @@ class RescanWithMypyAction : AbstractScanAction() {
         val latestScanTargets = panel.getScanTargets()
         val runConfiguration = project.let { MypySettings.getInstance(it).toRunConfiguration() }
         panel.initializeResultTree(latestScanTargets)
-        MypyService.getInstance(project).scanAsync(latestScanTargets, runConfiguration)
+        MypyService.getInstance(project).scanAsync(latestScanTargets, runConfiguration, getScanFailureHandler(project))
     }
 
     override fun update(event: AnActionEvent) {
