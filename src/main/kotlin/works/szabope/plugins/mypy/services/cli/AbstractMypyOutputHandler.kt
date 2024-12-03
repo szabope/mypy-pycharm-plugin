@@ -18,7 +18,7 @@ abstract class AbstractMypyOutputHandler {
     // - sometimes errors and warnings are mixed into json output
     // - and sometimes after a warning comes valuable json output
     // so if parsing output fails, we consider it an as error from mypy, but keep going
-    suspend fun handle(flow: Flow<String>) {
+    open suspend fun handle(flow: Flow<String>) {
         flow.filter { it.isNotBlank() }.collect {
             try {
                 val result = parse(it)
