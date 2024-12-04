@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [1.0.5] - 2024-12-03
+
+- fix annotator's annoying balloon errors
+- fix no module issue with scanning file being edited
+- fix inconsistency between currently edited file's annotations and toolwindow scan results
+- fix toolwindow not realizing that scan is done and keep showing in-progress state
+- fix possible deadlock on EDT
+
 ## [1.0.4] - 2024-12-01
 
 - Fix error handling
@@ -47,7 +55,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.4...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.5...HEAD
+[1.0.5]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.1...v1.0.2
