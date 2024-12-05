@@ -6,7 +6,6 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotificationProvider
-import com.jetbrains.python.pyi.PyiFileType
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.MypyPackageManagerService
 import works.szabope.plugins.mypy.services.MypyService.Companion.SUPPORTED_FILE_TYPES
@@ -19,18 +18,16 @@ class MissingMypyEditorNotificationPanel(fileEditor: FileEditor, isMypyInstalled
 
     init {
         createActionLabel(
-            MyBundle.message("mypy.intention.fix_executable.open_settings.text"), "MyPyOpenSettingsAction"
+            MyBundle.message("mypy.intention.complete_configuration.text"), "MyPyOpenSettingsAction"
         )
         if (!isMypyInstalled) {
-            @Suppress("DialogTitleCapitalization") createActionLabel(
-                MyBundle.message("mypy.intention.fix_executable.install_mypy.text"), "InstallMypyAction"
-            )
+            createActionLabel(MyBundle.message("mypy.intention.install_mypy.text"), "InstallMypyAction")
         }
-        text(MyBundle.message("mypy.settings.path_to_executable.missing"))
+        text(MyBundle.message("mypy.settings.incomplete"))
     }
 
     override fun getIntentionActionFamilyName(): String {
-        return MyBundle.message("mypy.intention.fix_executable.family_name")
+        return MyBundle.message("mypy.intention.configuration.family_name")
     }
 }
 

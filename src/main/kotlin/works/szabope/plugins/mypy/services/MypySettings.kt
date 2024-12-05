@@ -2,6 +2,7 @@ package works.szabope.plugins.mypy.services
 
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.util.SystemInfo
@@ -26,6 +27,7 @@ class MypySettings(internal val project: Project) :
         var arguments by string()
         var autoScrollToSource by property(false)
         var excludeNonProjectFiles by property(true)
+        var projectDirectory by string()
         val customExclusions by list<String>()
     }
 
@@ -60,6 +62,12 @@ class MypySettings(internal val project: Project) :
             state.excludeNonProjectFiles = value
         }
 
+    var projectDirectory
+        get() = state.projectDirectory
+        set(value) {
+            state.projectDirectory = value
+        }
+
     val customExclusions
         get() = state.customExclusions
 
@@ -76,7 +84,7 @@ class MypySettings(internal val project: Project) :
         }
     }
 
-    fun isInitialized(): Boolean = state.mypyExecutable != null
+    fun isInitialized(): Boolean = state.mypyExecutable != null && projectDirectory != null
 
     @Throws(SettingsValidationException::class)
     fun ensureValid() {
@@ -84,7 +92,7 @@ class MypySettings(internal val project: Project) :
             if (state.mypyExecutable != null) {
                 validateExecutable(state.mypyExecutable)
             }
-        } catch (e: ExecutableValidationException) {
+        } catch (e: SettingsValidationException) {
             mypyExecutable = null
             throw e
         }
@@ -96,11 +104,17 @@ class MypySettings(internal val project: Project) :
             configFilePath = null
             throw e
         }
+        try {
+            if (state.projectDirectory != null) {
+                validateProjectDirectory(state.projectDirectory)
+            }
+        } catch (e: SettingsValidationException) {
+            projectDirectory = null
+            throw e
+        }
     }
 
-    open class SettingsValidationException(val blame: String, message: String) : Exception(message)
-    class ExecutableValidationException(blame: String, message: String) : SettingsValidationException(blame, message)
-    class ConfigFileValidationException(blame: String, message: String) : SettingsValidationException(blame, message)
+    class SettingsValidationException(val blame: String, message: String) : Exception(message)
 
     suspend fun initSettings(defaultExecutable: String?, defaultConfigFile: String?, defaultArguments: String?) {
         if (ProjectRootManager.getInstance(project).projectSdk == null) {
@@ -115,9 +129,12 @@ class MypySettings(internal val project: Project) :
         if (arguments == null) {
             arguments = defaultArguments ?: MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
         }
+        if (projectDirectory == null) {
+            projectDirectory = project.guessProjectDir()?.path
+        }
     }
 
-    @Throws(ExecutableValidationException::class)
+    @Throws(SettingsValidationException::class)
     fun validateExecutable(path: String?) {
         if (path == null) {
             return
@@ -125,13 +142,13 @@ class MypySettings(internal val project: Project) :
         require(path.isNotBlank())
         val file = File(path)
         if (!file.exists()) {
-            throw ExecutableValidationException(path, MyBundle.message("mypy.settings.path_to_executable.not_exists"))
+            throw SettingsValidationException(path, MyBundle.message("mypy.settings.path_to_executable.not_exists"))
         }
         if (file.isDirectory) {
-            throw ExecutableValidationException(path, MyBundle.message("mypy.settings.path_to_executable.is_directory"))
+            throw SettingsValidationException(path, MyBundle.message("mypy.settings.path_to_executable.is_directory"))
         }
         if (!file.canExecute()) {
-            throw ExecutableValidationException(
+            throw SettingsValidationException(
                 path, MyBundle.message("mypy.settings.path_to_executable.not_executable")
             )
         }
@@ -141,7 +158,7 @@ class MypySettings(internal val project: Project) :
             PyVirtualEnvCli(project).execute("$path -V") { it.collect(stdout::appendLine) }
         }
         if (processResult.resultCode != 0) {
-            throw ExecutableValidationException(
+            throw SettingsValidationException(
                 path, MyBundle.message(
                     "mypy.settings.path_to_executable.exited_with_error",
                     path,
@@ -154,18 +171,18 @@ class MypySettings(internal val project: Project) :
         val minimumMypyVersion = SemVer.parseFromText(minimumMypyVersionText)!!
         val mypyVersion = "(\\d+.\\d+.\\d+)".toRegex().find(stdout)?.let { SemVer.parseFromText(it.value) }
         if (mypyVersion == null) {
-            throw ExecutableValidationException(
+            throw SettingsValidationException(
                 path, MyBundle.message("mypy.settings.path_to_executable.unknown_version")
             )
         }
         if (!mypyVersion.isGreaterOrEqualThan(minimumMypyVersion)) {
-            throw ExecutableValidationException(
+            throw SettingsValidationException(
                 path, MyBundle.message("mypy.settings.mypy_invalid_version", stdout.toString(), minimumMypyVersionText)
             )
         }
     }
 
-    @Throws(ConfigFileValidationException::class)
+    @Throws(SettingsValidationException::class)
     fun validateConfigFile(path: String?) {
         if (path == null) {
             return
@@ -173,12 +190,33 @@ class MypySettings(internal val project: Project) :
         require(path.isNotBlank())
         val file = File(path)
         if (!file.exists()) {
-            throw ConfigFileValidationException(path, MyBundle.message("mypy.settings.path_to_config_file.not_exists"))
+            throw SettingsValidationException(path, MyBundle.message("mypy.settings.path_to_config_file.not_exists"))
         }
         if (file.isDirectory) {
-            throw ConfigFileValidationException(
+            throw SettingsValidationException(
                 path,
                 MyBundle.message("mypy.settings.path_to_config_file.is_directory")
+            )
+        }
+    }
+
+    @Throws(SettingsValidationException::class)
+    fun validateProjectDirectory(path: String?) {
+        if (path == null) {
+            return
+        }
+        require(path.isNotBlank())
+        val file = File(path)
+        if (!file.exists()) {
+            throw SettingsValidationException(
+                path,
+                MyBundle.message("mypy.settings.path_to_project_directory.not_exist")
+            )
+        }
+        if (!file.isDirectory) {
+            throw SettingsValidationException(
+                path,
+                MyBundle.message("mypy.settings.path_to_project_directory.is_not_directory")
             )
         }
     }

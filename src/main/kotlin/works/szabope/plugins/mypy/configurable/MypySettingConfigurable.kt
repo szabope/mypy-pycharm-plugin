@@ -22,15 +22,18 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
     private val settings
         get() = MypySettings.getInstance(project)
 
-    private val fileChooserDescriptor = FileChooserDescriptor(true, false, false, false, false, false).withFileFilter(
-        FileFilter(
-            if (SystemInfo.isWindows) {
-                listOf("mypy.exe", "mypyc.exe")
-            } else {
-                listOf("mypy", "mypyc")
-            }
+    private val mypyExecutableChooserDescriptor =
+        FileChooserDescriptor(true, false, false, false, false, false).withFileFilter(
+            FileFilter(
+                if (SystemInfo.isWindows) {
+                    listOf("mypy.exe", "mypyc.exe")
+                } else {
+                    listOf("mypy", "mypyc")
+                }
+            )
         )
-    )
+
+    private val directoryChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
 
     override fun createPanel(): DialogPanel {
         return panel {
@@ -38,7 +41,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                 row {
                     label(MyBundle.message("mypy.settings.path_to_executable.label"))
                     textFieldWithBrowseButton(
-                        project = project, fileChooserDescriptor = fileChooserDescriptor
+                        project = project, fileChooserDescriptor = mypyExecutableChooserDescriptor
                     ).align(Align.FILL).bindText(
                         getter = { settings.mypyExecutable.orEmpty() },
                         setter = { settings.mypyExecutable = it.trimToNull() },
@@ -49,12 +52,11 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         }
                         try {
                             settings.validateExecutable(it.text.trimToNull())
-                        } catch (e: MypySettings.ExecutableValidationException) {
+                        } catch (e: MypySettings.SettingsValidationException) {
                             return@validationOnInput error(e.message ?: "N/A")
                         }
                         null
                     }
-
                 }.rowComment(
                     MyBundle.message(
                         "mypy.settings.path_to_executable.comment", MypyArgs.MYPY_MANDATORY_COMMAND_ARGS
@@ -68,7 +70,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     ).validationOnInput {
                         try {
                             settings.validateConfigFile(it.text.trimToNull())
-                        } catch (e: MypySettings.ConfigFileValidationException) {
+                        } catch (e: MypySettings.SettingsValidationException) {
                             return@validationOnInput error(e.message ?: "N/A")
                         }
                         null
@@ -88,10 +90,29 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     ), maxLineLength = MAX_LINE_LENGTH_WORD_WRAP
                 ).layout(RowLayout.PARENT_GRID)
                 row {
+                    label(MyBundle.message("mypy.settings.project_directory.label"))
+                    textFieldWithBrowseButton(
+                        project = project, fileChooserDescriptor = directoryChooserDescriptor
+                    ).align(Align.FILL).bindText(
+                        getter = { settings.projectDirectory.orEmpty() },
+                        setter = { settings.projectDirectory = it.trimToNull() },
+                    ).validationOnInput {
+                        if (it.text.isBlank()) {
+                            val message = MyBundle.message("mypy.settings.path_to_project_directory.empty_warning")
+                            return@validationOnInput warning(message)
+                        }
+                        try {
+                            settings.validateExecutable(it.text.trimToNull())
+                        } catch (e: MypySettings.SettingsValidationException) {
+                            return@validationOnInput error(e.message ?: "N/A")
+                        }
+                        null
+                    }
+                }
+                row {
                     checkBox("Exclude non-project files").bindSelected(
                         getter = { settings.isExcludeNonProjectFiles },
-                        setter = { settings.isExcludeNonProjectFiles = it }
-                    )
+                        setter = { settings.isExcludeNonProjectFiles = it })
                 }.layout(RowLayout.PARENT_GRID)
             }
         }
