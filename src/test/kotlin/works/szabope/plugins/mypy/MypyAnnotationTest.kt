@@ -6,6 +6,7 @@ import works.szabope.plugins.mypy.annotator.MypyInspection
 import works.szabope.plugins.mypy.services.MypySettings
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
+import kotlin.io.path.pathString
 
 @TestDataPath("\$CONTENT_ROOT/testData")
 class MypyAnnotationTest : BasePlatformTestCase() {
@@ -14,8 +15,10 @@ class MypyAnnotationTest : BasePlatformTestCase() {
 
     override fun setUp() {
         super.setUp()
-        val pathToMypy = Paths.get(myFixture.testDataPath).resolve("mypy").absolutePathString()
-        MypySettings.getInstance(myFixture.project).mypyExecutable = pathToMypy
+        with(MypySettings.getInstance(myFixture.project)) {
+            mypyExecutable = Paths.get(myFixture.testDataPath).resolve("mypy").absolutePathString()
+            projectDirectory = Paths.get(myFixture.testDataPath).pathString
+        }
         myFixture.enableInspections(MypyInspection())
     }
 

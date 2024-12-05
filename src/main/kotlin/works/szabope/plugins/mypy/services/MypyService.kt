@@ -33,7 +33,8 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         val configFilePath: String? = null,
         val arguments: String? = null,
         val excludeNonProjectFiles: Boolean = true,
-        val customExclusions: List<String> = listOf()
+        val customExclusions: List<String> = listOf(),
+        val projectDirectory: String
     )
 
     @Suppress("UnstableApiUsage")
@@ -45,7 +46,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         val command = buildCommand(runConfiguration, listOf(filePath))
         val handler = CollectingMypyOutputHandler()
         val result = runBlockingCancellable {
-            PyVirtualEnvCli(project).execute(command) { handler.handle(it) }
+            PyVirtualEnvCli(project).execute(command, runConfiguration.projectDirectory) { handler.handle(it) }
         }
         handleAnyFailures(command, result.resultCode, concatErrors(result, handler))
         return handler.getResults()
@@ -59,7 +60,8 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         val command = buildCommand(runConfiguration, scanPaths)
         val handler = PublishingMypyOutputHandler(project)
         manualScanJob = cs.launch {
-            val result = PyVirtualEnvCli(project).execute(command) { handler.handle(it) }
+            val result =
+                PyVirtualEnvCli(project).execute(command, runConfiguration.projectDirectory) { handler.handle(it) }
             logger.debug("${handler.resultCount} issues found")
             handleAnyFailures(command, result.resultCode, concatErrors(result, handler))
         }

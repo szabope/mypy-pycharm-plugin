@@ -18,8 +18,9 @@ class PyVirtualEnvCli(private val project: Project) {
             get() = stderrLines.joinToString("\n")
     }
 
-    suspend fun execute(command: String, stdout: suspend (Flow<String>) -> Unit): Status {
+    suspend fun execute(command: String, workDir: String? = null, stdout: suspend (Flow<String>) -> Unit): Status {
         require(command.isNotBlank())
+        val directory = workDir?.let { java.io.File(workDir) }
         val environment = getEnvironment().toMutableMap()
         val environmentAwareCommand = PyVirtualEnvTerminalCustomizer().customizeCommandAndEnvironment(
             project, project.basePath, command.split(" ").toTypedArray(), environment
@@ -30,7 +31,8 @@ class PyVirtualEnvCli(private val project: Project) {
                 *environmentAwareCommand,
                 stdout = Redirect.Consume { stdout(it) },
                 stderr = Redirect.CAPTURE,
-                env = environment
+                env = environment,
+                directory = directory
             )
             Status(result.resultCode, result.output)
         }

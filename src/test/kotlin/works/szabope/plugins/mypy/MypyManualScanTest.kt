@@ -23,6 +23,7 @@ import works.szabope.plugins.mypy.toolWindow.MypyToolWindowFactory
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
+import kotlin.io.path.pathString
 
 @TestDataPath("\$CONTENT_ROOT/testData")
 class MypyManualScanTest : BasePlatformTestCase() {
@@ -70,8 +71,10 @@ class MypyManualScanTest : BasePlatformTestCase() {
     }
 
     private fun setUpSettings() {
-        val pathToMypy = Paths.get(myFixture.testDataPath).resolve("mypy").absolutePathString()
-        MypySettings.getInstance(myFixture.project).mypyExecutable = pathToMypy
+        with(MypySettings.getInstance(myFixture.project)) {
+            mypyExecutable = Paths.get(myFixture.testDataPath).resolve("mypy").absolutePathString()
+            projectDirectory = Paths.get(myFixture.testDataPath).pathString
+        }
     }
 
     private fun setUpMypyToolWindow() {
