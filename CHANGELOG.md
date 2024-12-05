@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.0.6] - 2024-12-05
+
+- make sure that working directory is set for when calling mypy
+- enable configuring project directory
+
 ## [1.0.5] - 2024-12-03
 
 - fix annotator's annoying balloon errors
@@ -55,7 +60,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.5...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.6...HEAD
+[1.0.6]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.2...v1.0.3
