@@ -5,6 +5,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.io.toCanonicalPath
 import com.intellij.platform.backend.workspace.WorkspaceModel
 import com.intellij.platform.backend.workspace.virtualFile
@@ -44,8 +45,9 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
     ): List<MypyOutput> {
         val command = buildCommand(runConfiguration, listOf(filePath))
         val handler = CollectingMypyOutputHandler()
+        val workDir = project.guessProjectDir()?.path
         val result = runBlockingCancellable {
-            PyVirtualEnvCli(project).execute(command) { handler.handle(it) }
+            PyVirtualEnvCli(project).execute(command, workDir) { handler.handle(it) }
         }
         handleAnyFailures(command, result.resultCode, concatErrors(result, handler))
         return handler.getResults()
@@ -58,8 +60,9 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
     ) {
         val command = buildCommand(runConfiguration, scanPaths)
         val handler = PublishingMypyOutputHandler(project)
+        val workDir = project.guessProjectDir()?.path
         manualScanJob = cs.launch {
-            val result = PyVirtualEnvCli(project).execute(command) { handler.handle(it) }
+            val result = PyVirtualEnvCli(project).execute(command, workDir) { handler.handle(it) }
             logger.debug("${handler.resultCount} issues found")
             handleAnyFailures(command, result.resultCode, concatErrors(result, handler))
         }
