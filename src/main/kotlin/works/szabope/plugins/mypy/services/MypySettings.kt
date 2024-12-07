@@ -13,6 +13,7 @@ import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.services.cli.Cli
+import works.szabope.plugins.mypy.services.cli.PythonEnvironmentAwareCli
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import java.io.File
 
@@ -223,21 +224,24 @@ class MypySettings(internal val project: Project) :
     }
 
     private suspend fun autodetectExecutable(project: Project): String? {
-        val locateCommand = if (SystemInfo.isWindows) "where mypy.exe" else "which mypy"
+        val locateCommand = if (SystemInfo.isWindows) "where.exe mypy.exe" else "which mypy"
         val stdout = StringBuilder()
-        val processResult = Cli().execute(locateCommand) { it.collect(stdout::appendLine) }
-        if (processResult.resultCode != 0) {
-            ToolWindowManager.getInstance(project).notifyByBalloon(
-                MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message(
-                    "mypy.settings.path_to_executable.exited_with_error",
-                    locateCommand,
-                    processResult.resultCode,
-                    processResult.stderr
+        val processResult = PythonEnvironmentAwareCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
+        return when (processResult.resultCode) { // same for linux and windows
+            0 -> stdout.toString().lines().first().trim().ifBlank { null }
+            1 -> null
+            else -> {
+                ToolWindowManager.getInstance(project).notifyByBalloon(
+                    MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message(
+                        "mypy.settings.path_to_executable.exited_with_error",
+                        locateCommand,
+                        processResult.resultCode,
+                        processResult.stderr
+                    )
                 )
-            )
-            return null
+                null
+            }
         }
-        return stdout.toString().lines().first().trim().ifBlank { null }
     }
 
     companion object {
