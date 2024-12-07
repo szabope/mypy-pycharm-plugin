@@ -4,7 +4,7 @@ import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.webcore.packaging.PackageManagementService
 import com.intellij.webcore.packaging.RepoPackage
 import com.jetbrains.python.packaging.bridge.PythonPackageManagementServiceBridge
@@ -18,9 +18,9 @@ import kotlinx.coroutines.withContext
 class MypyPackageManagerService(private val project: Project, private val cs: CoroutineScope) {
 
     fun install(
-        successHandler: suspend (project: Project) -> Unit, failureHandler: suspend (project: Project) -> Unit
+        sdk: Sdk, successHandler: suspend (project: Project) -> Unit, failureHandler: suspend (project: Project) -> Unit
     ) {
-        val packageManager = getPackageManager()
+        val packageManager = getPackageManager(sdk)
         val mypyPackage = RepoPackage(PACKAGE_NAME, null)
         val listener = object : PackageManagementService.Listener {
             override fun operationStarted(packageName: String?) = Unit
@@ -41,13 +41,12 @@ class MypyPackageManagerService(private val project: Project, private val cs: Co
         }
     }
 
-    fun isInstalled(): Boolean {
-        return getPackageManager().installedPackagesList.find { it.name == PACKAGE_NAME } != null
+    fun isInstalled(sdk: Sdk): Boolean {
+        return getPackageManager(sdk).installedPackagesList.find { it.name == PACKAGE_NAME } != null
     }
 
     @Suppress("IncorrectServiceRetrieving")
-    private fun getPackageManager(): PythonPackageManagementServiceBridge {
-        val sdk = requireNotNull(ProjectRootManager.getInstance(project).projectSdk)
+    private fun getPackageManager(sdk: Sdk): PythonPackageManagementServiceBridge {
         return project.service<PackageManagerHolder>().bridgeForSdk(project, sdk)
     }
 

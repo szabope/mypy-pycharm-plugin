@@ -17,7 +17,8 @@ class InstallMypyAction : DumbAwareAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        MypyPackageManagerService.getInstance(project).install(this::successHandler, this::failureHandler)
+        val sdk = requireNotNull(ProjectRootManager.getInstance(project).projectSdk)
+        MypyPackageManagerService.getInstance(project).install(sdk, this::successHandler, this::failureHandler)
     }
 
     override fun update(event: AnActionEvent) {

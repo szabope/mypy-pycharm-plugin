@@ -9,11 +9,14 @@ import com.intellij.openapi.util.io.toCanonicalPath
 import com.intellij.platform.backend.workspace.WorkspaceModel
 import com.intellij.platform.backend.workspace.virtualFile
 import com.intellij.platform.workspace.jps.entities.ContentRootEntity
+import com.intellij.python.terminal.PyVirtualEnvTerminalCustomizer
+import com.intellij.util.EnvironmentUtil
 import com.intellij.util.text.nullize
 import com.jetbrains.python.PythonFileType
 import com.jetbrains.python.pyi.PyiFileType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import works.szabope.plugins.mypy.services.cli.*
 import kotlin.io.path.Path
@@ -45,9 +48,8 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
     ): List<MypyOutput> {
         val command = buildCommand(runConfiguration, listOf(filePath))
         val handler = CollectingMypyOutputHandler()
-        val result = runBlockingCancellable {
-            PyVirtualEnvCli(project).execute(command, runConfiguration.projectDirectory) { handler.handle(it) }
-        }
+        val result =
+            runBlockingCancellable { execute(command, runConfiguration.projectDirectory) { handler.handle(it) } }
         handleAnyFailures(command, result.resultCode, concatErrors(result, handler))
         return handler.getResults()
     }
@@ -60,8 +62,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         val command = buildCommand(runConfiguration, scanPaths)
         val handler = PublishingMypyOutputHandler(project)
         manualScanJob = cs.launch {
-            val result =
-                PyVirtualEnvCli(project).execute(command, runConfiguration.projectDirectory) { handler.handle(it) }
+            val result = execute(command, runConfiguration.projectDirectory) { handler.handle(it) }
             logger.debug("${handler.resultCount} issues found")
             handleAnyFailures(command, result.resultCode, concatErrors(result, handler))
         }
@@ -71,9 +72,8 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         manualScanJob?.cancel()
     }
 
-    private fun concatErrors(
-        resultInStderr: PyVirtualEnvCli.Status, resultInStdout: AbstractMypyOutputHandler
-    ) = arrayOf(resultInStderr.stderr, resultInStdout.getError()).joinToString("\n").trim()
+    private fun concatErrors(resultInStderr: Cli.Status, resultInStdout: AbstractMypyOutputHandler) =
+        arrayOf(resultInStderr.stderr, resultInStdout.getError()).joinToString("\n").trim()
 
     private fun buildCommand(runConfiguration: RunConfiguration, targets: List<String>): String {
         val (mypyExecutable, configFilePath, arguments, excludeNonProjectFiles, customExclusions) = runConfiguration
@@ -102,6 +102,22 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
             }
         }
         return exclusions
+    }
+
+    private suspend fun execute(command: String, workDir: String, stdout: suspend (Flow<String>) -> Unit): Cli.Status {
+        require(command.isNotBlank())
+        val environment = getEnvironment().toMutableMap()
+        val environmentAwareCommand = PyVirtualEnvTerminalCustomizer().customizeCommandAndEnvironment(
+            project, project.basePath, command.split(" ").toTypedArray(), environment
+        ).filter { it.isNotEmpty() }.joinToString(" ")
+        return Cli().execute(environmentAwareCommand, workDir, environment, stdout)
+    }
+
+    private fun getEnvironment(): Map<String, String> {
+        val envs = HashMap(System.getenv())
+        envs[EnvironmentUtil.DISABLE_OMZ_AUTO_UPDATE] = "true"
+        envs["HISTFILE"] = "/dev/null"
+        return envs
     }
 
     companion object {

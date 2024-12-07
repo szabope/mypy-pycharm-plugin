@@ -11,7 +11,7 @@ import com.intellij.util.text.SemVer
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
-import works.szabope.plugins.mypy.services.cli.PyVirtualEnvCli
+import works.szabope.plugins.mypy.services.cli.Cli
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import java.io.File
 
@@ -155,7 +155,7 @@ class MypySettings(internal val project: Project) :
 
         val stdout = StringBuilder()
         val processResult = runBlocking {
-            PyVirtualEnvCli(project).execute("$path -V") { it.collect(stdout::appendLine) }
+            Cli().execute("$path -V") { it.collect(stdout::appendLine) }
         }
         if (processResult.resultCode != 0) {
             throw SettingsValidationException(
@@ -224,7 +224,7 @@ class MypySettings(internal val project: Project) :
     private suspend fun autodetectExecutable(project: Project): String? {
         val locateCommand = if (SystemInfo.isWindows) "where mypy.exe" else "which mypy"
         val stdout = StringBuilder()
-        val processResult = PyVirtualEnvCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
+        val processResult = Cli().execute(locateCommand) { it.collect(stdout::appendLine) }
         if (processResult.resultCode != 0) {
             ToolWindowManager.getInstance(project).notifyByBalloon(
                 MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message(

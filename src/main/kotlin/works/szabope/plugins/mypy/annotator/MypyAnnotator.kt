@@ -21,12 +21,11 @@ import works.szabope.plugins.mypy.services.MypyService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.MypySettings.SettingsValidationException
 import works.szabope.plugins.mypy.services.cli.MypyOutput
-import works.szabope.plugins.mypy.services.cli.PyVirtualEnvCli
 import works.szabope.plugins.mypy.toRunConfiguration
 
 internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo, List<MypyOutput>>() {
 
-    private val logger = logger<PyVirtualEnvCli>()
+    private val logger = logger<MypyAnnotator>()
 
     class MypyAnnotatorInfo(val file: VirtualFile, val project: Project)
 
