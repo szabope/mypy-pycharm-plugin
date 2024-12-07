@@ -12,7 +12,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.dsl.builder.*
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
-import works.szabope.plugins.mypy.services.MypyArgs
+import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.services.MypySettings
 
 internal class MypySettingConfigurable(private val project: Project) : BoundSearchableConfigurable(

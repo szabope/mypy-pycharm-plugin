@@ -19,7 +19,7 @@ open class ScanWithMypyAction : AbstractScanAction() {
         val runConfiguration = MypySettings.getInstance(project).toRunConfiguration()
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(MypyToolWindowPanel.ID) ?: return
         (toolWindow.contentManager.getContent(0)?.component as MypyToolWindowPanel?)?.initializeResultTree(targets)
-        MypyService.getInstance(project).scanAsync(targets, runConfiguration, getScanFailureHandler(project))
+        MypyService.getInstance(project).scanAsync(targets, runConfiguration)
         toolWindow.show()
     }
 

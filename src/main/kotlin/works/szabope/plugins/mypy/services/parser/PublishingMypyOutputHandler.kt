@@ -1,4 +1,4 @@
-package works.szabope.plugins.mypy.services.cli
+package works.szabope.plugins.mypy.services.parser
 
 import com.intellij.ide.ActivityTracker
 import com.intellij.openapi.application.EDT

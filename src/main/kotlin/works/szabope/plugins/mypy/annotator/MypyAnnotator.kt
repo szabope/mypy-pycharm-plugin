@@ -20,7 +20,7 @@ import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.MypyService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.MypySettings.SettingsValidationException
-import works.szabope.plugins.mypy.services.cli.MypyOutput
+import works.szabope.plugins.mypy.services.parser.MypyOutput
 import works.szabope.plugins.mypy.toRunConfiguration
 
 internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo, List<MypyOutput>>() {
@@ -60,9 +60,7 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
         }
         val service = MypyService.getInstance(info.project)
         val runConfiguration = MypySettings.getInstance(info.project).toRunConfiguration()
-        return service.scan(info.file.path, runConfiguration) { command, status, error ->
-            logger.warn(MyBundle.message("mypy.executable.error", command, status ?: 0, error))
-        }
+        return service.scan(info.file.path, runConfiguration)
     }
 
     override fun apply(file: PsiFile, annotationResult: List<MypyOutput>, holder: AnnotationHolder) {

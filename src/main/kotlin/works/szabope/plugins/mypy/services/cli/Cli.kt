@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class Cli {
-    data class Status(val resultCode: Int, private val stderrLines: List<String>) {
+    class Status(val resultCode: Int, private val stderrLines: List<String>) {
         val stderr: String
             get() = stderrLines.joinToString("\n")
     }

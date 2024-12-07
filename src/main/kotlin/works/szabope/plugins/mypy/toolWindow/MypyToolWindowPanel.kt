@@ -16,7 +16,7 @@ import com.intellij.util.EditSourceOnEnterKeyHandler
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.tree.TreeUtil
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.mypy.services.cli.MypyOutput
+import works.szabope.plugins.mypy.services.parser.MypyOutput
 import java.awt.BorderLayout
 import javax.swing.Box
 import kotlin.io.path.Path

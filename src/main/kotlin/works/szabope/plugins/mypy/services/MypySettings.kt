@@ -11,6 +11,7 @@ import com.intellij.util.text.SemVer
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.services.cli.Cli
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import java.io.File

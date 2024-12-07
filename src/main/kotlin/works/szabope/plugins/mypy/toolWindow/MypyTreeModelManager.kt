@@ -3,7 +3,7 @@ package works.szabope.plugins.mypy.toolWindow
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.ui.treeStructure.Tree
 import works.szabope.plugins.mypy.MyBundle
-import works.szabope.plugins.mypy.services.cli.MypyOutput
+import works.szabope.plugins.mypy.services.parser.MypyOutput
 
 class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<String>) {
     private val logger = logger<MypyTreeModelManager>()

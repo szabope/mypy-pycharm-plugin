@@ -5,7 +5,7 @@ import com.intellij.ide.projectView.PresentationData
 import com.intellij.navigation.NavigationItem
 import org.jetbrains.annotations.ApiStatus.Internal
 import org.jetbrains.annotations.Nls
-import works.szabope.plugins.mypy.services.cli.MypyOutput
+import works.szabope.plugins.mypy.services.parser.MypyOutput
 import javax.swing.Icon
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
