@@ -86,7 +86,7 @@ class MypySettings(internal val project: Project) :
         }
     }
 
-    fun isInitialized(): Boolean = state.mypyExecutable != null && projectDirectory != null
+    fun isComplete(): Boolean = state.mypyExecutable != null && projectDirectory != null
 
     @Throws(SettingsValidationException::class)
     fun ensureValid() {

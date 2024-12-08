@@ -40,7 +40,7 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
         } catch (e: SettingsValidationException) {
             logger.warn(MyBundle.message("mypy.toolwindow.balloon.error", e.message!!, e.blame))
         }
-        if (!settings.isInitialized()) {
+        if (!settings.isComplete()) {
             return emptyList()
         }
 

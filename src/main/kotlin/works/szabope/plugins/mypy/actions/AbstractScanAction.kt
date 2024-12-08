@@ -22,6 +22,6 @@ abstract class AbstractScanAction : DumbAwareAction() {
                 MyBundle.message("mypy.toolwindow.balloon.error", e.message!!, e.blame)
             )
         }
-        return settings.isInitialized() && !MypyService.getInstance(project).scanInProgress
+        return settings.isComplete() && !MypyService.getInstance(project).scanInProgress
     }
 }
