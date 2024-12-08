@@ -18,7 +18,10 @@ import kotlinx.coroutines.withContext
 @Service(Service.Level.PROJECT)
 class MypyPackageManagerService(private val project: Project, private val cs: CoroutineScope) {
 
-    fun install(handleSuccess: suspend (project: Project) -> Unit, handleFailure: suspend (project: Project) -> Unit) {
+    fun install(
+        handleSuccess: suspend () -> Unit,
+        handleFailure: suspend (description: PackageManagementService.ErrorDescription) -> Unit
+    ) {
         val sdk = requireNotNull(ProjectRootManager.getInstance(project).projectSdk)
         val packageManager = getPackageManager(sdk)
         val mypyPackage = RepoPackage(PACKAGE_NAME, null)
@@ -29,8 +32,8 @@ class MypyPackageManagerService(private val project: Project, private val cs: Co
                 ignored: String?, errorDesc: PackageManagementService.ErrorDescription?
             ) {
                 when (errorDesc) {
-                    null -> cs.launch { handleSuccess(project) }
-                    else -> cs.launch { handleFailure(project) }
+                    null -> cs.launch { handleSuccess() }
+                    else -> cs.launch { handleFailure(errorDesc) }
                 }
             }
         }
