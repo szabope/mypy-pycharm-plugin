@@ -5,6 +5,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.webcore.packaging.PackageManagementService
 import com.intellij.webcore.packaging.RepoPackage
 import com.jetbrains.python.packaging.bridge.PythonPackageManagementServiceBridge
@@ -17,9 +18,8 @@ import kotlinx.coroutines.withContext
 @Service(Service.Level.PROJECT)
 class MypyPackageManagerService(private val project: Project, private val cs: CoroutineScope) {
 
-    fun install(
-        sdk: Sdk, successHandler: suspend (project: Project) -> Unit, failureHandler: suspend (project: Project) -> Unit
-    ) {
+    fun install(handleSuccess: suspend (project: Project) -> Unit, handleFailure: suspend (project: Project) -> Unit) {
+        val sdk = requireNotNull(ProjectRootManager.getInstance(project).projectSdk)
         val packageManager = getPackageManager(sdk)
         val mypyPackage = RepoPackage(PACKAGE_NAME, null)
         val listener = object : PackageManagementService.Listener {
@@ -29,8 +29,8 @@ class MypyPackageManagerService(private val project: Project, private val cs: Co
                 ignored: String?, errorDesc: PackageManagementService.ErrorDescription?
             ) {
                 when (errorDesc) {
-                    null -> cs.launch { successHandler(project) }
-                    else -> cs.launch { failureHandler(project) }
+                    null -> cs.launch { handleSuccess(project) }
+                    else -> cs.launch { handleFailure(project) }
                 }
             }
         }
@@ -41,7 +41,12 @@ class MypyPackageManagerService(private val project: Project, private val cs: Co
         }
     }
 
-    fun isInstalled(sdk: Sdk): Boolean {
+    fun canInstall(): Boolean {
+        val sdk = ProjectRootManager.getInstance(project).projectSdk ?: return false
+        return sdk.sdkType.isLocalSdk(sdk) && !isInstalled(sdk)
+    }
+
+    private fun isInstalled(sdk: Sdk): Boolean {
         return getPackageManager(sdk).installedPackagesList.find { it.name == PACKAGE_NAME } != null
     }
 

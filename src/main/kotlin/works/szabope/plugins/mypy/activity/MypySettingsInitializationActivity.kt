@@ -6,7 +6,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ex.ActionUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.startup.ProjectActivity
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.MypyPackageManagerService
@@ -34,10 +33,10 @@ internal class MypySettingsInitializationActivity : ProjectActivity {
             ) { event, _ ->
                 run {
                     ActionUtil.performActionDumbAwareWithCallbacks(openSettingsAction, event)
-                    notification.expire()
+                    notification.hideBalloon()
                 }
             })
-        if (canMypyBeInstalled(project)) {
+        if (MypyPackageManagerService.getInstance(project).canInstall()) {
             val installMypyAction = ActionManager.getInstance().getAction("InstallMypyAction")
             notification.addAction(
                 NotificationAction.create(
@@ -50,10 +49,5 @@ internal class MypySettingsInitializationActivity : ProjectActivity {
                 })
         }
         notification.notify(project)
-    }
-
-    private fun canMypyBeInstalled(project: Project): Boolean {
-        val sdk = ProjectRootManager.getInstance(project).projectSdk ?: return false
-        return sdk.sdkType.isLocalSdk(sdk) && !MypyPackageManagerService.getInstance(project).isInstalled(sdk)
     }
 }
