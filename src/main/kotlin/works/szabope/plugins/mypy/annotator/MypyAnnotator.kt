@@ -38,7 +38,7 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
         try {
             settings.ensureValid()
         } catch (e: SettingsValidationException) {
-            logger.warn(MyBundle.message("mypy.toolwindow.balloon.error", e.message!!, e.blame))
+            logger.warn(MyBundle.message("${e.message!!}\n${e.blame}"))
         }
         if (!settings.isComplete()) {
             return emptyList()

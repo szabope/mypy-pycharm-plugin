@@ -4,12 +4,14 @@ import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.webcore.packaging.PackageManagementService
 import com.intellij.webcore.packaging.RepoPackage
 import com.jetbrains.python.packaging.bridge.PythonPackageManagementServiceBridge
 import com.jetbrains.python.packaging.common.PackageManagerHolder
+import com.jetbrains.python.sdk.pythonSdk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,12 +47,12 @@ class MypyPackageManagerService(private val project: Project, private val cs: Co
     }
 
     fun canInstall(): Boolean {
-        val sdk = ProjectRootManager.getInstance(project).projectSdk ?: return false
+        val sdk = project.modules.firstNotNullOfOrNull { it.pythonSdk } ?: return false
         return sdk.sdkType.isLocalSdk(sdk) && !isInstalled(sdk)
     }
 
     private fun isInstalled(sdk: Sdk): Boolean {
-        return getPackageManager(sdk).installedPackagesList.find { it.name == PACKAGE_NAME } != null
+        return getPackageManager(sdk).installedPackagesList.any { it.name == PACKAGE_NAME }
     }
 
     @Suppress("IncorrectServiceRetrieving")

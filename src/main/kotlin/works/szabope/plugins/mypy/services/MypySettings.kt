@@ -12,10 +12,12 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
+import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
 import works.szabope.plugins.mypy.services.cli.Cli
 import works.szabope.plugins.mypy.services.cli.PythonEnvironmentAwareCli
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import java.io.File
+import javax.swing.event.HyperlinkEvent
 
 @Service(Service.Level.PROJECT)
 @State(name = "MypySettings", storages = [Storage("MypyPlugin.xml")], category = SettingsCategory.PLUGINS)
@@ -196,8 +198,7 @@ class MypySettings(internal val project: Project) :
         }
         if (file.isDirectory) {
             throw SettingsValidationException(
-                path,
-                MyBundle.message("mypy.settings.path_to_config_file.is_directory")
+                path, MyBundle.message("mypy.settings.path_to_config_file.is_directory")
             )
         }
     }
@@ -211,14 +212,12 @@ class MypySettings(internal val project: Project) :
         val file = File(path)
         if (!file.exists()) {
             throw SettingsValidationException(
-                path,
-                MyBundle.message("mypy.settings.path_to_project_directory.not_exist")
+                path, MyBundle.message("mypy.settings.path_to_project_directory.not_exist")
             )
         }
         if (!file.isDirectory) {
             throw SettingsValidationException(
-                path,
-                MyBundle.message("mypy.settings.path_to_project_directory.is_not_directory")
+                path, MyBundle.message("mypy.settings.path_to_project_directory.is_not_directory")
             )
         }
     }
@@ -232,13 +231,12 @@ class MypySettings(internal val project: Project) :
             1 -> null
             else -> {
                 ToolWindowManager.getInstance(project).notifyByBalloon(
-                    MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message(
-                        "mypy.settings.path_to_executable.exited_with_error",
-                        locateCommand,
-                        processResult.resultCode,
-                        processResult.stderr
-                    )
-                )
+                    MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error"), null
+                ) {
+                    if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
+                        MypyExecutionErrorDialog(locateCommand, processResult.stderr, processResult.resultCode).show()
+                    }
+                }
                 null
             }
         }

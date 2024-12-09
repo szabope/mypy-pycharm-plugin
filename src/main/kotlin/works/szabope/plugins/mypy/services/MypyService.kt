@@ -20,12 +20,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
+import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
 import works.szabope.plugins.mypy.services.cli.PythonEnvironmentAwareCli
 import works.szabope.plugins.mypy.services.parser.CollectingMypyOutputHandler
 import works.szabope.plugins.mypy.services.parser.IMypyOutputHandler
 import works.szabope.plugins.mypy.services.parser.MypyOutput
 import works.szabope.plugins.mypy.services.parser.PublishingMypyOutputHandler
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
+import javax.swing.event.HyperlinkEvent
 import kotlin.io.path.Path
 
 @Service(Service.Level.PROJECT)
@@ -70,10 +72,12 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
             logger.debug("${handler.resultCount} issues found")
             result.getError()?.also {
                 ToolWindowManager.getInstance(project).notifyByBalloon(
-                    MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message(
-                        "mypy.executable.error", command, result.resultCode, it
-                    )
-                )
+                    MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error"), null
+                ) {
+                    if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
+                        MypyExecutionErrorDialog(command, result.getError() ?: "", result.resultCode).show()
+                    }
+                }
             }
         }
     }
@@ -82,8 +86,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         manualScanJob?.cancel()
     }
 
-    private fun buildCommand(runConfiguration: RunConfiguration, targets: List<String>): String {
-        val (mypyExecutable, configFilePath, arguments, excludeNonProjectFiles, customExclusions) = runConfiguration
+    private fun buildCommand(runConfiguration: RunConfiguration, targets: List<String>) = with(runConfiguration) {
         val commandBuilder = StringBuilder(mypyExecutable).append(" ").append(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS)
         configFilePath.nullize(true)?.apply { commandBuilder.append(" --config-file $this") }
         arguments.nullize(true)?.apply { commandBuilder.append(" $this") }
@@ -91,8 +94,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
             targets.flatMap { collectExclusionsFor(it) }.union(customExclusions)
                 .forEach { commandBuilder.append(" --exclude $it") }
         }
-        commandBuilder.append(" ").append(targets.joinToString(" "))
-        return commandBuilder.toString()
+        commandBuilder.append(" ").append(targets.joinToString(" ")).toString()
     }
 
     private fun collectExclusionsFor(target: String): List<String> {
