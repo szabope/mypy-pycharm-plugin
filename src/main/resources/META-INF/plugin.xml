@@ -26,8 +26,7 @@
                          bundle="messages.MyBundle" key="mypy.inspection.name" enabledByDefault="true"/>
         <backgroundPostStartupActivity
                 implementation="works.szabope.plugins.mypy.activity.MypySettingsInitializationActivity"/>
-        <editorNotificationProvider
-                implementation="works.szabope.plugins.mypy.notification.MypyEditorNotificationProvider"/>
+        <notificationGroup displayType="STICKY_BALLOON" id="Mypy Group" toolWindowId="MyPy"/>
     </extensions>
 
     <actions>

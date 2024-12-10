@@ -3,7 +3,7 @@ package works.szabope.plugins.mypy.messages
 import com.intellij.util.messages.MessageBus
 import com.intellij.util.messages.Topic
 import com.intellij.util.messages.Topic.ProjectLevel
-import works.szabope.plugins.mypy.services.cli.MypyOutput
+import works.szabope.plugins.mypy.services.parser.MypyOutput
 
 class MypyScanResultPublisher(messageBus: MessageBus) {
 

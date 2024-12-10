@@ -19,14 +19,12 @@ import com.intellij.util.DocumentUtil
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.MypyService
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.mypy.services.MypySettings.SettingsValidationException
-import works.szabope.plugins.mypy.services.cli.MypyOutput
-import works.szabope.plugins.mypy.services.cli.PyVirtualEnvCli
+import works.szabope.plugins.mypy.services.parser.MypyOutput
 import works.szabope.plugins.mypy.toRunConfiguration
 
 internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo, List<MypyOutput>>() {
 
-    private val logger = logger<PyVirtualEnvCli>()
+    private val logger = logger<MypyAnnotator>()
 
     class MypyAnnotatorInfo(val file: VirtualFile, val project: Project)
 
@@ -36,15 +34,10 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
 
     override fun doAnnotate(info: MypyAnnotatorInfo): List<MypyOutput> {
         val settings = MypySettings.getInstance(info.project)
-        try {
-            settings.ensureValid()
-        } catch (e: SettingsValidationException) {
-            logger.warn(MyBundle.message("mypy.toolwindow.balloon.error", e.message!!, e.blame))
-        }
-        if (!settings.isInitialized()) {
+        settings.ensureValid()
+        if (!settings.isComplete()) {
             return emptyList()
         }
-
         val fileDocumentManager = FileDocumentManager.getInstance()
         val document = fileDocumentManager.getCachedDocument(info.file)
         if (document != null) {
@@ -61,9 +54,7 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
         }
         val service = MypyService.getInstance(info.project)
         val runConfiguration = MypySettings.getInstance(info.project).toRunConfiguration()
-        return service.scan(info.file.path, runConfiguration) { command, status, error ->
-            logger.warn(MyBundle.message("mypy.executable.error", command, status ?: 0, error))
-        }
+        return service.scan(info.file.path, runConfiguration)
     }
 
     override fun apply(file: PsiFile, annotationResult: List<MypyOutput>, holder: AnnotationHolder) {

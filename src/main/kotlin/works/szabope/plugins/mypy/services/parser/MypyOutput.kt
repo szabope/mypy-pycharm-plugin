@@ -1,4 +1,4 @@
-package works.szabope.plugins.mypy.services.cli
+package works.szabope.plugins.mypy.services.parser
 
 import kotlinx.serialization.Serializable
 
