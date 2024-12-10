@@ -8,7 +8,6 @@ import com.intellij.testFramework.common.waitUntil
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.junit.Ignore
 import works.szabope.plugins.mypy.activity.MypySettingsInitializationActivity
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
@@ -20,7 +19,6 @@ class MypyConfigurationTest : BasePlatformTestCase() {
 
     override fun getTestDataPath() = "src/test/testData/configuration"
 
-    @Ignore
     @Suppress("UnstableApiUsage")
     fun testInitializeFromOldMypySettings() {
         myFixture.copyFileToProject("mypy.conf")
