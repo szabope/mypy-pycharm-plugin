@@ -19,7 +19,6 @@ import com.intellij.util.DocumentUtil
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.MypyService
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.mypy.services.MypySettings.SettingsValidationException
 import works.szabope.plugins.mypy.services.parser.MypyOutput
 import works.szabope.plugins.mypy.toRunConfiguration
 
@@ -35,15 +34,10 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
 
     override fun doAnnotate(info: MypyAnnotatorInfo): List<MypyOutput> {
         val settings = MypySettings.getInstance(info.project)
-        try {
-            settings.ensureValid()
-        } catch (e: SettingsValidationException) {
-            logger.warn(MyBundle.message("${e.message!!}\n${e.blame}"))
-        }
+        settings.ensureValid()
         if (!settings.isComplete()) {
             return emptyList()
         }
-
         val fileDocumentManager = FileDocumentManager.getInstance()
         val document = fileDocumentManager.getCachedDocument(info.file)
         if (document != null) {

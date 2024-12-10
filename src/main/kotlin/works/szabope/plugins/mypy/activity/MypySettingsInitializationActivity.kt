@@ -8,7 +8,7 @@ import com.intellij.platform.workspace.storage.EntityChange
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import works.szabope.plugins.mypy.services.MypyIncompleteConfigurationNotificationService
-import works.szabope.plugins.mypy.services.MypyPackageManagerService
+import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
 
@@ -33,9 +33,8 @@ internal class MypySettingsInitializationActivity : ProjectActivity {
         }
         if (!settings.isComplete()) {
             val notificationService = MypyIncompleteConfigurationNotificationService.getInstance(project)
-            val canInstall = MypyPackageManagerService.getInstance(project).canInstall()
+            val canInstall = MypyPackageUtil.canInstall(project)
             notificationService.notify(canInstall)
         }
     }
-
 }

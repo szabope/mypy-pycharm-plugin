@@ -45,15 +45,13 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     ).align(Align.FILL).bindText(
                         getter = { settings.mypyExecutable.orEmpty() },
                         setter = { settings.mypyExecutable = it.trimToNull() },
-                    ).validationOnInput {
-                        if (it.text.isBlank()) {
+                    ).validationOnInput { field ->
+                        if (field.text.isBlank()) {
                             val message = MyBundle.message("mypy.settings.path_to_executable.empty_warning")
                             return@validationOnInput warning(message)
                         }
-                        try {
-                            settings.validateExecutable(it.text.trimToNull())
-                        } catch (e: MypySettings.SettingsValidationException) {
-                            return@validationOnInput error(e.message ?: "N/A")
+                        settings.validateExecutable(field.text.trimToNull())?.also {
+                            return@validationOnInput error(it.message)
                         }
                         null
                     }
@@ -67,11 +65,9 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     textFieldWithBrowseButton(project = project).align(Align.FILL).bindText(
                         getter = { settings.configFilePath.orEmpty() },
                         setter = { settings.configFilePath = it.trimToNull() },
-                    ).validationOnInput {
-                        try {
-                            settings.validateConfigFile(it.text.trimToNull())
-                        } catch (e: MypySettings.SettingsValidationException) {
-                            return@validationOnInput error(e.message ?: "N/A")
+                    ).validationOnInput { field ->
+                        settings.validateConfigFile(field.text.trimToNull())?.also {
+                            return@validationOnInput error(it.message)
                         }
                         null
                     }
@@ -96,15 +92,13 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     ).align(Align.FILL).bindText(
                         getter = { settings.projectDirectory.orEmpty() },
                         setter = { settings.projectDirectory = it.trimToNull() },
-                    ).validationOnInput {
-                        if (it.text.isBlank()) {
+                    ).validationOnInput { field ->
+                        if (field.text.isBlank()) {
                             val message = MyBundle.message("mypy.settings.path_to_project_directory.empty_warning")
                             return@validationOnInput warning(message)
                         }
-                        try {
-                            settings.validateExecutable(it.text.trimToNull())
-                        } catch (e: MypySettings.SettingsValidationException) {
-                            return@validationOnInput error(e.message ?: "N/A")
+                        settings.validateProjectDirectory(field.text.trimToNull())?.also {
+                            return@validationOnInput error(it.message)
                         }
                         null
                     }

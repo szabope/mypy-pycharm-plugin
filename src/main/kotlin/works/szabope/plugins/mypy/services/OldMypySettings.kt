@@ -6,7 +6,10 @@ import org.jetbrains.annotations.ApiStatus
 
 @Service(Service.Level.PROJECT)
 @State(
-    name = "OldMypySettings", storages = [Storage("mypy.xml", deprecated = true)], category = SettingsCategory.PLUGINS
+    name = "MypyConfigService",
+    storages = [Storage("mypy.xml", deprecated = true)],
+    category = SettingsCategory.PLUGINS,
+    allowLoadInTests = true,
 )
 class OldMypySettings : SimplePersistentStateComponent<OldMypySettings.OldMypySettingsState>(
     OldMypySettingsState()
