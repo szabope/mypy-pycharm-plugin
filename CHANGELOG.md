@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [1.0.7] - 2024-12-10
+
+- bump to 1.0.7
+- notification to offer installing mypy only if local interpreter is in use
+- handle mypy installation errors
+- show mypy installation error in dialog
+- fix remote sdk recognition
+- fix autodetect output handling
+- replace banner with sticky bubble to inform about missing configuration
+- execute mypy configuration check when sdk is replaced
+- show failure details in dialog
+- make sure that there are no duplicate install balloon
+- add progress bar to installation
+- fix configuration migration from old plugin
+
 ## [1.0.6] - 2024-12-05
 
 - make sure that working directory is set for when calling mypy
@@ -60,7 +75,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.6...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.7...HEAD
+[1.0.7]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.3...v1.0.4
