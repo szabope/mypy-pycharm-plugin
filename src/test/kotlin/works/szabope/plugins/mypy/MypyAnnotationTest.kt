@@ -8,10 +8,10 @@ import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.pathString
 
-@TestDataPath("\$CONTENT_ROOT/testData")
+@TestDataPath("\$CONTENT_ROOT/testData/annotation")
 class MypyAnnotationTest : BasePlatformTestCase() {
 
-    override fun getTestDataPath() = "src/test/testData"
+    override fun getTestDataPath() = "src/test/testData/annotation"
 
     override fun setUp() {
         super.setUp()

@@ -25,20 +25,20 @@ import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.pathString
 
-@TestDataPath("\$CONTENT_ROOT/testData")
+@TestDataPath("\$CONTENT_ROOT/testData/manualScan")
 class MypyManualScanTest : BasePlatformTestCase() {
 
     private val tree: Tree = Tree()
 
-    override fun getTestDataPath() = "src/test/testData"
+    override fun getTestDataPath() = "src/test/testData/manualScan"
 
     override fun setUp() {
         super.setUp()
-        setUpSettings()
         setUpMypyToolWindow()
     }
 
     fun testManualScan() = runBlocking {
+        setUpSettings("mypy")
         val testName = getTestName(true)
         val file = myFixture.configureByFile("$testName.py")
         scan(file)
@@ -70,9 +70,9 @@ class MypyManualScanTest : BasePlatformTestCase() {
         action.actionPerformed(actionEvent)
     }
 
-    private fun setUpSettings() {
+    private fun setUpSettings(executable: String) {
         with(MypySettings.getInstance(myFixture.project)) {
-            mypyExecutable = Paths.get(myFixture.testDataPath).resolve("mypy").absolutePathString()
+            mypyExecutable = Paths.get(myFixture.testDataPath).resolve(executable).absolutePathString()
             projectDirectory = Paths.get(myFixture.testDataPath).pathString
         }
     }
