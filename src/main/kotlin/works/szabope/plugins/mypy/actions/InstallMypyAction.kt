@@ -1,3 +1,5 @@
+@file:Suppress("removal")
+
 package works.szabope.plugins.mypy.actions
 
 import com.intellij.openapi.actionSystem.ActionUpdateThread
@@ -8,18 +10,20 @@ import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.webcore.packaging.PackageManagementService
-import com.jetbrains.python.packaging.PyPackagesNotificationPanel
 import com.jetbrains.python.packaging.bridge.PythonPackageManagementServiceBridge
+import com.jetbrains.python.packaging.ui.PyPackageManagementService.PyPackageInstallationErrorDescription
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.dialog.IDialogManager
 import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import java.util.concurrent.CompletableFuture
 
+@Suppress("removal")
 class InstallMypyAction : DumbAwareAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -37,9 +41,12 @@ class InstallMypyAction : DumbAwareAction() {
                             .initSettings(customMypyPath, mypyConfigFilePath, mypyArguments)
                     }
                 } else {
-                    @Suppress("DialogTitleCapitalization") PyPackagesNotificationPanel.showPackageInstallationError(
-                        MyBundle.message("action.InstallMypyAction.fail_html"), errorDescription
-                    )
+                    val title = MyBundle.message("action.InstallMypyAction.fail_html")
+                    if (errorDescription is PyPackageInstallationErrorDescription) {
+                        IDialogManager.showPyPackageInstallationErrorDialog(title, errorDescription)
+                    } else {
+                        IDialogManager.showPackagingErrorDialog(title, errorDescription)
+                    }
                 }
             }
         }

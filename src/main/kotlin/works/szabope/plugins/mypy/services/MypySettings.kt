@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
-import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
+import works.szabope.plugins.mypy.dialog.IDialogManager
 import works.szabope.plugins.mypy.services.cli.Cli
 import works.szabope.plugins.mypy.services.cli.PythonEnvironmentAwareCli
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
@@ -227,7 +227,11 @@ class MypySettings(internal val project: Project) :
                     MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error"), null
                 ) {
                     if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
-                        MypyExecutionErrorDialog(locateCommand, processResult.stderr, processResult.resultCode).show()
+                        IDialogManager.showMypyExecutionErrorDialog(
+                            locateCommand,
+                            processResult.stderr,
+                            processResult.resultCode
+                        )
                     }
                 }
                 null
