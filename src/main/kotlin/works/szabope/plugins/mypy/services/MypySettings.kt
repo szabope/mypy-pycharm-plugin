@@ -102,7 +102,8 @@ class MypySettings(internal val project: Project) :
         }
     }
 
-    class SettingsValidationProblem(val message: String) {
+    @JvmInline
+    value class SettingsValidationProblem(val message: String) {
         override fun toString() = message
     }
 

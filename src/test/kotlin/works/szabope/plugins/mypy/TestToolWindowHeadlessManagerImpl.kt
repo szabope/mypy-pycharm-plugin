@@ -9,8 +9,7 @@ class TestToolWindowHeadlessManagerImpl(project: Project) : ToolWindowHeadlessMa
     private val myHandlers = hashMapOf<String, (ToolWindowBalloonShowOptions) -> Unit>()
 
     override fun notifyByBalloon(options: ToolWindowBalloonShowOptions) {
-        val handler = myHandlers[options.toolWindowId]!! //TODO
-        handler.invoke(options)
+        myHandlers[options.toolWindowId]?.invoke(options)
     }
 
     fun onBalloon(toolWindowId: String, handler: (ToolWindowBalloonShowOptions) -> Unit) {
