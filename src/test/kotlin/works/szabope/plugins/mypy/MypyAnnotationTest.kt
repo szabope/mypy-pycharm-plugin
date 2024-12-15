@@ -15,20 +15,28 @@ class MypyAnnotationTest : BasePlatformTestCase() {
 
     override fun setUp() {
         super.setUp()
-        with(MypySettings.getInstance(myFixture.project)) {
-            mypyExecutable = Paths.get(myFixture.testDataPath).resolve("mypy").absolutePathString()
-            projectDirectory = Paths.get(myFixture.testDataPath).pathString
-        }
         myFixture.enableInspections(MypyInspection())
     }
 
     fun testMypyAnnotation() {
-        val testName = getTestName(true)
-        myFixture.configureByFile("$testName.py")
-        val highlightInfos = myFixture.doHighlighting()
-        assertFalse(highlightInfos.isEmpty())
-        val action = myFixture.findSingleIntention(MyBundle.message("mypy.intention.ignore.text"))
-        myFixture.launchAction(action)
-        myFixture.checkResultByFile("$testName.after.py", true)
+        with(MypySettings.getInstance(myFixture.project)) {
+            mypyExecutable = Paths.get(myFixture.testDataPath).resolve("mypy").absolutePathString()
+            projectDirectory = Paths.get(myFixture.testDataPath).pathString
+        }
+        val intention = myFixture.getAvailableIntention(MyBundle.message("mypy.intention.ignore.text"), TEST_FILE)
+        assertNotNull(intention)
+        myFixture.launchAction(intention!!)
+        myFixture.checkResultByFile(TEST_FILE_ANNOTATED, true)
+    }
+
+    fun testMypyAnnotationWithIncompleteConfiguration() {
+        MypySettings.getInstance(myFixture.project).mypyExecutable = null
+        val intention = myFixture.getAvailableIntention(MyBundle.message("mypy.intention.ignore.text"), TEST_FILE)
+        assertNull(intention)
+    }
+
+    companion object {
+        const val TEST_FILE = "mypyAnnotation.py"
+        const val TEST_FILE_ANNOTATED = "mypyAnnotation.after.py"
     }
 }
