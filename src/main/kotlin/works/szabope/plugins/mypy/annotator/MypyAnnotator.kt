@@ -65,7 +65,7 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
         } ?: HighlightSeverity.ERROR
 
         annotationResult.forEach { issue ->
-            val psiElement = file.findElementFor(issue) ?: return@forEach
+            val psiElement = requireNotNull(file.findElementFor(issue)) { "Mypy result mismatch for $issue" }
             holder.newAnnotation(severity, issue.message).range(psiElement.textRange)
                 .withFix(MypyIgnoreIntention(issue.line)).create()
         }

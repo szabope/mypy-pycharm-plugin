@@ -41,7 +41,7 @@ class MypyAnnotationTest : BasePlatformTestCase() {
 
     fun `test function annotated with comment`() {
         myFixture.configureByText(
-            "a.py", """|def<caret> lets_have_fun() -> [int]:  # comment
+            "b.py", """|def<caret> lets_have_fun() -> [int]:  # comment
                                 |   return 'fun'
                                 |""".trimMargin()
         )
@@ -65,5 +65,15 @@ class MypyAnnotationTest : BasePlatformTestCase() {
         )
         assertNotEmpty(myFixture.doHighlighting())
         assertEmpty(myFixture.filterAvailableIntentions(MyBundle.message("mypy.intention.ignore.text")))
+    }
+
+    fun `test single line triple-quoted string annotated with intention available`() {
+        myFixture.configureByText(
+            "d.py", """|def more_fun_here() -> str:
+                                |   return <caret>f""${'"'}this one here {x}""${'"'}""".trimMargin()
+        )
+        assertNotEmpty(myFixture.doHighlighting())
+        val intention = myFixture.findSingleIntention(MyBundle.message("mypy.intention.ignore.text"))
+        assertNotNull(intention)
     }
 }

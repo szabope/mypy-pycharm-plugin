@@ -2,5 +2,6 @@
 if [ "$1" = "-V" ]; then
   echo "mypy 1.11.2 (compiled: yes)"
 else
-  echo "{\"file\": \"${!#}\", \"line\": 1, \"column\": -1, \"message\": \"Bracketed expression \\\"[...]\\\" is not valid as a type\", \"hint\": \"Did you mean \\\"List[...]\\\"?\", \"code\": \"valid-type\", \"severity\": \"error\"}"
+  for last; do true; done
+  cat "$0_$(basename "$last")_result.json"
 fi
