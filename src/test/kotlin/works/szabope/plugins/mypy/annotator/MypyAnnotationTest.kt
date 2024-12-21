@@ -1,5 +1,6 @@
 package works.szabope.plugins.mypy.annotator
 
+import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import works.szabope.plugins.mypy.MyBundle
@@ -35,6 +36,7 @@ class MypyAnnotationTest : BasePlatformTestCase() {
                |   return 'fun'
                |""".trimMargin()
         )
+        PsiTestUtil.checkFileStructure(myFixture.file)
     }
 
     fun `test triple-quoted string annotated, but no intention available`() {

@@ -6,12 +6,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.startOffset
-import com.jetbrains.python.ast.impl.PyUtilCore
 import com.jetbrains.python.psi.PyUtil.StringNodeInfo
 import com.jetbrains.python.psi.impl.PyPsiUtils
 import works.szabope.plugins.mypy.MyBundle
 
-// TODO: test https://plugins.jetbrains.com/docs/intellij/modifying-psi.html#maintaining-tree-structure-consistency
 // To make sure you're not introducing inconsistencies, you can call PsiTestUtil.checkFileStructure()
 // in the tests for your action that modifies the PSI. This method ensures that the structure you've built is the same
 // as what the parser produces.
@@ -29,7 +27,7 @@ class MypyIgnoreIntention(private val line: Int) : PsiElementBaseIntentionAction
     }
 
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement): Boolean {
-        return isTypeIgnoreCommandPresent(element) && !isTripleQuotedMultilineString(element)
+        return !isTripleQuotedMultilineString(element)
     }
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
@@ -38,10 +36,6 @@ class MypyIgnoreIntention(private val line: Int) : PsiElementBaseIntentionAction
         val spaces = " ".repeat(existingComment?.let { 0 } ?: 2)
         element.containingFile.fileDocument.insertString(lineEndOffset, "$spaces# type: ignore ")
     }
-
-    @Suppress("UnstableApiUsage")
-    private fun isTypeIgnoreCommandPresent(element: PsiElement) =
-        "ignore" != PyPsiUtils.findSameLineComment(element)?.text?.let { PyUtilCore.getTypeCommentValue(it) }
 
     /** mypy does not support `#type: ignore` on multiline triple quoted elements */
     private fun isTripleQuotedMultilineString(element: PsiElement): Boolean {
