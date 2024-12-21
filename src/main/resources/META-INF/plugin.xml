@@ -29,7 +29,7 @@
         <notificationGroup displayType="STICKY_BALLOON" id="Mypy Group" toolWindowId="MyPy"/>
         <applicationService serviceInterface="works.szabope.plugins.mypy.dialog.IDialogManager"
                             serviceImplementation="works.szabope.plugins.mypy.dialog.DialogManager"
-                            testServiceImplementation="works.szabope.plugins.mypy.TestDialogManager"/>
+                            testServiceImplementation="works.szabope.plugins.mypy.testutil.TestDialogManager"/>
     </extensions>
 
     <actions>

@@ -1,4 +1,4 @@
-package works.szabope.plugins.mypy
+package works.szabope.plugins.mypy.testutil
 
 import com.intellij.openapi.ui.DialogWrapper
 import works.szabope.plugins.mypy.dialog.MypyDialog

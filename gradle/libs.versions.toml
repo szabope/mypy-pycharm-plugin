@@ -13,7 +13,7 @@ serialization = "2.0.20"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-kotlinProcess = { group = "com.github.pgreze", name = "kotlin-process", version.ref = "kotlinProcess"}
+kotlinProcess = { group = "com.github.pgreze", name = "kotlin-process", version.ref = "kotlinProcess" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
@@ -21,4 +21,4 @@ intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "inte
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }
-serialization = { id="org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization"}
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization" }

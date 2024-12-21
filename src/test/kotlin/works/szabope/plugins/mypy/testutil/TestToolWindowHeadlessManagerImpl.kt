@@ -1,4 +1,4 @@
-package works.szabope.plugins.mypy
+package works.szabope.plugins.mypy.testutil
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowBalloonShowOptions

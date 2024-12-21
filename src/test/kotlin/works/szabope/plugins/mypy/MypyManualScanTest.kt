@@ -27,6 +27,7 @@ import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowFactory
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
+import works.szabope.plugins.mypy.testutil.TestToolWindowHeadlessManagerImpl
 import java.net.URL
 import java.nio.file.Paths
 import java.util.concurrent.CompletableFuture
