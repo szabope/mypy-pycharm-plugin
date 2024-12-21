@@ -10,10 +10,6 @@ import com.jetbrains.python.psi.PyUtil.StringNodeInfo
 import com.jetbrains.python.psi.impl.PyPsiUtils
 import works.szabope.plugins.mypy.MyBundle
 
-// To make sure you're not introducing inconsistencies, you can call PsiTestUtil.checkFileStructure()
-// in the tests for your action that modifies the PSI. This method ensures that the structure you've built is the same
-// as what the parser produces.
-
 /**
  * Intention action to append `# type: ignore` comment to suppress Mypy annotations.
  */

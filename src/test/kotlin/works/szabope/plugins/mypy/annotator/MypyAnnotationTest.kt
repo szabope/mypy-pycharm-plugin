@@ -39,6 +39,23 @@ class MypyAnnotationTest : BasePlatformTestCase() {
         PsiTestUtil.checkFileStructure(myFixture.file)
     }
 
+    fun `test function annotated with comment`() {
+        myFixture.configureByText(
+            "a.py", """|def<caret> lets_have_fun() -> [int]:  # comment
+                                |   return 'fun'
+                                |""".trimMargin()
+        )
+        val intention = myFixture.findSingleIntention(MyBundle.message("mypy.intention.ignore.text"))
+        assertNotNull(intention)
+        myFixture.launchAction(intention)
+        myFixture.checkResult(
+            """|def lets_have_fun() -> [int]:  # type: ignore # comment
+               |   return 'fun'
+               |""".trimMargin()
+        )
+        PsiTestUtil.checkFileStructure(myFixture.file)
+    }
+
     fun `test triple-quoted string annotated, but no intention available`() {
         myFixture.configureByText(
             "c.py", """|def more_fun_here() -> str:
