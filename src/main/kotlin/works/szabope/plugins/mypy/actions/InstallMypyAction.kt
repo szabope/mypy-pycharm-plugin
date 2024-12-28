@@ -10,7 +10,6 @@ import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.webcore.packaging.PackageManagementService
-import com.jetbrains.python.packaging.bridge.PythonPackageManagementServiceBridge
 import com.jetbrains.python.packaging.ui.PyPackageManagementService.PyPackageInstallationErrorDescription
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
@@ -23,7 +22,6 @@ import works.szabope.plugins.mypy.services.OldMypySettings
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import java.util.concurrent.CompletableFuture
 
-@Suppress("removal")
 class InstallMypyAction : DumbAwareAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -60,7 +58,7 @@ class InstallMypyAction : DumbAwareAction() {
         return ActionUpdateThread.BGT
     }
 
-    private suspend fun install(packageManager: PythonPackageManagementServiceBridge): PackageManagementService.ErrorDescription? {
+    private suspend fun install(packageManager: PackageManagementService): PackageManagementService.ErrorDescription? {
         val result = CompletableFuture<PackageManagementService.ErrorDescription>()
         val listener = object : PackageManagementService.Listener {
             override fun operationStarted(packageName: String?) = Unit

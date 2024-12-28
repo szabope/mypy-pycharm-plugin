@@ -42,7 +42,7 @@ class MypyIncompleteConfigurationNotificationService(private val project: Projec
                     }
                 })
         }
-        this.notification.get()?.expire()
+        this.notification.get()?.expire() // TODO: not thread-safe
         this.notification = WeakReference(notification)
         notification.notify(project)
     }

@@ -3,8 +3,8 @@ package works.szabope.plugins.mypy.services
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
+import com.intellij.webcore.packaging.PackageManagementService
 import com.intellij.webcore.packaging.RepoPackage
-import com.jetbrains.python.packaging.bridge.PythonPackageManagementServiceBridge
 import com.jetbrains.python.packaging.common.PackageManagerHolder
 import com.jetbrains.python.sdk.pythonSdk
 
@@ -19,7 +19,7 @@ object MypyPackageUtil {
     fun getPackage() = RepoPackage(PACKAGE_NAME, null)
 
     @Suppress("IncorrectServiceRetrieving")
-    fun getPackageManager(project: Project): PythonPackageManagementServiceBridge? {
+    fun getPackageManager(project: Project): PackageManagementService? {
         return getSdk(project)?.let { sdk -> project.service<PackageManagerHolder>().bridgeForSdk(project, sdk) }
     }
 

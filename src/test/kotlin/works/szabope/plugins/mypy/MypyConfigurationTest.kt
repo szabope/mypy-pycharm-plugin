@@ -1,21 +1,15 @@
 package works.szabope.plugins.mypy
 
 import com.intellij.configurationStore.deserializeState
-import com.intellij.openapi.components.ComponentManagerEx
 import com.intellij.openapi.util.JDOMUtil
 import com.intellij.testFramework.TestDataPath
-import com.intellij.testFramework.common.waitUntil
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import works.szabope.plugins.mypy.activity.MypySettingsInitializationActivity
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
 
 @TestDataPath("\$CONTENT_ROOT/testData/configuration")
-class MypyConfigurationTest : BasePlatformTestCase() {
+class MypyConfigurationTest : MypyTestCase() {
 
     override fun getTestDataPath() = "src/test/testData/configuration"
 
@@ -38,13 +32,11 @@ class MypyConfigurationTest : BasePlatformTestCase() {
         val oldMypyState = deserializeState(oldMypyStateXml, OldMypySettings.OldMypySettingsState::class.java)
         val oldSettings = OldMypySettings.getInstance(project)
         oldSettings.loadState(oldMypyState!!)
-        (project as ComponentManagerEx).getCoroutineScope().launch {
-            MypySettingsInitializationActivity().execute(project)
-        }
+//        executeMypySettingsInitialization() TODO
+//        runBlocking {
+//            waitUntil { isMypySettingsInitialized() }
+//        }
         with(settings) {
-            runBlocking {
-                waitUntil { configFilePath != null && arguments != null }
-            }
             assertNull(mypyExecutable)
             assertEquals(configFilePath, oldSettings.mypyConfigFilePath)
             assertEquals(arguments, oldSettings.mypyArguments)
@@ -57,4 +49,12 @@ class MypyConfigurationTest : BasePlatformTestCase() {
         MypySettings.getInstance(project).mypyExecutable = pathToObsoleteMypy
         assertNull(MypySettings.getInstance(project).mypyExecutable)
     }
+//
+//    fun testEnsureValid() {
+//        TODO()
+//    }
+//
+//    fun testIsComplete() {
+//        TODO()
+//    }
 }

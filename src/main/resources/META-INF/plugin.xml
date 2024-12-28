@@ -30,6 +30,7 @@
         <applicationService serviceInterface="works.szabope.plugins.mypy.dialog.IDialogManager"
                             serviceImplementation="works.szabope.plugins.mypy.dialog.DialogManager"
                             testServiceImplementation="works.szabope.plugins.mypy.testutil.TestDialogManager"/>
+        <sdkType implementation="works.szabope.plugins.mypy.testutil.TestPythonLocalSdkType"/>
     </extensions>
 
     <actions>

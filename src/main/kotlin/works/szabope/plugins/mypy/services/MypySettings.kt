@@ -120,6 +120,8 @@ class MypySettings(internal val project: Project) :
             configFilePath = null
             return@ensureValid it
         }
+        //TODO: test - [   4337]   WARN - #works.szabope.plugins.mypy.services.MypySettings$Companion -
+        // projectDirectory validation failed for 'Selected directory does not exist' with '/src'
         validateProjectDirectory(state.projectDirectory)?.also {
             logger.warn("clearing invalid projectDirectory $projectDirectory")
             projectDirectory = null
