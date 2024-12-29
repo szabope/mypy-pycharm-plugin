@@ -2,6 +2,7 @@
 # libraries
 junit = "4.13.2"
 kotlinProcess = "1.5"
+mockk = "1.13.10"
 
 # plugins
 changelog = "2.2.1"
@@ -14,6 +15,7 @@ serialization = "2.0.20"
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinProcess = { group = "com.github.pgreze", name = "kotlin-process", version.ref = "kotlinProcess" }
+mockk = { group = "io.mockk", name = "mockk-jvm", version.ref = "mockk" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }

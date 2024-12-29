@@ -22,7 +22,6 @@ import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.testutil.TestPackageManagementService
 import works.szabope.plugins.mypy.testutil.TestPythonLocalSdkType
 
-
 class MypyIncompleteConfigurationNotificationTest : AbstractToolWindowTestCase() {
 
     private lateinit var packageManager: TestPackageManagementService
@@ -57,7 +56,7 @@ class MypyIncompleteConfigurationNotificationTest : AbstractToolWindowTestCase()
     }
 
     fun testLocalSdkNotification() = runBlocking {
-        withInterpreter(TestPythonLocalSdkType::class.java) {
+        withInterpreter(TestPythonLocalSdkType()) {
             val notification = getSettingsNotification()
             val actions = notification.actions
             assertEquals(2, actions.size)
@@ -88,9 +87,9 @@ class MypyIncompleteConfigurationNotificationTest : AbstractToolWindowTestCase()
     }
 
     private suspend inline fun <reified T : SdkType> withInterpreter(
-        sdkTypeClass: Class<T>, additionalData: PythonSdkAdditionalData = PyPipEnvSdkAdditionalData(), f: () -> Unit
+        sdkType: T, additionalData: PythonSdkAdditionalData = PyPipEnvSdkAdditionalData(), f: () -> Unit
     ) {
-        val sdkType = SdkType.findInstance(sdkTypeClass)
+        SdkType.EP_NAME.point.registerExtension(sdkType, testRootDisposable)
         val sdk = writeIntentReadAction { ProjectJdkTable.getInstance().createSdk(PyNames.PYTHON_SDK_ID_NAME, sdkType) }
         val modificator = sdk.sdkModificator
         modificator.sdkAdditionalData = additionalData
