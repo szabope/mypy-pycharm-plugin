@@ -5,7 +5,6 @@ import com.intellij.notification.Notification
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext
 import com.intellij.openapi.application.runWriteActionAndWait
-import com.intellij.openapi.application.writeIntentReadAction
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.projectRoots.SdkType
@@ -17,7 +16,6 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.testutil.TestPackageManagementService
 import works.szabope.plugins.mypy.testutil.TestPythonLocalSdkType
@@ -38,7 +36,7 @@ class MypyIncompleteConfigurationNotificationTest : AbstractToolWindowTestCase()
         super.tearDown()
     }
 
-    fun testNoSdkNotification() = runBlocking {
+    fun testNoSdkNotification() {
         val openSettingsAction = ActionManager.getInstance().getAction("MyPyOpenSettingsAction")
         mockkObject(openSettingsAction)
         every { openSettingsAction.actionPerformed(any()) } returns Unit
@@ -55,7 +53,7 @@ class MypyIncompleteConfigurationNotificationTest : AbstractToolWindowTestCase()
         }
     }
 
-    fun testLocalSdkNotification() = runBlocking {
+    fun testLocalSdkNotification() {
         withInterpreter(TestPythonLocalSdkType()) {
             val notification = getSettingsNotification()
             val actions = notification.actions
@@ -86,24 +84,30 @@ class MypyIncompleteConfigurationNotificationTest : AbstractToolWindowTestCase()
         return notifications.first()
     }
 
-    private suspend inline fun <reified T : SdkType> withInterpreter(
+    private inline fun <reified T : SdkType> withInterpreter(
         sdkType: T, additionalData: PythonSdkAdditionalData = PyPipEnvSdkAdditionalData(), f: () -> Unit
     ) {
         SdkType.EP_NAME.point.registerExtension(sdkType, testRootDisposable)
-        val sdk = writeIntentReadAction { ProjectJdkTable.getInstance().createSdk(PyNames.PYTHON_SDK_ID_NAME, sdkType) }
+        val sdk = runWriteActionAndWait { ProjectJdkTable.getInstance().createSdk(PyNames.PYTHON_SDK_ID_NAME, sdkType) }
         val modificator = sdk.sdkModificator
         modificator.sdkAdditionalData = additionalData
         sdkType.setupSdkPaths(sdk)
-        awaitMypySettingsInitialized {
+        awaitProcessed {
             runWriteActionAndWait {
                 modificator.commitChanges()
                 ProjectJdkTable.getInstance().addJdk(sdk)
-                ModuleRootManager.getInstance(project.modules[0]).modifiableModel.also { model -> model.sdk = sdk }
-                    .commit()
+                with(ModuleRootManager.getInstance(project.modules[0]).modifiableModel) {
+                    this.sdk = sdk
+                    commit()
+                }
             }
         }
         f.invoke()
         runWriteActionAndWait {
+            with(ModuleRootManager.getInstance(project.modules[0]).modifiableModel) {
+                this.sdk = null
+                commit()
+            }
             ProjectJdkTable.getInstance().removeJdk(sdk)
         }
     }

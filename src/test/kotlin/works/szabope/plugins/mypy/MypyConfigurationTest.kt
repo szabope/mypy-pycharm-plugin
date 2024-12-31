@@ -3,13 +3,14 @@ package works.szabope.plugins.mypy
 import com.intellij.configurationStore.deserializeState
 import com.intellij.openapi.util.JDOMUtil
 import com.intellij.testFramework.TestDataPath
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
 
 @TestDataPath("\$CONTENT_ROOT/testData/configuration")
-class MypyConfigurationTest : MypyTestCase() {
+class MypyConfigurationTest : BasePlatformTestCase() {
 
     override fun getTestDataPath() = "src/test/testData/configuration"
 
@@ -32,14 +33,11 @@ class MypyConfigurationTest : MypyTestCase() {
         val oldMypyState = deserializeState(oldMypyStateXml, OldMypySettings.OldMypySettingsState::class.java)
         val oldSettings = OldMypySettings.getInstance(project)
         oldSettings.loadState(oldMypyState!!)
-//        executeMypySettingsInitialization() TODO
-//        runBlocking {
-//            waitUntil { isMypySettingsInitialized() }
-//        }
+        MypySettingsInitializationTestService.getInstance(project).executeInitialization()
         with(settings) {
             assertNull(mypyExecutable)
-            assertEquals(configFilePath, oldSettings.mypyConfigFilePath)
-            assertEquals(arguments, oldSettings.mypyArguments)
+            assertEquals(oldSettings.mypyConfigFilePath, configFilePath)
+            assertEquals(oldSettings.mypyArguments, arguments)
         }
     }
 
