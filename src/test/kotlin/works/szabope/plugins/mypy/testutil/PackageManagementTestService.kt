@@ -5,7 +5,7 @@ import com.intellij.webcore.packaging.InstalledPackage
 import com.intellij.webcore.packaging.PackageManagementService
 import com.intellij.webcore.packaging.RepoPackage
 
-class TestPackageManagementService : PackageManagementService() {
+class PackageManagementTestService : PackageManagementService() {
 
     private val installedPackages = mutableListOf<InstalledPackage>()
 

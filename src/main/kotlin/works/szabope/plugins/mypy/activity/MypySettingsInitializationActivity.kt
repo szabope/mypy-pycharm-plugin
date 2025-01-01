@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.platform.backend.workspace.workspaceModel
 import com.intellij.platform.workspace.jps.entities.ModuleEntity
-import com.intellij.platform.workspace.storage.EntityChange
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
@@ -23,7 +22,7 @@ internal class MypySettingsInitializationActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
         configureMypy(project)
         project.workspaceModel.eventLog.filter {
-            it.getChanges(ModuleEntity::class.java).filterIsInstance<EntityChange.Replaced<ModuleEntity>>().isNotEmpty()
+            it.getChanges(ModuleEntity::class.java).isNotEmpty()
         }.collectLatest {
             configureMypy(project)
         }
