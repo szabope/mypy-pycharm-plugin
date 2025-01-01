@@ -17,6 +17,7 @@ class MypyIncompleteConfigurationNotificationService(private val project: Projec
 
     private var notification: WeakReference<Notification> = WeakReference(null)
 
+    @Synchronized
     fun notify(canInstall: Boolean) {
         val notification = NotificationGroupManager.getInstance().getNotificationGroup("Mypy Group")
             .createNotification(MyBundle.message("mypy.settings.incomplete"), NotificationType.WARNING)
@@ -42,7 +43,7 @@ class MypyIncompleteConfigurationNotificationService(private val project: Projec
                     }
                 })
         }
-        this.notification.get()?.expire() // TODO: not thread-safe
+        this.notification.get()?.expire()
         this.notification = WeakReference(notification)
         notification.notify(project)
     }
