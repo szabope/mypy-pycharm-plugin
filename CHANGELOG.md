@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.0.8] - 2025-01-01
+
+- organize tests
+- increase coverage
+- make sure there is a single mypy notification at a time
+- Fix Issue #36 - do not automatically save the document loaded into the editor to avoid side effects
+
 ## [1.0.7] - 2024-12-10
 
 - bump to 1.0.7
@@ -75,7 +82,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.7...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.8...HEAD
+[1.0.8]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.4...v1.0.5
