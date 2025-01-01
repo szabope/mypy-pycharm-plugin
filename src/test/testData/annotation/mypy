@@ -3,5 +3,10 @@ if [ "$1" = "-V" ]; then
   echo "mypy 1.11.2 (compiled: yes)"
 else
   for last; do true; done
-  cat "$0_$(basename "$last")_result.json"
+  filename=$(basename "$last")
+  # Let's extract original filename from temp file's name, e.g. pycharm_mypy_15708631520625806318_d.py -> d.py
+  filename="${filename/pycharm_mypy_/}"
+  filename="${filename//[0-9]/}"
+  filename="${filename/_/}"
+  cat "$0_${filename}_result.json"
 fi
