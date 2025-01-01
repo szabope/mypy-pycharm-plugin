@@ -20,7 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
-import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
+import works.szabope.plugins.mypy.dialog.IDialogManager
 import works.szabope.plugins.mypy.services.cli.PythonEnvironmentAwareCli
 import works.szabope.plugins.mypy.services.parser.CollectingMypyOutputHandler
 import works.szabope.plugins.mypy.services.parser.IMypyOutputHandler
@@ -70,12 +70,12 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         manualScanJob = cs.launch {
             val result = execute(command, runConfiguration.projectDirectory, handler)
             logger.debug("${handler.resultCount} issues found")
-            result.getError()?.also {
+            if (result.getError() != null) {
                 ToolWindowManager.getInstance(project).notifyByBalloon(
                     MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error"), null
                 ) {
                     if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
-                        MypyExecutionErrorDialog(command, result.getError() ?: "", result.resultCode).show()
+                        IDialogManager.showMypyExecutionErrorDialog(command, result.getError() ?: "", result.resultCode)
                     }
                 }
             }
