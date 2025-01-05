@@ -26,7 +26,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
         FileChooserDescriptor(true, false, false, false, false, false).withFileFilter(
             FileFilter(
                 if (SystemInfo.isWindows) {
-                    listOf("mypy.exe", "mypyc.exe")
+                    listOf("mypy.exe", "mypyc.exe", "mypy.bat")
                 } else {
                     listOf("mypy", "mypyc")
                 }
