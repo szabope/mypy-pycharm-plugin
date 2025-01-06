@@ -1,7 +1,14 @@
 package works.szabope.plugins.mypy.configurable
 
 import com.intellij.grazie.utils.trimToNull
+import com.intellij.ide.DataManager
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionPlaces
+import com.intellij.openapi.actionSystem.ActionUiKind
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.ex.ActionUtil
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.observable.properties.AtomicBooleanProperty
 import com.intellij.openapi.options.BoundSearchableConfigurable
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
@@ -9,12 +16,18 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.util.Condition
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.ui.dsl.builder.*
+import com.intellij.ui.layout.ComponentPredicate
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
+import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.services.MypySettings
+import javax.swing.JButton
 
+//TODO: disable OK and Apply if form is not valid (can we allow any extensions?)
+//TODO: on configuration becoming complete, make notification disappear if any
 internal class MypySettingConfigurable(private val project: Project) : BoundSearchableConfigurable(
     MyBundle.message("mypy.configurable.name"), MyBundle.message("mypy.configurable.name"), _id = ID
 ), Configurable.NoScroll {
@@ -40,9 +53,10 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
             indent {
                 row {
                     label(MyBundle.message("mypy.settings.path_to_executable.label"))
-                    textFieldWithBrowseButton(
+                    val pathToExecutableField = textFieldWithBrowseButton(
                         project = project, fileChooserDescriptor = mypyExecutableChooserDescriptor
-                    ).align(Align.FILL).bindText(
+                    )
+                    pathToExecutableField.align(Align.FILL).bindText(
                         getter = { settings.mypyExecutable.orEmpty() },
                         setter = { settings.mypyExecutable = it.trimToNull() },
                     ).validationOnInput { field ->
@@ -55,6 +69,19 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         }
                         null
                     }
+                    button(MyBundle.message("mypy.settings.autodetect.label")) {
+                        runWithModalProgressBlocking(
+                            project, MyBundle.message("mypy.settings.autodetect.in_progress")
+                        ) {
+                            pathToExecutableField.component.text = settings.autodetectExecutable() ?: ""
+                        }
+                    }.enabledIf(object : ComponentPredicate() {
+                        override fun invoke() = pathToExecutableField.component.text.isBlank()
+
+                        override fun addListener(listener: (Boolean) -> Unit) {
+                            pathToExecutableField.onChanged { listener(it.text.isBlank()) }
+                        }
+                    }).align(AlignX.RIGHT + AlignY.CENTER)
                 }.rowComment(
                     MyBundle.message(
                         "mypy.settings.path_to_executable.comment", MypyArgs.MYPY_MANDATORY_COMMAND_ARGS
@@ -102,11 +129,28 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         }
                         null
                     }
-                }
+                }.layout(RowLayout.PARENT_GRID)
                 row {
-                    checkBox("Exclude non-project files").bindSelected(
+                    checkBox(MyBundle.message("mypy.settings.exclude_non_project_files.label")).bindSelected(
                         getter = { settings.isExcludeNonProjectFiles },
                         setter = { settings.isExcludeNonProjectFiles = it })
+                }.layout(RowLayout.PARENT_GRID)
+                row {
+                    val buttonClicked = AtomicBooleanProperty(false)
+                    val action = ActionManager.getInstance().getAction("InstallMypyAction")
+                    lateinit var result: Cell<JButton>
+                    result = button(MyBundle.message("mypy.intention.install_mypy.text")) {
+                        val dataContext = DataManager.getInstance().getDataContext(result.component)
+                        val event = AnActionEvent.createEvent(
+                            action, dataContext, null, ActionPlaces.UNKNOWN, ActionUiKind.NONE, null
+                        )
+                        ActionUtil.invokeAction(action, event) {
+                            buttonClicked.set(false)
+                        }
+                    }.enabledIf(object : ComponentPredicate() {
+                        override fun invoke() = !buttonClicked.get() && MypyPackageUtil.canInstall(project)
+                        override fun addListener(listener: (Boolean) -> Unit) = buttonClicked.afterChange(listener)
+                    })
                 }.layout(RowLayout.PARENT_GRID)
             }
         }

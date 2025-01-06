@@ -130,7 +130,7 @@ class MypySettings(internal val project: Project) :
 
     suspend fun initSettings(defaultExecutable: String?, defaultConfigFile: String?, defaultArguments: String?) {
         if (mypyExecutable == null) {
-            mypyExecutable = defaultExecutable ?: autodetectExecutable(project)
+            mypyExecutable = defaultExecutable ?: autodetectExecutable()
         }
         if (configFilePath == null) {
             configFilePath = defaultConfigFile
@@ -216,7 +216,7 @@ class MypySettings(internal val project: Project) :
         return null
     }
 
-    private suspend fun autodetectExecutable(project: Project): String? {
+    suspend fun autodetectExecutable(): String? {
         val locateCommand = if (SystemInfo.isWindows) "where.exe mypy.exe" else "which mypy"
         val stdout = StringBuilder()
         val processResult = PythonEnvironmentAwareCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
