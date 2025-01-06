@@ -68,7 +68,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                             return@validationOnInput error(it.message)
                         }
                         null
-                    }
+                    }.resizableColumn()
                     button(MyBundle.message("mypy.settings.autodetect.label")) {
                         runWithModalProgressBlocking(
                             project, MyBundle.message("mypy.settings.autodetect.in_progress")
