@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.0.10] - 2025-01-07
+
+- add install and detect buttons to mypy settings
+- mypy settings: make validation error prevent user from saving the form
+- mypy settings: installing mypy to automatically fill path to executable with autodetect result, if it is empty
+- update readme
+
 ## [1.0.9] - 2025-01-05
 
 - enable setting mypy.bat as executable on windows
@@ -86,7 +93,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.9...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.10...HEAD
+[1.0.10]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.6...v1.0.7
