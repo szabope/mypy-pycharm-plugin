@@ -26,7 +26,7 @@ import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.services.MypySettings
 import javax.swing.JButton
 
-//TODO: disable OK and Apply if form is not valid (can we allow any extensions?)
+//TODO: install to fill path
 //TODO: on configuration becoming complete, make notification disappear if any
 internal class MypySettingConfigurable(private val project: Project) : BoundSearchableConfigurable(
     MyBundle.message("mypy.configurable.name"), MyBundle.message("mypy.configurable.name"), _id = ID
@@ -64,8 +64,10 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                             val message = MyBundle.message("mypy.settings.path_to_executable.empty_warning")
                             return@validationOnInput warning(message)
                         }
-                        settings.validateExecutable(field.text.trimToNull())?.also {
-                            return@validationOnInput error(it.message)
+                        null
+                    }.validationOnApply {
+                        settings.validateExecutable(pathToExecutableField.component.text.trimToNull())?.also {
+                            return@validationOnApply error(it.message)
                         }
                         null
                     }.resizableColumn()
@@ -92,9 +94,9 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     textFieldWithBrowseButton(project = project).align(Align.FILL).bindText(
                         getter = { settings.configFilePath.orEmpty() },
                         setter = { settings.configFilePath = it.trimToNull() },
-                    ).validationOnInput { field ->
+                    ).validationOnApply { field ->
                         settings.validateConfigFile(field.text.trimToNull())?.also {
-                            return@validationOnInput error(it.message)
+                            return@validationOnApply error(it.message)
                         }
                         null
                     }
@@ -114,9 +116,10 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                 ).layout(RowLayout.PARENT_GRID)
                 row {
                     label(MyBundle.message("mypy.settings.project_directory.label"))
-                    textFieldWithBrowseButton(
+                    val projectDirectoryField = textFieldWithBrowseButton(
                         project = project, fileChooserDescriptor = directoryChooserDescriptor
-                    ).align(Align.FILL).bindText(
+                    )
+                    projectDirectoryField.align(Align.FILL).bindText(
                         getter = { settings.projectDirectory.orEmpty() },
                         setter = { settings.projectDirectory = it.trimToNull() },
                     ).validationOnInput { field ->
@@ -124,8 +127,10 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                             val message = MyBundle.message("mypy.settings.path_to_project_directory.empty_warning")
                             return@validationOnInput warning(message)
                         }
-                        settings.validateProjectDirectory(field.text.trimToNull())?.also {
-                            return@validationOnInput error(it.message)
+                        null
+                    }.validationOnApply {
+                        settings.validateProjectDirectory(projectDirectoryField.component.text.trimToNull())?.also {
+                            return@validationOnApply error(it.message)
                         }
                         null
                     }
@@ -153,6 +158,12 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     })
                 }.layout(RowLayout.PARENT_GRID)
             }
+        }
+    }
+
+    override fun apply() {
+        if ((createComponent() as DialogPanel).validateAll().isEmpty()) {
+            super.apply()
         }
     }
 
