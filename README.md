@@ -10,8 +10,14 @@ It is the rework of [Roberto Leinardi](https://github.com/szabope/mypy-pycharm-p
 >
 >Type checkers help ensure that you're using variables and functions in your code correctly. With mypy, add type hints (PEP 484) to your Python programs, and mypy will warn you when you use those types incorrectly.
 
-![low_res_mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/146a7eaccf3ad32a127dbdcef7bf4042e943411a/art/results_lowres.png)
+![low_res_mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/3b600281f84ecec09d345ec7541c39c6b705ddff/art/results_lowres.png)
 <!-- Plugin description end -->
+
+## Requirements
+- mypy >= 1.11.0
+- mypy must be executable by the IDE. *e.g. mypy in WSL won't work with IDE running on Windows*
+- mypy does not need to be installed into the project's environment, it can be configured independently
+
 
 ## Installation steps
 https://www.jetbrains.com/help/pycharm/managing-plugins.html#Managing_Plugins.topic
@@ -21,12 +27,14 @@ Configuration is done on a project basis. Regardless of whether it is set up via
 
 ### Automated configuration
 Upon project load, the plugin looks for existing settings for Leinardi's mypy plugin and makes a copy of them. Executable only set if the version of mypy is supported.\
-If such configuration was not found, the plugin tries to detect the executable by running `where mypy.exe` on Windows, `which mypy` otherwise.
+If such configuration was not found, the plugin tries to detect the executable by running `where mypy.exe` on Windows, `which mypy` otherwise.\
+Incomplete configuration triggers a notification (`Install mypy` only shown if applicable):\
+![mypy_plugin_incomplete_configuration_screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/3b600281f84ecec09d345ec7541c39c6b705ddff/art/mypy_not_set.png)
 
 ### Manual configuration
 You can modify settings at [Tools](https://www.jetbrains.com/help/pycharm/settings-tools.html#Settings_Tools.topic) / **Mypy**.
 
-![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/settings.png)
+![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/3b600281f84ecec09d345ec7541c39c6b705ddff/art/settings.png)
 
 ### Inspection severity
 MyPy severity level is set to `Error` by default. You can change this in [inspection settings](https://www.jetbrains.com/help/pycharm/inspections-settings.html#Inspections_Settings.topic).
@@ -44,9 +52,9 @@ Mypy configuration is not retained from the previous run.\
 action is available within MyPy toolwindow. It clears the results and runs mypy for the one file that is open 
 and currently focused in the Editor.
 
-![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/menu.png)
+![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/3b600281f84ecec09d345ec7541c39c6b705ddff/art/menu.png)
 
-![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/results.png)
+![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/3b600281f84ecec09d345ec7541c39c6b705ddff/art/results.png)
 
 ## FAQ
 ### Scan fails with: `External tool failed with error.` or `External tool returned unexpected output.`
