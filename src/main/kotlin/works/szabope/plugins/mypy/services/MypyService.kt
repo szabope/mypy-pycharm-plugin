@@ -4,14 +4,17 @@ import com.intellij.grazie.utils.trimToNull
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.util.io.toCanonicalPath
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.platform.backend.workspace.WorkspaceModel
 import com.intellij.platform.backend.workspace.virtualFile
 import com.intellij.platform.workspace.jps.entities.ContentRootEntity
+import com.intellij.util.io.delete
 import com.intellij.util.text.nullize
 import com.jetbrains.python.PythonFileType
 import com.jetbrains.python.pyi.PyiFileType
@@ -29,6 +32,8 @@ import works.szabope.plugins.mypy.services.parser.PublishingMypyOutputHandler
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import javax.swing.event.HyperlinkEvent
 import kotlin.io.path.Path
+import kotlin.io.path.pathString
+import kotlin.io.path.writeText
 
 @Service(Service.Level.PROJECT)
 class MypyService(private val project: Project, private val cs: CoroutineScope) {
@@ -54,14 +59,27 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
     }
 
     @Suppress("UnstableApiUsage")
-    fun scan(filePath: String, runConfiguration: RunConfiguration): List<MypyOutput> {
-        val command = buildCommand(runConfiguration, listOf(filePath))
-        val handler = CollectingMypyOutputHandler()
-        val result = runBlockingCancellable { execute(command, runConfiguration.projectDirectory, handler) }
-        result.getError()?.also {
-            logger.warn(MyBundle.message("mypy.executable.error", command, result.resultCode, it))
+    fun scan(file: VirtualFile, runConfiguration: RunConfiguration): List<MypyOutput> {
+        val targetPath = file.path
+        val fileDocumentManager = FileDocumentManager.getInstance()
+        val document = requireNotNull(fileDocumentManager.getCachedDocument(file)) {
+            "Please, report this issue at https://github.com/szabope/mypy-pycharm-plugin/issues"
         }
-        return handler.getResults()
+        val tempFile = kotlin.io.path.createTempFile(prefix = "pycharm_mypy_", suffix = "_" + file.name)
+        try {
+            tempFile.toFile().deleteOnExit()
+            tempFile.writeText(document.charsSequence)
+            val shadowArg = "--shadow-file $targetPath ${tempFile.pathString}"
+            val command = buildCommand(runConfiguration, listOf(targetPath), shadowArg)
+            val handler = CollectingMypyOutputHandler()
+            val result = runBlockingCancellable { execute(command, runConfiguration.projectDirectory, handler) }
+            result.getError()?.also {
+                logger.warn(MyBundle.message("mypy.executable.error", command, result.resultCode, it))
+            }
+            return handler.getResults()
+        } finally {
+            tempFile.delete()
+        }
     }
 
     fun scanAsync(scanPaths: List<String>, runConfiguration: RunConfiguration) {
@@ -86,16 +104,18 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         manualScanJob?.cancel()
     }
 
-    private fun buildCommand(runConfiguration: RunConfiguration, targets: List<String>) = with(runConfiguration) {
-        val commandBuilder = StringBuilder(mypyExecutable).append(" ").append(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS)
-        configFilePath.nullize(true)?.apply { commandBuilder.append(" --config-file $this") }
-        arguments.nullize(true)?.apply { commandBuilder.append(" $this") }
-        if (excludeNonProjectFiles) {
-            targets.flatMap { collectExclusionsFor(it) }.union(customExclusions)
-                .forEach { commandBuilder.append(" --exclude $it") }
+    private fun buildCommand(runConfiguration: RunConfiguration, targets: List<String>, extraArgs: String? = null) =
+        with(runConfiguration) {
+            val commandBuilder = StringBuilder(mypyExecutable).append(" ").append(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS)
+            configFilePath.nullize(true)?.apply { commandBuilder.append(" --config-file $this") }
+            arguments.nullize(true)?.apply { commandBuilder.append(" $this") }
+            if (excludeNonProjectFiles) {
+                targets.flatMap { collectExclusionsFor(it) }.union(customExclusions)
+                    .forEach { commandBuilder.append(" --exclude $it") }
+            }
+            extraArgs?.nullize(true)?.apply { commandBuilder.append(" $extraArgs") }
+            commandBuilder.append(" ").append(targets.joinToString(" ")).toString()
         }
-        commandBuilder.append(" ").append(targets.joinToString(" ")).toString()
-    }
 
     private fun collectExclusionsFor(target: String): List<String> {
         val exclusions = mutableListOf<String>()
@@ -106,8 +126,6 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
                 val contentRootPath = entity.url.virtualFile?.path?.let { Path(it) } ?: return@forEach
                 entity.excludedUrls.mapNotNull { it.url.virtualFile?.path }.map { Path(it) }
                     .forEach { exclusions.add(contentRootPath.relativize(it).toCanonicalPath()) }
-            } else {
-                logger.info("nay")
             }
         }
         return exclusions

@@ -6,21 +6,17 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.util.DocumentUtil
-import com.intellij.util.io.delete
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.services.MypyService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.parser.MypyOutput
 import works.szabope.plugins.mypy.toRunConfiguration
-import kotlin.io.path.pathString
-import kotlin.io.path.writeText
 
 internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo, List<MypyOutput>>() {
 
@@ -38,21 +34,8 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
         if (!settings.isComplete()) {
             return emptyList()
         }
-        val fileDocumentManager = FileDocumentManager.getInstance()
-        val document = requireNotNull(fileDocumentManager.getCachedDocument(info.file)) {
-            "Please, report this issue at https://github.com/szabope/mypy-pycharm-plugin/issues"
-        }
-
-        val tempFile = kotlin.io.path.createTempFile(prefix = "pycharm_mypy_", suffix = "_" + info.file.name)
-        try {
-            tempFile.toFile().deleteOnExit()
-            tempFile.writeText(document.charsSequence)
-            val service = MypyService.getInstance(info.project)
-            val runConfiguration = MypySettings.getInstance(info.project).toRunConfiguration()
-            return service.scan(tempFile.pathString, runConfiguration)
-        } finally {
-            tempFile.delete()
-        }
+        val runConfiguration = MypySettings.getInstance(info.project).toRunConfiguration()
+        return MypyService.getInstance(info.project).scan(info.file, runConfiguration)
     }
 
     override fun apply(file: PsiFile, annotationResult: List<MypyOutput>, holder: AnnotationHolder) {
