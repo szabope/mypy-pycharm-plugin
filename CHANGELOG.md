@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.0.11] - 2025-01-13
+
+- fix falsely reported issues in editor in case of circular imports due to the check is running on a temp file (https://github.com/szabope/mypy-pycharm-plugin/issues/45 )
+
 ## [1.0.10] - 2025-01-07
 
 - add install and detect buttons to mypy settings
@@ -93,7 +97,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.10...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.11...HEAD
+[1.0.11]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.10...v1.0.11
 [1.0.10]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.7...v1.0.8
