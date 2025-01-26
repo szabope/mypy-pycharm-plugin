@@ -13,16 +13,16 @@ class Cli {
     }
 
     suspend fun execute(
-        command: String,
+        command: List<String>,
         workDir: String? = null,
         env: Map<String, String>? = null,
         stdout: suspend (Flow<String>) -> Unit
     ): Status {
-        require(command.isNotBlank())
+        require(command.isNotEmpty())
         val directory = workDir?.let { java.io.File(workDir) }
         return withContext(Dispatchers.IO) {
             val result = process(
-                *command.split(" ").toTypedArray(),
+                *command.toTypedArray(),
                 stdout = Redirect.Consume { stdout(it) },
                 stderr = Redirect.CAPTURE,
                 directory = directory,

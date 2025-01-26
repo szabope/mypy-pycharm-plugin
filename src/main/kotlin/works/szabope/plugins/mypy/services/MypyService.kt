@@ -69,7 +69,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         try {
             tempFile.toFile().deleteOnExit()
             tempFile.writeText(document.charsSequence)
-            val shadowArg = "--shadow-file $targetPath ${tempFile.pathString}"
+            val shadowArg = listOf("--shadow-file", targetPath, tempFile.pathString)
             val command = buildCommand(runConfiguration, listOf(targetPath), shadowArg)
             val handler = CollectingMypyOutputHandler()
             val result = runBlockingCancellable { execute(command, runConfiguration.projectDirectory, handler) }
@@ -93,7 +93,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
                     MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error"), null
                 ) {
                     if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
-                        IDialogManager.showMypyExecutionErrorDialog(command, result.getError() ?: "", result.resultCode)
+                        IDialogManager.showMypyExecutionErrorDialog(command.joinToString(" "), result.getError() ?: "", result.resultCode)
                     }
                 }
             }
@@ -104,17 +104,22 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         manualScanJob?.cancel()
     }
 
-    private fun buildCommand(runConfiguration: RunConfiguration, targets: List<String>, extraArgs: String? = null) =
+    private fun buildCommand(runConfiguration: RunConfiguration, targets: List<String>, extraArgs: List<String> = emptyList()): List<String> =
         with(runConfiguration) {
-            val commandBuilder = StringBuilder(mypyExecutable).append(" ").append(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS)
-            configFilePath.nullize(true)?.apply { commandBuilder.append(" --config-file $this") }
-            arguments.nullize(true)?.apply { commandBuilder.append(" $this") }
+            val command = mutableListOf(mypyExecutable)
+            command.addAll(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS)
+            configFilePath.nullize(true)?.let { path -> command.add(path) }
+            arguments.nullize(true)?.let { args -> command.addAll(args.split(" ")) }
             if (excludeNonProjectFiles) {
                 targets.flatMap { collectExclusionsFor(it) }.union(customExclusions)
-                    .forEach { commandBuilder.append(" --exclude $it") }
+                    .forEach { exclusion ->
+                        command.add("--exclude")
+                        command.add(exclusion)
+                    }
             }
-            extraArgs?.nullize(true)?.apply { commandBuilder.append(" $extraArgs") }
-            commandBuilder.append(" ").append(targets.joinToString(" ")).toString()
+            extraArgs.forEach { arg -> command.add(arg) }
+            command.addAll(targets)
+            command
         }
 
     private fun collectExclusionsFor(target: String): List<String> {
@@ -131,7 +136,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         return exclusions
     }
 
-    private suspend fun execute(command: String, workDir: String, stdoutHandler: IMypyOutputHandler): MypyStatus =
+    private suspend fun execute(command: List<String>, workDir: String, stdoutHandler: IMypyOutputHandler): MypyStatus =
         PythonEnvironmentAwareCli(project).execute(command, workDir, stdoutHandler::handle).let {
             MypyStatus(it.resultCode, it.stderr, stdoutHandler.getError())
         }
