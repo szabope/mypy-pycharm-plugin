@@ -86,7 +86,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     }).align(AlignX.RIGHT + AlignY.CENTER)
                 }.rowComment(
                     MyBundle.message(
-                        "mypy.settings.path_to_executable.comment", MypyArgs.MYPY_MANDATORY_COMMAND_ARGS
+                        "mypy.settings.path_to_executable.comment", MypyArgs.MYPY_MANDATORY_COMMAND_ARGS.joinToString(" ")
                     ), maxLineLength = MAX_LINE_LENGTH_WORD_WRAP
                 ).layout(RowLayout.PARENT_GRID)
                 row {
