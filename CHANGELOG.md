@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [1.0.12] - 2025-01-27
+
+- Changelog update - `v1.0.11` by @github-actions in https://github.com/szabope/mypy-pycharm-plugin/pull/47
+- Accommodate spaces when executing commands by @seanf in https://github.com/szabope/mypy-pycharm-plugin/pull/48
+- Add test for space in mypy path #48 by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/49
+- bump version by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/50
+- @seanf made their first contribution in https://github.com/szabope/mypy-pycharm-plugin/pull/48
+
 ## [1.0.11] - 2025-01-13
 
 - fix falsely reported issues in editor in case of circular imports due to the check is running on a temp file (https://github.com/szabope/mypy-pycharm-plugin/issues/45 )
@@ -97,7 +105,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs MyPy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.11...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.12...HEAD
+[1.0.12]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.10...v1.0.11
 [1.0.10]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.8...v1.0.9
