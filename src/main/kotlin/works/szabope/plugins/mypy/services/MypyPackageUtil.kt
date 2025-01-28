@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture
 
 object MypyPackageUtil {
 
-    private val PACKAGE = RepoPackage("mypy", null)
+    internal val PACKAGE = RepoPackage("mypy", null)
 
     fun canInstall(project: Project): Boolean {
         val sdk = project.pythonSdk ?: return false

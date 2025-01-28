@@ -4,20 +4,14 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.openapi.ui.MessageType
-import com.intellij.openapi.util.SystemInfo
-import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.util.text.SemVer
+import com.jetbrains.python.sdk.pythonSdk
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
-import works.szabope.plugins.mypy.dialog.IDialogManager
 import works.szabope.plugins.mypy.services.cli.Cli
-import works.szabope.plugins.mypy.services.cli.PythonEnvironmentAwareCli
-import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import java.io.File
-import javax.swing.event.HyperlinkEvent
 
 @Service(Service.Level.PROJECT)
 @State(name = "MypySettings", storages = [Storage("MypyPlugin.xml")], category = SettingsCategory.PLUGINS)
@@ -26,7 +20,6 @@ class MypySettings(internal val project: Project) :
 
     @ApiStatus.Internal
     class MypyState : BaseState() {
-        var mypyExecutable by string()
         var configFilePath by string()
         var arguments by string()
         var autoScrollToSource by property(false)
@@ -34,17 +27,6 @@ class MypySettings(internal val project: Project) :
         var projectDirectory by string()
         val customExclusions by list<String>()
     }
-
-    var mypyExecutable
-        get() = state.mypyExecutable
-        set(value) {
-            val validityProblem = validateExecutable(value)
-            if (validityProblem == null) {
-                state.mypyExecutable = value
-            } else {
-                logger.warn("mypyExecutable validation failed for '$validityProblem' for '$value'")
-            }
-        }
 
     var configFilePath
         get() = state.configFilePath
@@ -107,12 +89,10 @@ class MypySettings(internal val project: Project) :
         override fun toString() = message
     }
 
-    fun isComplete(): Boolean = state.mypyExecutable != null && projectDirectory != null
+    fun isComplete(): Boolean = projectDirectory != null
 
     fun ensureValid(): SettingsValidationProblem? {
-        validateExecutable(state.mypyExecutable)?.also {
-            logger.warn("clearing invalid mypyExecutable $mypyExecutable")
-            mypyExecutable = null
+        validateExecutable()?.also {
             return@ensureValid it
         }
         validateConfigFile(state.configFilePath)?.also {
@@ -128,10 +108,7 @@ class MypySettings(internal val project: Project) :
         return null
     }
 
-    suspend fun initSettings(defaultExecutable: String?, defaultConfigFile: String?, defaultArguments: String?) {
-        if (mypyExecutable == null) {
-            mypyExecutable = defaultExecutable ?: autodetectExecutable()
-        }
+    suspend fun initSettings(defaultConfigFile: String?, defaultArguments: String?) {
         if (configFilePath == null) {
             configFilePath = defaultConfigFile
         }
@@ -143,29 +120,17 @@ class MypySettings(internal val project: Project) :
         }
     }
 
-    fun validateExecutable(path: String?): SettingsValidationProblem? {
-        if (path != null) {
-            require(path.isNotBlank())
-            val file = File(path)
-            if (!file.exists()) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.not_exists"))
-            }
-            if (file.isDirectory) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.is_directory"))
-            }
-            if (!file.canExecute()) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.not_executable"))
-            }
-
+    fun validateExecutable(): SettingsValidationProblem? {
+        if (true) {
             val stdout = StringBuilder()
             val processResult = runBlocking {
-                Cli().execute(listOf("$path", "-V")) { it.collect(stdout::appendLine) }
+                Cli().execute(listOf(project.pythonSdk?.homePath!!, "-m", "mypy", "-V")) { it.collect(stdout::appendLine) }
             }
             if (processResult.resultCode != 0) {
                 return SettingsValidationProblem(
                     MyBundle.message(
                         "mypy.settings.path_to_executable.exited_with_error",
-                        path,
+                        "${project.pythonSdk?.homePath} -m mypy",
                         processResult.resultCode,
                         processResult.stderr
                     )
@@ -214,30 +179,6 @@ class MypySettings(internal val project: Project) :
             }
         }
         return null
-    }
-
-    suspend fun autodetectExecutable(): String? {
-        val locateCommand = if (SystemInfo.isWindows) listOf("where.exe", "mypy.exe") else listOf("which", "mypy")
-        val stdout = StringBuilder()
-        val processResult = PythonEnvironmentAwareCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
-        return when (processResult.resultCode) { // same for linux and windows
-            0 -> stdout.toString().lines().first().trim().ifBlank { null }
-            1 -> null
-            else -> {
-                ToolWindowManager.getInstance(project).notifyByBalloon(
-                    MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error"), null
-                ) {
-                    if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
-                        IDialogManager.showMypyExecutionErrorDialog(
-                            locateCommand.joinToString(" "),
-                            processResult.stderr,
-                            processResult.resultCode
-                        )
-                    }
-                }
-                null
-            }
-        }
     }
 
     companion object {

@@ -33,7 +33,7 @@ class InstallMypyAction : DumbAwareAction() {
                     )
                     with(OldMypySettings.getInstance(project)) {
                         MypySettings.getInstance(project)
-                            .initSettings(customMypyPath, mypyConfigFilePath, mypyArguments)
+                            .initSettings(mypyConfigFilePath, mypyArguments)
                     }
                 } else {
                     val title = MyBundle.message("action.InstallMypyAction.fail_html")

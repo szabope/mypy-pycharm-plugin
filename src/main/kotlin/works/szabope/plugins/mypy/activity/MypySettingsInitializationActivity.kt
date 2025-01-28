@@ -32,7 +32,7 @@ internal class MypySettingsInitializationActivity : ProjectActivity {
         val settings = MypySettings.getInstance(project)
         if (!settings.isComplete()) {
             with(OldMypySettings.getInstance(project)) {
-                settings.initSettings(customMypyPath, mypyConfigFilePath, mypyArguments)
+                settings.initSettings(mypyConfigFilePath, mypyArguments)
             }
         }
         if (!settings.isComplete()) {

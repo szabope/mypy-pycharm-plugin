@@ -14,10 +14,7 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.util.Condition
-import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.platform.ide.progress.runWithModalProgressBlocking
-import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.*
 import com.intellij.ui.layout.ComponentPredicate
 import org.jetbrains.annotations.ApiStatus
@@ -35,55 +32,12 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
     private val settings
         get() = MypySettings.getInstance(project)
 
-    private val mypyExecutableChooserDescriptor =
-        FileChooserDescriptor(true, false, false, false, false, false).withFileFilter(
-            FileFilter(
-                if (SystemInfo.isWindows) {
-                    listOf("mypy.exe", "mypyc.exe", "mypy.bat")
-                } else {
-                    listOf("mypy", "mypyc")
-                }
-            )
-        )
-
     private val directoryChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
 
     override fun createPanel(): DialogPanel {
-        val pathToExecutableComponent =
-            textFieldWithBrowseButton(project = project, fileChooserDescriptor = mypyExecutableChooserDescriptor)
         return panel {
             indent {
                 row {
-                    label(MyBundle.message("mypy.settings.path_to_executable.label"))
-                    val pathToExecutableField = cell(pathToExecutableComponent)
-                    pathToExecutableField.align(Align.FILL).bindText(
-                        getter = { settings.mypyExecutable.orEmpty() },
-                        setter = { settings.mypyExecutable = it.trimToNull() },
-                    ).validationOnInput { field ->
-                        if (field.text.isBlank()) {
-                            val message = MyBundle.message("mypy.settings.path_to_executable.empty_warning")
-                            return@validationOnInput warning(message)
-                        }
-                        null
-                    }.validationOnApply {
-                        settings.validateExecutable(pathToExecutableComponent.text.trimToNull())?.also {
-                            return@validationOnApply error(it.message)
-                        }
-                        null
-                    }.resizableColumn()
-                    button(MyBundle.message("mypy.settings.autodetect.label")) {
-                        runWithModalProgressBlocking(
-                            project, MyBundle.message("mypy.settings.autodetect.in_progress")
-                        ) {
-                            pathToExecutableComponent.text = settings.autodetectExecutable() ?: ""
-                        }
-                    }.enabledIf(object : ComponentPredicate() {
-                        override fun invoke() = pathToExecutableComponent.text.isBlank()
-
-                        override fun addListener(listener: (Boolean) -> Unit) {
-                            pathToExecutableField.onChanged { listener(it.text.isBlank()) }
-                        }
-                    }).align(AlignX.RIGHT + AlignY.CENTER)
                 }.rowComment(
                     MyBundle.message(
                         "mypy.settings.path_to_executable.comment",
@@ -152,13 +106,6 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         )
                         ActionUtil.invokeAction(action, event) {
                             buttonClicked.set(false)
-                            if (pathToExecutableComponent.text.isBlank()) {
-                                runWithModalProgressBlocking(
-                                    project, MyBundle.message("mypy.settings.autodetect.in_progress")
-                                ) {
-                                    pathToExecutableComponent.text = settings.autodetectExecutable() ?: ""
-                                }
-                            }
                         }
                     }.enabledIf(object : ComponentPredicate() {
                         override fun invoke() = !buttonClicked.get() && MypyPackageUtil.canInstall(project)

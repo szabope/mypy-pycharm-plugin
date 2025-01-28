@@ -17,13 +17,10 @@ class OldMypySettings : SimplePersistentStateComponent<OldMypySettings.OldMypySe
 
     @ApiStatus.Internal
     class OldMypySettingsState : BaseState() {
-        var customMypyPath by string()
         var mypyConfigFilePath by string()
         var mypyArguments by string()
     }
 
-    val customMypyPath
-        get() = state.customMypyPath
     val mypyConfigFilePath
         get() = state.mypyConfigFilePath
     val mypyArguments
