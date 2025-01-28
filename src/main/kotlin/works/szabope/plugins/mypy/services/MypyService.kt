@@ -7,6 +7,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.util.io.toCanonicalPath
 import com.intellij.openapi.vfs.VirtualFile
@@ -18,6 +19,8 @@ import com.intellij.util.io.delete
 import com.intellij.util.text.nullize
 import com.jetbrains.python.PythonFileType
 import com.jetbrains.python.pyi.PyiFileType
+import com.jetbrains.python.sdk.PythonSdkUtil
+import com.jetbrains.python.sdk.pythonSdk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -46,7 +49,6 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         get() = manualScanJob?.isActive == true
 
     data class RunConfiguration(
-        val mypyExecutable: String,
         val configFilePath: String? = null,
         val arguments: String? = null,
         val excludeNonProjectFiles: Boolean = true,
@@ -114,7 +116,12 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         extraArgs: List<String> = emptyList()
     ): List<String> =
         with(runConfiguration) {
-            val command = mutableListOf(mypyExecutable)
+            val sdk: Sdk = project.pythonSdk ?: throw IllegalStateException("Project has no Python SDK")
+            if (!PythonSdkUtil.isPythonSdk(sdk)) {
+                throw IllegalStateException("SDK is not a Python SDK")
+            }
+            val pythonBinary = sdk.homePath ?: throw IllegalStateException("SDK has no home path")
+            val command: MutableList<String> = mutableListOf(pythonBinary, "-m", MypyPackageUtil.PACKAGE.name)
             command.addAll(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS)
             configFilePath.nullize(true)?.let { path -> command.add(path) }
             arguments.nullize(true)?.let { args -> command.addAll(args.split(" ")) }
@@ -127,7 +134,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
             }
             extraArgs.forEach { arg -> command.add(arg) }
             command.addAll(targets)
-            command
+            command.toList()
         }
 
     private fun collectExclusionsFor(target: String): List<String> {
