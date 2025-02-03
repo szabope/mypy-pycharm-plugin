@@ -30,9 +30,7 @@ class MypyAnnotatorTest : BasePlatformTestCase() {
     fun `test MypyAnnotator does not fail if mypy executable path has a space in it`() {
         with(MypySettings.getInstance(project)) {
             mypyExecutable = Paths.get(testDataPath).resolve("white space/mypy").absolutePathString()
-            configFilePath = Paths.get(testDataPath).resolve("white space/mypy.ini").absolutePathString()
             projectDirectory = Paths.get(testDataPath).pathString
-            arguments = null
         }
         myFixture.configureByText(
             "a.py", """|def<caret> lets_have_fun() -> [int]:
