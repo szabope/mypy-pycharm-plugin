@@ -159,7 +159,7 @@ class MypySettings(internal val project: Project) :
 
             val stdout = StringBuilder()
             val processResult = runBlocking {
-                Cli().execute(listOf("$path", "-V")) { it.collect(stdout::appendLine) }
+                Cli().execute(path, "-V") { it.collect(stdout::appendLine) }
             }
             if (processResult.resultCode != 0) {
                 return SettingsValidationProblem(
@@ -217,9 +217,10 @@ class MypySettings(internal val project: Project) :
     }
 
     suspend fun autodetectExecutable(): String? {
-        val locateCommand = if (SystemInfo.isWindows) listOf("where.exe", "mypy.exe") else listOf("which", "mypy")
+        val locateCommand = if (SystemInfo.isWindows) arrayOf("where.exe", "mypy.exe") else arrayOf("which", "mypy")
         val stdout = StringBuilder()
-        val processResult = PythonEnvironmentAwareCli(project).execute(locateCommand) { it.collect(stdout::appendLine) }
+        val processResult =
+            PythonEnvironmentAwareCli(project).execute(command = locateCommand) { it.collect(stdout::appendLine) }
         return when (processResult.resultCode) { // same for linux and windows
             0 -> stdout.toString().lines().first().trim().ifBlank { null }
             1 -> null

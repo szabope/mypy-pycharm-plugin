@@ -8,16 +8,20 @@ import kotlinx.coroutines.flow.Flow
 class PythonEnvironmentAwareCli(private val project: Project) {
 
     suspend fun execute(
-        command: List<String>,
+        vararg command: String,
         workDir: String? = null,
         handle: suspend (Flow<String>) -> Unit
     ): Cli.Status {
         require(command.isNotEmpty())
         val environment = getEnvironment().toMutableMap()
         val environmentAwareCommand = PyVirtualEnvTerminalCustomizer().customizeCommandAndEnvironment(
-            project, project.basePath, command.toTypedArray(), environment
-        ).toList()
-        return Cli().execute(environmentAwareCommand, workDir, environment) { handle(it) }
+            project, project.basePath, command, environment
+        ).filter { it.isNotEmpty() }.toTypedArray()
+        return Cli().execute(
+            command = environmentAwareCommand,
+            workDir = workDir,
+            env = environment
+        ) { handle(it) }
     }
 
     private fun getEnvironment(): Map<String, String> {

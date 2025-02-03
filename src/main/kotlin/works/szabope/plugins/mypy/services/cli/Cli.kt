@@ -13,7 +13,7 @@ class Cli {
     }
 
     suspend fun execute(
-        command: List<String>,
+        vararg command: String,
         workDir: String? = null,
         env: Map<String, String>? = null,
         stdout: suspend (Flow<String>) -> Unit
@@ -22,7 +22,7 @@ class Cli {
         val directory = workDir?.let { java.io.File(workDir) }
         return withContext(Dispatchers.IO) {
             val result = process(
-                *command.toTypedArray(),
+                command = command,
                 stdout = Redirect.Consume { stdout(it) },
                 stderr = Redirect.CAPTURE,
                 directory = directory,
