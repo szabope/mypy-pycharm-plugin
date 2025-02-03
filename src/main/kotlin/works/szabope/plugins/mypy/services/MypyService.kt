@@ -116,7 +116,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         with(runConfiguration) {
             val command = mutableListOf(mypyExecutable)
             command.addAll(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS)
-            configFilePath.nullize(true)?.let { path -> command.addAll(listOf("--config-file", path)) }
+            configFilePath.nullize(true)?.let { path -> command.add(path) }
             arguments.nullize(true)?.let { args -> command.addAll(args.split(" ")) }
             if (excludeNonProjectFiles) {
                 targets.flatMap { collectExclusionsFor(it) }.union(customExclusions)
