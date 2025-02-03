@@ -1,1 +1,0 @@
-{"file": "/home/debian/PycharmProjects/subprocess-workflow/src/a.py", "line": 1, "column": -1, "message": "Bracketed expression \"[...]\" is not valid as a type", "hint": "Did you mean \"List[...]\"?", "code": "valid-type", "severity": "error"}

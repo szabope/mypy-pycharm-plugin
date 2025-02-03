@@ -93,11 +93,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
                     MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error"), null
                 ) {
                     if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
-                        IDialogManager.showMypyExecutionErrorDialog(
-                            command.joinToString(" "),
-                            result.getError() ?: "",
-                            result.resultCode
-                        )
+                        IDialogManager.showMypyExecutionErrorDialog(command.joinToString(" "), result.getError() ?: "", result.resultCode)
                     }
                 }
             }
@@ -108,11 +104,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         manualScanJob?.cancel()
     }
 
-    private fun buildCommand(
-        runConfiguration: RunConfiguration,
-        targets: List<String>,
-        extraArgs: List<String> = emptyList()
-    ): List<String> =
+    private fun buildCommand(runConfiguration: RunConfiguration, targets: List<String>, extraArgs: List<String> = emptyList()): List<String> =
         with(runConfiguration) {
             val command = mutableListOf(mypyExecutable)
             command.addAll(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS)
