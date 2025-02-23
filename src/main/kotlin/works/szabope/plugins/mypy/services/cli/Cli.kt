@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
-class Cli {
+object Cli {
     class Status(val resultCode: Int, private val stderrLines: List<String>) {
         val stderr: String
             get() = stderrLines.joinToString("\n")

@@ -10,6 +10,8 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.actions.InstallMypyAction
+import works.szabope.plugins.mypy.actions.OpenSettingsAction
 import java.lang.ref.WeakReference
 
 @Service(Service.Level.PROJECT)
@@ -21,7 +23,7 @@ class MypyIncompleteConfigurationNotificationService(private val project: Projec
     fun notify(canInstall: Boolean) {
         val notification = NotificationGroupManager.getInstance().getNotificationGroup("Mypy Group")
             .createNotification(MyBundle.message("mypy.settings.incomplete"), NotificationType.WARNING)
-        val openSettingsAction = ActionManager.getInstance().getAction("MyPyOpenSettingsAction")
+        val openSettingsAction = ActionManager.getInstance().getAction(OpenSettingsAction.ID)
         notification.addAction(
             NotificationAction.create(
                 MyBundle.message("mypy.intention.complete_configuration.text")
@@ -32,7 +34,7 @@ class MypyIncompleteConfigurationNotificationService(private val project: Projec
                 }
             })
         if (canInstall) {
-            val installMypyAction = ActionManager.getInstance().getAction("InstallMypyAction")
+            val installMypyAction = ActionManager.getInstance().getAction(InstallMypyAction.ID)
             notification.addAction(
                 NotificationAction.create(
                     MyBundle.message("mypy.intention.install_mypy.text"),

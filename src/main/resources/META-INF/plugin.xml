@@ -24,8 +24,7 @@
                          implementationClass="works.szabope.plugins.mypy.annotator.MypyInspection"
                          groupBundle="messages.MyBundle" groupKey="mypy.inspection.group_name"
                          bundle="messages.MyBundle" key="mypy.inspection.name" enabledByDefault="true"/>
-        <backgroundPostStartupActivity
-                implementation="works.szabope.plugins.mypy.activity.MypySettingsInitializationActivity"/>
+        <postStartupActivity implementation="works.szabope.plugins.mypy.activity.SettingsInitializationActivity"/>
         <notificationGroup displayType="STICKY_BALLOON" id="Mypy Group" toolWindowId="MyPy"/>
         <applicationService serviceInterface="works.szabope.plugins.mypy.dialog.IDialogManager"
                             serviceImplementation="works.szabope.plugins.mypy.dialog.DialogManager"
@@ -62,7 +61,7 @@
             <!--            class="works.szabope.plugins.mypy.actions.SeverityFiltersActionGroup"/>-->
             <!-- </group>-->
             <!-- <separator/>-->
-            <action id="MyPyOpenSettingsAction"
+            <action id="works.szabope.plugins.mypy.action.OpenSettingsAction"
                     class="works.szabope.plugins.mypy.actions.OpenSettingsAction"
                     icon="AllIcons.General.GearPlain"/>
         </group>
@@ -74,6 +73,7 @@
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
             <add-to-group group-id="ChangesViewPopupMenu" anchor="last"/>
         </action>
-        <action id="InstallMypyAction" class="works.szabope.plugins.mypy.actions.InstallMypyAction"/>
+        <action id="works.szabope.plugins.mypy.actions.InstallMypyAction"
+                class="works.szabope.plugins.mypy.actions.InstallMypyAction"/>
     </actions>
 </idea-plugin>

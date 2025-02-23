@@ -23,6 +23,7 @@ import com.intellij.ui.layout.ComponentPredicate
 import org.jetbrains.annotations.ApiStatus
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
+import works.szabope.plugins.mypy.actions.InstallMypyAction
 import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.services.MypySettings
 import javax.swing.JButton
@@ -142,7 +143,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                 }.layout(RowLayout.PARENT_GRID)
                 row {
                     val buttonClicked = AtomicBooleanProperty(false)
-                    val action = ActionManager.getInstance().getAction("InstallMypyAction")
+                    val action = ActionManager.getInstance().getAction(InstallMypyAction.ID)
                     lateinit var result: Cell<JButton>
                     result = button(MyBundle.message("mypy.intention.install_mypy.text")) {
                         val dataContext = DataManager.getInstance().getDataContext(result.component)

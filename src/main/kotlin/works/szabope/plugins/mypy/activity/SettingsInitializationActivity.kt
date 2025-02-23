@@ -1,5 +1,6 @@
 package works.szabope.plugins.mypy.activity
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.platform.backend.workspace.workspaceModel
@@ -14,21 +15,25 @@ import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
 
-internal class MypySettingsInitializationActivity : ProjectActivity {
+internal class SettingsInitializationActivity : ProjectActivity {
 
     @TestOnly
     val configurationCalled = Channel<Unit>(capacity = 1, onBufferOverflow = BufferOverflow.DROP_LATEST)
 
     override suspend fun execute(project: Project) {
-        configureMypy(project)
-        project.workspaceModel.eventLog.filter {
-            it.getChanges(ModuleEntity::class.java).isNotEmpty()
-        }.collectLatest {
-            configureMypy(project)
+        configurePlugin(project)
+        if (!ApplicationManager.getApplication().isUnitTestMode) {
+            project.workspaceModel.eventLog.filter {
+                it.getChanges(ModuleEntity::class.java).isNotEmpty()
+            }.collectLatest {
+                configurePlugin(project)
+            }
         }
     }
 
-    private suspend fun configureMypy(project: Project) {
+    @TestOnly
+    suspend fun configurePlugin(project: Project) {
+        MypyPackageUtil.reloadPackages(project)
         val settings = MypySettings.getInstance(project)
         if (!settings.isComplete()) {
             with(OldMypySettings.getInstance(project)) {

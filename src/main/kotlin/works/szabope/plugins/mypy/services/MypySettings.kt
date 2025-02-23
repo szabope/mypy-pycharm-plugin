@@ -7,9 +7,9 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.util.text.SemVer
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
+import org.jetbrains.annotations.TestOnly
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.dialog.IDialogManager
@@ -143,47 +143,49 @@ class MypySettings(internal val project: Project) :
         }
     }
 
+    @Suppress("FoldInitializerAndIfToElvis")
     fun validateExecutable(path: String?): SettingsValidationProblem? {
-        if (path != null) {
-            require(path.isNotBlank())
-            val file = File(path)
-            if (!file.exists()) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.not_exists"))
-            }
-            if (file.isDirectory) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.is_directory"))
-            }
-            if (!file.canExecute()) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.not_executable"))
-            }
+        if (path == null) return null
+        require(path.isNotBlank())
+        val file = File(path)
+        if (!file.exists()) {
+            return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.not_exists"))
+        }
+        if (file.isDirectory) {
+            return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.is_directory"))
+        }
+        if (!file.canExecute()) {
+            return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.not_executable"))
+        }
 
-            val stdout = StringBuilder()
-            val processResult = runBlocking {
-                Cli().execute(path, "-V") { it.collect(stdout::appendLine) }
-            }
-            if (processResult.resultCode != 0) {
-                return SettingsValidationProblem(
-                    MyBundle.message(
-                        "mypy.settings.path_to_executable.exited_with_error",
-                        path,
-                        processResult.resultCode,
-                        processResult.stderr
-                    )
+        val stdout = StringBuilder()
+        val processResult = runBlocking {
+            Cli.execute(path, "-V") { it.collect(stdout::appendLine) }
+        }
+        if (processResult.resultCode != 0) {
+            return SettingsValidationProblem(
+                MyBundle.message(
+                    "mypy.settings.path_to_executable.exited_with_error",
+                    path,
+                    processResult.resultCode,
+                    processResult.stderr
                 )
-            }
-            val minimumMypyVersionText = MyBundle.message("mypy.minimumVersion")
-            val minimumMypyVersion = SemVer.parseFromText(minimumMypyVersionText)!!
-            val mypyVersion = "(\\d+.\\d+.\\d+)".toRegex().find(stdout)?.let { SemVer.parseFromText(it.value) }
-            if (mypyVersion == null) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.unknown_version"))
-            }
-            if (!mypyVersion.isGreaterOrEqualThan(minimumMypyVersion)) {
-                return SettingsValidationProblem(
-                    MyBundle.message(
-                        "mypy.settings.mypy_invalid_version", stdout.toString(), minimumMypyVersionText
-                    )
+            )
+        }
+        val mypyVersion = "(\\d+.\\d+.\\d+)".toRegex().find(stdout)?.groups?.last()?.value
+        if (mypyVersion == null) {
+            return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.unknown_version"))
+        }
+        return validateVersion(mypyVersion)
+    }
+
+    private fun validateVersion(mypyVersion: String): SettingsValidationProblem? {
+        if (!MypyPackageUtil.isVersionSupported(mypyVersion)) {
+            return SettingsValidationProblem(
+                MyBundle.message(
+                    "mypy.settings.mypy_invalid_version", mypyVersion, MypyPackageUtil.MINIMUM_VERSION
                 )
-            }
+            )
         }
         return null
     }
@@ -230,15 +232,18 @@ class MypySettings(internal val project: Project) :
                 ) {
                     if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
                         IDialogManager.showMypyExecutionErrorDialog(
-                            locateCommand.joinToString(" "),
-                            processResult.stderr,
-                            processResult.resultCode
+                            locateCommand.joinToString(" "), processResult.stderr, processResult.resultCode
                         )
                     }
                 }
                 null
             }
         }
+    }
+
+    @TestOnly
+    fun reset() {
+        loadState(MypyState())
     }
 
     companion object {

@@ -3,6 +3,7 @@ package works.szabope.plugins.mypy.services
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import org.jetbrains.annotations.ApiStatus
+import org.jetbrains.annotations.TestOnly
 
 @Service(Service.Level.PROJECT)
 @State(
@@ -28,6 +29,11 @@ class OldMypySettings : SimplePersistentStateComponent<OldMypySettings.OldMypySe
         get() = state.mypyConfigFilePath
     val mypyArguments
         get() = state.mypyArguments
+
+    @TestOnly
+    fun reset() {
+        loadState(OldMypySettingsState())
+    }
 
     companion object {
         @JvmStatic

@@ -3,38 +3,20 @@ package works.szabope.plugins.mypy
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.intellij.util.cancelOnDispose
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import works.szabope.plugins.mypy.activity.MypySettingsInitializationActivity
-import java.util.concurrent.atomic.AtomicBoolean
+import com.intellij.openapi.startup.StartupActivity
+import works.szabope.plugins.mypy.activity.SettingsInitializationActivity
 
 @Service
-class MypySettingsInitializationTestService(private val project: Project, private val cs: CoroutineScope) {
+class MypySettingsInitializationTestService(private val project: Project) {
 
-    private val isStarted = AtomicBoolean(false)
-    private val initializationActivity = MypySettingsInitializationActivity()
+    private var initializationActivity =
+        (StartupActivity.POST_STARTUP_ACTIVITY.point as Sequence<*>).filter { it is SettingsInitializationActivity }
+            .single() as SettingsInitializationActivity
 
-    suspend fun awaitProcessed(cb: () -> Unit) {
+    suspend fun triggerReconfiguration() {
         initializationActivity.configurationCalled.tryReceive() // clear existing
-        cb.invoke()
-        awaitActivity()
-    }
-
-    private suspend fun awaitActivity() {
+        initializationActivity.configurePlugin(project)
         initializationActivity.configurationCalled.receive()
-    }
-
-    @Suppress("UnstableApiUsage")
-    fun executeInitialization() {
-        if (isStarted.getAndSet(true)) {
-            return
-        }
-        cs.launch {
-            initializationActivity.execute(project)
-        }.cancelOnDispose(project, true)
-        runBlocking { awaitActivity() }
     }
 
     companion object {
