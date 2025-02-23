@@ -9,7 +9,7 @@ import works.szabope.plugins.mypy.testutil.TestToolWindowHeadlessManagerImpl
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowFactory
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 
-abstract class AbstractToolWindowTestCase : MypyTestCase() {
+abstract class AbstractToolWindowTestCase : AbstractMypyTestCase() {
 
     protected val tree: Tree = Tree()
     protected lateinit var toolWindowManager: TestToolWindowHeadlessManagerImpl
@@ -19,6 +19,11 @@ abstract class AbstractToolWindowTestCase : MypyTestCase() {
         toolWindowManager = TestToolWindowHeadlessManagerImpl(project)
         project.replaceService(ToolWindowManager::class.java, toolWindowManager, testRootDisposable)
         setUpMypyToolWindow()
+    }
+
+    override fun tearDown() {
+        toolWindowManager.cleanup()
+        super.tearDown()
     }
 
     private fun setUpMypyToolWindow() {

@@ -17,7 +17,7 @@ class PythonEnvironmentAwareCli(private val project: Project) {
         val environmentAwareCommand = PyVirtualEnvTerminalCustomizer().customizeCommandAndEnvironment(
             project, project.basePath, command, environment
         ).filter { it.isNotEmpty() }.toTypedArray()
-        return Cli().execute(
+        return Cli.execute(
             command = environmentAwareCommand,
             workDir = workDir,
             env = environment

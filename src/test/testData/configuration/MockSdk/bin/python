@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ "$1" = "-V" ]; then
+  printf "Python 3.11.2\n"
+else
+  exit 1
+fi

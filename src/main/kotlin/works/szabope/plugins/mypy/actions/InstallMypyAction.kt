@@ -54,4 +54,8 @@ class InstallMypyAction : DumbAwareAction() {
     override fun getActionUpdateThread(): ActionUpdateThread {
         return ActionUpdateThread.BGT
     }
+
+    companion object {
+        const val ID = "works.szabope.plugins.mypy.actions.InstallMypyAction"
+    }
 }
