@@ -1,6 +1,5 @@
 package works.szabope.plugins.mypy.services
 
-import com.intellij.grazie.utils.trimToNull
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
@@ -21,6 +20,7 @@ import com.jetbrains.python.pyi.PyiFileType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import trimToNull
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.dialog.IDialogManager
