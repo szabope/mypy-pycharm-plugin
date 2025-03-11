@@ -140,8 +140,11 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
 
     private suspend fun execute(
         vararg command: String, workDir: String, stdoutHandler: IMypyOutputHandler
-    ): MypyStatus = PythonEnvironmentAwareCli(project).execute(command = command, workDir, stdoutHandler::handle).let {
-        MypyStatus(it.resultCode, it.stderr, stdoutHandler.getError())
+    ): MypyStatus {
+        logger.debug("Executing command: ${command.joinToString(" ") } with workDir: $workDir")
+        return PythonEnvironmentAwareCli(project).execute(command = command, workDir, stdoutHandler::handle).let {
+            MypyStatus(it.resultCode, it.stderr, stdoutHandler.getError())
+        }
     }
 
     companion object {
