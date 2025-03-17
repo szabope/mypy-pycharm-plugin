@@ -1,4 +1,4 @@
-# MyPy Pycharm Plugin Changelog
+# Mypy Pycharm Plugin Changelog
 
 ## [Unreleased]
 
@@ -130,7 +130,7 @@ Fix Naming collisions with old plugin
      - Check files in the current changelist: **removed**
      - Clear all: **removed**
      - Severity filters: **removed**
-     - Rescan: **added** - runs MyPy scan on the latest target(s)
+     - Rescan: **added** - runs mypy scan on the latest target(s)
 
 [Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.17...HEAD
 [1.0.17]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.16...v1.0.17
