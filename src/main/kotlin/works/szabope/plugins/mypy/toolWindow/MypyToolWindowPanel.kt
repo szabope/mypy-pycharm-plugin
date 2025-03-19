@@ -111,6 +111,6 @@ class MypyToolWindowPanel(private val project: Project, private val tree: Tree =
 
         @JvmStatic
         val MYPY_SEVERITY_FILTER_VALUES = arrayOf("ERROR", "WARNING", "NOTE")
-        const val ID = "Mypy"
+        const val ID = "Mypy "
     }
 }

@@ -11,7 +11,7 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="Mypy" factoryClass="works.szabope.plugins.mypy.toolWindow.MypyToolWindowFactory"
+        <toolWindow id="Mypy " factoryClass="works.szabope.plugins.mypy.toolWindow.MypyToolWindowFactory"
                     anchor="bottom" canCloseContents="false" icon="/icons/mypyToolWindow.svg"/>
         <projectConfigurable
                 id="works.szabope.mypy.configurable"
