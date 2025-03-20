@@ -1,1 +1,1 @@
-rootProject.name = "MyPy PyCharm Plugin"
+rootProject.name = "Mypy PyCharm Plugin"

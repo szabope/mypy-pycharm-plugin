@@ -2,10 +2,10 @@
 [![Apache-2.0 license](https://img.shields.io/github/license/szabope/mypy-pycharm-plugin.svg?style=plastic)](https://github.com/szabope/mypy-pycharm-plugin/blob/master/LICENSE)
 
 <!-- Plugin description -->
-This plugin provides PyCharm with both real-time and on-demand scanning capabilities using an external MyPy tool.\
+This plugin provides PyCharm with both real-time and on-demand scanning capabilities using an external mypy tool.\
 It is the rework of [Roberto Leinardi](https://github.com/szabope/mypy-pycharm-plugin?tab=readme-ov-file#acknowledgements)'s [mypy-pycharm](https://github.com/leinardi/mypy-pycharm) plugin.[ Click here](https://github.com/szabope/mypy-pycharm-plugin?tab=readme-ov-file#differences-from-the-original-plugin) to see differences.
 
-[MyPy](https://github.com/python/mypy), as described by its authors:
+[Mypy](https://github.com/python/mypy), as described by its authors:
 >Mypy is a static type checker for Python.
 >
 >Type checkers help ensure that you're using variables and functions in your code correctly. With mypy, add type hints (PEP 484) to your Python programs, and mypy will warn you when you use those types incorrectly.
@@ -37,7 +37,7 @@ You can modify settings at [Tools](https://www.jetbrains.com/help/pycharm/settin
 ![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/3b600281f84ecec09d345ec7541c39c6b705ddff/art/settings.png)
 
 ### Inspection severity
-MyPy severity level is set to `Error` by default. You can change this in [inspection settings](https://www.jetbrains.com/help/pycharm/inspections-settings.html#Inspections_Settings.topic).
+Mypy severity level is set to `Error` by default. You can change this in [inspection settings](https://www.jetbrains.com/help/pycharm/inspections-settings.html#Inspections_Settings.topic).
 
 ## Usage
 
@@ -46,10 +46,10 @@ action is available in right-click menus for the Python file loaded into the edi
 and Python files and directories in the project and changes views. You may select multiple targets, 
 but all of them has to be either a Python file or a directory.\
 **Rescan Latest** ![](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/refresh.svg) 
-action is available within MyPy toolwindow. It clears the results and re-runs mypy for the latest target. 
+action is available within Mypy toolwindow. It clears the results and re-runs mypy for the latest target. 
 Mypy configuration is not retained from the previous run.\
 **Scan Editor** ![](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/338908f67473081858a50cf55ecf6e4c37e69fd4/art/execute.svg) 
-action is available within MyPy toolwindow. It clears the results and runs mypy for the one file that is open 
+action is available within Mypy toolwindow. It clears the results and runs mypy for the one file that is open 
 and currently focused in the Editor.
 
 ![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/3b600281f84ecec09d345ec7541c39c6b705ddff/art/menu.png)
