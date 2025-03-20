@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.0.18] - 2025-03-20
+
+- Changelog update - `v1.0.17` by @github-actions in https://github.com/szabope/mypy-pycharm-plugin/pull/72
+- Fix capitalization of mypy by @gy-mate in https://github.com/szabope/mypy-pycharm-plugin/pull/75
+- Release 1.0.18 by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/77
+- @gy-mate made their first contribution in https://github.com/szabope/mypy-pycharm-plugin/pull/75
+
 ## [1.0.17] - 2025-03-11
 
 - Changelog update - `v1.0.16` by @github-actions in https://github.com/szabope/mypy-pycharm-plugin/pull/67
@@ -132,7 +139,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.17...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.18...HEAD
+[1.0.18]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.17...v1.0.18
 [1.0.17]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.16...v1.0.17
 [1.0.16]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.15...v1.0.16
 [1.0.15]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.14...v1.0.15
