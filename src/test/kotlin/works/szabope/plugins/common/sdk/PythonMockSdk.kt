@@ -1,8 +1,4 @@
-// Copyright 2000-2021 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
-// original file: [intellij-community] com.jetbrains.python.PythonMockSdk
-@file:Suppress("UNCHECKED_CAST", "UnstableApiUsage")
-
-package works.szabope.plugins.mypy.testutil
+package works.szabope.plugins.common.sdk
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.projectRoots.ProjectJdkTable
@@ -14,8 +10,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.containers.ContainerUtil
 import com.jetbrains.python.PyNames
-import com.jetbrains.python.codeInsight.typing.PyTypeShed.findAllRootsForLanguageLevel
-import com.jetbrains.python.codeInsight.userSkeletons.PyUserSkeletonsUtil
+import com.jetbrains.python.codeInsight.typing.PyTypeShed
 import com.jetbrains.python.psi.LanguageLevel
 import com.jetbrains.python.sdk.PythonSdkAdditionalData
 import com.jetbrains.python.sdk.PythonSdkType
@@ -79,8 +74,7 @@ object PythonMockSdk {
         ContainerUtil.addIfNotNull(
             result, localFS.refreshAndFindFileByIoFile(File(mockSdkPath, PythonSdkUtil.SKELETON_DIR_NAME))
         )
-        ContainerUtil.addIfNotNull(result, PyUserSkeletonsUtil.getUserSkeletonsDirectory())
-        result.addAll(findAllRootsForLanguageLevel(level))
+        result.addAll(PyTypeShed.findAllRootsForLanguageLevel(level))
         return result
     }
 

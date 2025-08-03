@@ -10,12 +10,28 @@ import com.intellij.ui.dsl.builder.panel
 import works.szabope.plugins.mypy.MyBundle
 
 data class MypyErrorDescription(
-    val command: String, val output: String, @DetailedDescription val message: String? = null
+    @DetailedDescription val details: String, @DetailedDescription val message: String? = null
 )
 
+class MypyPackageInstallationErrorDialog(message: String) : MypyErrorDialog(
+    MyBundle.message("mypy.dialog.installation_error.title"),
+    MypyErrorDescription(MyBundle.message("mypy.dialog.installation_error.details", message))
+)
+
+
 class MypyExecutionErrorDialog(command: String, result: String, resultCode: Int) : MypyErrorDialog(
-    MyBundle.message("mypy.dialog.execution_error.title"),
-    MypyErrorDescription(command, result, MyBundle.message("mypy.dialog.execution_error.status_code", resultCode))
+    MyBundle.message("mypy.dialog.execution_error.title"), MypyErrorDescription(
+        MyBundle.message("mypy.dialog.execution_error.status_code", resultCode, result),
+        MyBundle.message("mypy.dialog.execution_error.message", command)
+    )
+)
+
+class MypyGeneralErrorDialog(throwable: Throwable) : MypyErrorDialog(
+    MyBundle.message("mypy.dialog.general_error.title"), MypyErrorDescription(
+        MyBundle.message(
+            "mypy.dialog.general_error.details", throwable.message!!, throwable.stackTraceToString()
+        ), MyBundle.message("mypy.please_report_this_issue")
+    )
 )
 
 open class MypyErrorDialog(
@@ -31,7 +47,7 @@ open class MypyErrorDialog(
     override fun createCenterPanel() = panel {
         row {
             textArea().applyToComponent {
-                text = MyBundle.message("mypy.dialog.execution_error.content", description.command, description.output)
+                text = description.details
                 isEditable = false
                 columns = COLUMNS_LARGE
                 lineWrap = true

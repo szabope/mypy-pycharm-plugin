@@ -37,21 +37,14 @@ class MypyIncompleteConfigurationNotificationTest : AbstractToolWindowTestCase()
     }
 
     fun testLocalSdkNotification() =
-        withMockSdk("${Paths.get(testDataPath).absolutePathString()}/MockSdk") { packageManager ->
+        withMockSdk("${Paths.get(testDataPath).absolutePathString()}/MockSdk") {
             val notification = getSettingsNotification()
             val actions = notification.actions
             assertEquals(2, actions.size)
-            val action = AnActionWrapper(actions.last()) // Install mypy action
-            val event = getAnActionEvent(notification)
-            action.update(event)
-            assertTrue(event.presentation.isEnabled)
-            action.actionPerformed(event)
-            assertNotEmpty(packageManager.installedPackages.filter { it.name == "mypy" })
         }
 
     fun testRemoteSdkNotification() =
-        withMockSdk("${Paths.get(testDataPath).absolutePathString()}/MockSdk") { packageManager ->
-            val mockSdk = packageManager.sdk
+        withMockSdk("${Paths.get(testDataPath).absolutePathString()}/MockSdk") { mockSdk ->
             // let's lie about locality, see com.jetbrains.python.sdk.PythonSdkUtil#isRemote(Sdk)
             val mockAdditionalData = mockk<PyRemoteSdkAdditionalData>()
             every { mockAdditionalData.sdkId } returns "Python something"

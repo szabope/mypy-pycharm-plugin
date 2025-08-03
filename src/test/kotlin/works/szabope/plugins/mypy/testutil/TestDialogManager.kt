@@ -4,14 +4,13 @@
 package works.szabope.plugins.mypy.testutil
 
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.webcore.packaging.PackageManagementService
-import com.intellij.webcore.packaging.PackagingErrorDialog
+import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.packaging.PyPackageInstallationErrorDialog
-import com.jetbrains.python.packaging.ui.PyPackageManagementService
 import org.junit.Assert.assertNull
 import works.szabope.plugins.mypy.dialog.IDialogManager
 import works.szabope.plugins.mypy.dialog.MypyDialog
 import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
+import works.szabope.plugins.mypy.dialog.MypyGeneralErrorDialog
 
 class TestDialogManager : IDialogManager {
     private val myHandlers = hashMapOf<Class<out DialogWrapper>, (MypyDialog) -> Int>()
@@ -31,18 +30,14 @@ class TestDialogManager : IDialogManager {
         }
     }
 
-    override fun createPyPackageInstallationErrorDialog(
-        title: String,
-        errorDescription: PyPackageManagementService.PyPackageInstallationErrorDescription
-    ) = TestDialogWrapper(PyPackageInstallationErrorDialog::class.java)
-
-    override fun createPackagingErrorDialog(
-        title: String,
-        errorDescription: PackageManagementService.ErrorDescription
-    ) = TestDialogWrapper(PackagingErrorDialog::class.java)
+    override fun createPyPackageInstallationErrorDialog(exception: PyExecutionException) =
+        TestDialogWrapper(PyPackageInstallationErrorDialog::class.java)
 
     override fun createMypyExecutionErrorDialog(command: String, result: String, resultCode: Int) =
         TestDialogWrapper(MypyExecutionErrorDialog::class.java)
+
+    override fun createGeneralErrorDialog(failure: Throwable) =
+        TestDialogWrapper(MypyGeneralErrorDialog::class.java, failure)
 
     override fun onDialog(dialogClass: Class<out DialogWrapper>, handler: (MypyDialog) -> Int) {
         assertNull(myHandlers.put(dialogClass, handler))

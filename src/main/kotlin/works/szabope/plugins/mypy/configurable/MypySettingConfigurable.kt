@@ -21,10 +21,10 @@ import com.intellij.ui.dsl.builder.*
 import com.intellij.ui.layout.ComponentPredicate
 import org.jetbrains.annotations.ApiStatus
 import trimToNull
+import works.szabope.plugins.common.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.actions.InstallMypyAction
-import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.services.MypySettings
 import javax.swing.JButton
 
@@ -161,7 +161,9 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                             }
                         }
                     }.enabledIf(object : ComponentPredicate() {
-                        override fun invoke() = !buttonClicked.get() && MypyPackageUtil.canInstall(project)
+                        override fun invoke() =
+                            !buttonClicked.get() && PluginPackageManagementService.getInstance(project).canInstall()
+
                         override fun addListener(listener: (Boolean) -> Unit) = buttonClicked.afterChange(listener)
                     })
                 }.layout(RowLayout.PARENT_GRID)
