@@ -6,10 +6,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.util.Version
 import com.intellij.openapi.wm.ToolWindowManager
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.TestOnly
+import works.szabope.plugins.common.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.dialog.IDialogManager
@@ -89,19 +91,6 @@ class MypySettings(internal val project: Project) :
     val customExclusions
         get() = state.customExclusions
 
-    fun addExclusion(exclusion: String) {
-        require(exclusion.isNotBlank())
-        if (!state.customExclusions.contains(exclusion)) {
-            state.customExclusions.add(exclusion)
-        }
-    }
-
-    fun removeExclusion(exclusion: String) {
-        if (state.customExclusions.contains(exclusion)) {
-            state.customExclusions.remove(exclusion)
-        }
-    }
-
     @JvmInline
     value class SettingsValidationProblem(val message: String) {
         override fun toString() = message
@@ -176,14 +165,16 @@ class MypySettings(internal val project: Project) :
         if (mypyVersion == null) {
             return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.unknown_version"))
         }
-        return validateVersion(mypyVersion)
+        return validateVersion(Version.parseVersion(mypyVersion)!!)
     }
 
-    private fun validateVersion(mypyVersion: String): SettingsValidationProblem? {
-        if (!MypyPackageUtil.isVersionSupported(mypyVersion)) {
+    private fun validateVersion(version: Version): SettingsValidationProblem? {
+        if (!PluginPackageManagementService.getInstance(project).isVersionSupported(version)) {
             return SettingsValidationProblem(
                 MyBundle.message(
-                    "mypy.settings.mypy_invalid_version", mypyVersion, MypyPackageUtil.MINIMUM_VERSION
+                    "mypy.settings.mypy_invalid_version",
+                    "${version.major}.${version.minor}.${version.bugfix}",
+                    MypyPluginPackageManagementService.MINIMUM_VERSION
                 )
             )
         }

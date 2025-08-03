@@ -2,16 +2,13 @@ package works.szabope.plugins.mypy
 
 import com.intellij.openapi.application.runWriteActionAndWait
 import com.intellij.openapi.projectRoots.ProjectJdkTable
+import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.jetbrains.python.packaging.management.PythonPackageManager
 import com.jetbrains.python.sdk.pythonSdk
 import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import works.szabope.plugins.common.sdk.PythonMockSdk
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.mypy.testutil.PythonMockSdk
-import works.szabope.plugins.mypy.testutil.TestPythonPackageManager
 
 abstract class AbstractMypyTestCase : BasePlatformTestCase() {
 
@@ -30,19 +27,15 @@ abstract class AbstractMypyTestCase : BasePlatformTestCase() {
         MypySettingsInitializationTestService.getInstance(project).triggerReconfiguration()
     }
 
-    @Suppress("UnstableApiUsage")
-    fun withMockSdk(path: String, action: (TestPythonPackageManager) -> Unit) {
+    fun withMockSdk(path: String, action: (Sdk) -> Unit) {
         val mockSdk = PythonMockSdk.create(path)
         runWriteActionAndWait {
             ProjectJdkTable.getInstance().addJdk(mockSdk)
         }
         project.pythonSdk = mockSdk
         module.pythonSdk = mockSdk
-        val packageManager = TestPythonPackageManager(project, mockSdk)
-        mockkObject(PythonPackageManager)
-        every { PythonPackageManager.forSdk(any(), any()) } returns packageManager
         try {
-            action(packageManager)
+            action(mockSdk)
         } finally {
             project.pythonSdk = null
             module.pythonSdk = null

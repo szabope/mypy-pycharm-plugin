@@ -10,8 +10,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import org.jetbrains.annotations.TestOnly
+import works.szabope.plugins.common.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypyIncompleteConfigurationNotificationService
-import works.szabope.plugins.mypy.services.MypyPackageUtil
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
 
@@ -33,7 +33,7 @@ internal class SettingsInitializationActivity : ProjectActivity {
 
     @TestOnly
     suspend fun configurePlugin(project: Project) {
-        MypyPackageUtil.reloadPackages(project)
+        PluginPackageManagementService.getInstance(project).reloadPackages()
         val settings = MypySettings.getInstance(project)
         if (!settings.isComplete()) {
             with(OldMypySettings.getInstance(project)) {
@@ -42,7 +42,7 @@ internal class SettingsInitializationActivity : ProjectActivity {
         }
         if (!settings.isComplete()) {
             val notificationService = MypyIncompleteConfigurationNotificationService.getInstance(project)
-            val canInstall = MypyPackageUtil.canInstall(project)
+            val canInstall = PluginPackageManagementService.getInstance(project).canInstall()
             notificationService.notify(canInstall)
         }
         configurationCalled.send(Unit)
