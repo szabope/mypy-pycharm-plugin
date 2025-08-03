@@ -31,12 +31,7 @@ abstract class AbstractPluginPackageManagementService : PluginPackageManagementS
     }
 
     override suspend fun reloadPackages(): Result<List<PythonPackage>>? {
-        return try {
-            getPackageManager()?.reloadPackages()?.getOrThrow()?.let { Result.success(it) }
-        } catch (e: Exception) {
-            // e.g. org.apache.hc.client5.http.HttpHostConnectException thrown when docker (in given SDK) is unavailable
-            Result.failure(e)
-        }
+        return getPackageManager()?.reloadPackages()?.mapSuccess { Result.success(it) } as Result<List<PythonPackage>>?
     }
 
     override fun getInstalledVersion(): Version? {
