@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.util.Version
 import com.intellij.webcore.packaging.InstalledPackage
+import com.jetbrains.python.errorProcessing.PyResult
 import com.jetbrains.python.packaging.PyRequirement
 import com.jetbrains.python.packaging.common.PythonPackage
 import com.jetbrains.python.packaging.pyRequirement
@@ -35,11 +36,11 @@ class MypyPluginPackageManagementServiceStub(
         return success(Unit)
     }
 
-    override suspend fun reloadPackages(): Result<List<PythonPackage>> {
+    override suspend fun reloadPackages(): PyResult<List<PythonPackage>>? {
         if (project.pythonSdk == null) {
-            return success(emptyList())
+            return PyResult.success(emptyList())
         }
-        return success(getInstalledPackages().map { PythonPackage(it.name, it.version!!, false) }.toList())
+        return PyResult.success(getInstalledPackages().map { PythonPackage(it.name, it.version!!, false) }.toList())
     }
 
     override fun getRequirement(): PyRequirement {

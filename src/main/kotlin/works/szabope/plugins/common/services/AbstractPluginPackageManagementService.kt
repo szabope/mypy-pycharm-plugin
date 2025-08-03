@@ -3,6 +3,7 @@ package works.szabope.plugins.common.services
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Version
 import com.intellij.remote.RemoteSdkProperties
+import com.jetbrains.python.errorProcessing.PyResult
 import com.jetbrains.python.getOrThrow
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.packaging.PyPackage
@@ -30,8 +31,8 @@ abstract class AbstractPluginPackageManagementService : PluginPackageManagementS
         return PythonSdkUtil.isVirtualEnv(sdk) || PythonSdkUtil.isCondaVirtualEnv(sdk)
     }
 
-    override suspend fun reloadPackages(): Result<List<PythonPackage>>? {
-        return getPackageManager()?.reloadPackages()?.mapSuccess { Result.success(it) } as Result<List<PythonPackage>>?
+    override suspend fun reloadPackages(): PyResult<List<PythonPackage>>? {
+        return getPackageManager()?.reloadPackages()
     }
 
     override fun getInstalledVersion(): Version? {
