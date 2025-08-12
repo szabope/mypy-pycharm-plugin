@@ -11,7 +11,7 @@ import com.jetbrains.python.packaging.common.PythonPackage
 import com.jetbrains.python.packaging.pyRequirement
 import com.jetbrains.python.packaging.requirement.PyRequirementRelation
 import com.jetbrains.python.sdk.pythonSdk
-import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
+import works.szabope.plugins.common_.services.AbstractPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService.Companion.MINIMUM_VERSION
 import kotlin.Result.Companion.success
 

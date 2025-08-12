@@ -1,6 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-package works.szabope.plugins.common.services
+package works.szabope.plugins.common_.services
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project

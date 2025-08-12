@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.python.packaging.PyRequirement
 import com.jetbrains.python.packaging.pyRequirement
 import com.jetbrains.python.packaging.requirement.PyRequirementRelation
-import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
+import works.szabope.plugins.common_.services.AbstractPluginPackageManagementService
 
 class MypyPluginPackageManagementService(override val project: Project) : AbstractPluginPackageManagementService() {
 

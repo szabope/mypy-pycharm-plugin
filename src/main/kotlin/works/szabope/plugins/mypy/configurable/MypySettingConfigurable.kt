@@ -21,7 +21,7 @@ import com.intellij.ui.dsl.builder.*
 import com.intellij.ui.layout.ComponentPredicate
 import org.jetbrains.annotations.ApiStatus
 import trimToNull
-import works.szabope.plugins.common.services.PluginPackageManagementService
+import works.szabope.plugins.common_.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.actions.InstallMypyAction
