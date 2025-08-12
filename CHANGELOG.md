@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.0.23] - 2025-08-12
+
+- Changelog update - `v1.0.22` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/95
+- fix conflict with pylint by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/98
+
 ## [1.0.22] - 2025-08-03
 
 - Changelog update - `v1.0.21` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/93
@@ -160,7 +165,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.22...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.23...HEAD
+[1.0.23]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.22...v1.0.23
 [1.0.22]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.21...v1.0.22
 [1.0.21]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.20...v1.0.21
 [1.0.20]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.19...v1.0.20
