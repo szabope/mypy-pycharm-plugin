@@ -13,7 +13,7 @@ import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.jetbrains.python.packaging.PyExecutionException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import works.szabope.plugins.common.services.PluginPackageManagementService
+import works.szabope.plugins.common_.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.dialog.IDialogManager
 import works.szabope.plugins.mypy.services.MypySettings

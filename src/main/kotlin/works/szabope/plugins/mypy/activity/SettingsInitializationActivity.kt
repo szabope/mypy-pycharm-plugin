@@ -10,7 +10,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import org.jetbrains.annotations.TestOnly
-import works.szabope.plugins.common.services.PluginPackageManagementService
+import works.szabope.plugins.common_.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypyIncompleteConfigurationNotificationService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
