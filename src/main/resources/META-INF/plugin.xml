@@ -29,9 +29,6 @@
         <applicationService serviceInterface="works.szabope.plugins.mypy.dialog.IDialogManager"
                             serviceImplementation="works.szabope.plugins.mypy.dialog.DialogManager"
                             testServiceImplementation="works.szabope.plugins.mypy.testutil.TestDialogManager"/>
-        <projectService serviceInterface="works.szabope.plugins.common_.services.PluginPackageManagementService"
-                        serviceImplementation="works.szabope.plugins.mypy.services.MypyPluginPackageManagementService"
-                        testServiceImplementation="works.szabope.plugins.mypy.testutil.MypyPluginPackageManagementServiceStub"/>
     </extensions>
 
     <actions>

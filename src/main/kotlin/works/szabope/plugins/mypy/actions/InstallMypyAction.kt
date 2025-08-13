@@ -13,9 +13,9 @@ import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.jetbrains.python.packaging.PyExecutionException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import works.szabope.plugins.common_.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.dialog.IDialogManager
+import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
@@ -27,33 +27,29 @@ class InstallMypyAction : DumbAwareAction() {
         val project = e.project ?: return
         runWithModalProgressBlocking(project, MyBundle.message("action.InstallMypyAction.in_progress")) {
             withContext(Dispatchers.EDT) {
-                PluginPackageManagementService.getInstance(project).installRequirement()
-                    .onSuccess {
-                        @Suppress("DialogTitleCapitalization") ToolWindowManager.getInstance(project).notifyByBalloon(
-                            MypyToolWindowPanel.ID,
-                            MessageType.INFO,
-                            MyBundle.message("action.InstallMypyAction.done_html")
-                        )
-                        with(OldMypySettings.getInstance(project)) {
-                            MypySettings.getInstance(project)
-                                .initSettings(customMypyPath, mypyConfigFilePath, mypyArguments)
-                        }
+                MypyPluginPackageManagementService.getInstance(project).installRequirement().onSuccess {
+                    @Suppress("DialogTitleCapitalization") ToolWindowManager.getInstance(project).notifyByBalloon(
+                        MypyToolWindowPanel.ID, MessageType.INFO, MyBundle.message("action.InstallMypyAction.done_html")
+                    )
+                    with(OldMypySettings.getInstance(project)) {
+                        MypySettings.getInstance(project)
+                            .initSettings(customMypyPath, mypyConfigFilePath, mypyArguments)
                     }
-                    .onFailure { failure ->
-                        if (failure is PyExecutionException) {
-                            IDialogManager.showPyPackageInstallationErrorDialog(failure)
-                        } else {
-                            thisLogger().error(failure)
-                            IDialogManager.showGeneralErrorDialog(failure)
-                        }
+                }.onFailure { failure ->
+                    if (failure is PyExecutionException) {
+                        IDialogManager.showPyPackageInstallationErrorDialog(failure)
+                    } else {
+                        thisLogger().error(failure)
+                        IDialogManager.showGeneralErrorDialog(failure)
                     }
+                }
             }
         }
     }
 
     override fun update(event: AnActionEvent) {
         event.presentation.isEnabled =
-            event.project?.let { PluginPackageManagementService.getInstance(it).canInstall() } ?: false
+            event.project?.let { MypyPluginPackageManagementService.getInstance(it).canInstall() } ?: false
     }
 
     override fun getActionUpdateThread(): ActionUpdateThread {
