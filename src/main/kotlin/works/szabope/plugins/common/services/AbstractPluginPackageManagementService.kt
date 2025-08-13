@@ -1,4 +1,4 @@
-package works.szabope.plugins.common_.services
+package works.szabope.plugins.common.services
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Version

@@ -11,7 +11,6 @@ import com.intellij.openapi.wm.ToolWindowManager
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.TestOnly
-import works.szabope.plugins.common_.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.dialog.IDialogManager
@@ -169,7 +168,7 @@ class MypySettings(internal val project: Project) :
     }
 
     private fun validateVersion(version: Version): SettingsValidationProblem? {
-        if (!PluginPackageManagementService.getInstance(project).isVersionSupported(version)) {
+        if (!MypyPluginPackageManagementService.getInstance(project).isVersionSupported(version)) {
             return SettingsValidationProblem(
                 MyBundle.message(
                     "mypy.settings.mypy_invalid_version",
