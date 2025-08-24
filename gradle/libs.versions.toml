@@ -3,6 +3,7 @@
 junit = "4.13.2"
 kotlinProcess = "1.5.1"
 mockk = "1.14.4"
+myPluginCommon = "0.0.1"
 
 # plugins
 changelog = "2.2.1"
@@ -16,6 +17,7 @@ serialization = "2.2.0"
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinProcess = { group = "com.github.pgreze", name = "kotlin-process", version.ref = "kotlinProcess" }
 mockk = { group = "io.mockk", name = "mockk-jvm", version.ref = "mockk" }
+myPluginCommon = { group = "works.szabope.plugins", name = "common", version.ref = "myPluginCommon" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
