@@ -17,12 +17,20 @@ version = providers.gradleProperty("pluginVersion").get()
 
 // Set the JVM language level used to build the project.
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 // Configure project's dependencies
 repositories {
     mavenCentral()
+
+    maven {
+        url = uri("https://maven.pkg.github.com/szabope/pycharm-plugin-base")
+        credentials {
+            username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("USERNAME")
+            password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("TOKEN")
+        }
+    }
 
     // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
@@ -51,6 +59,7 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
     }
     implementation(libs.kotlinProcess)
+    implementation(libs.myPluginCommon)
 }
 
 // Configure IntelliJ Platform Gradle Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html
