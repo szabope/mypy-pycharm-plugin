@@ -2,13 +2,13 @@ package works.szabope.plugins.mypy.toolWindow
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.ui.treeStructure.Tree
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.parser.MypyOutput
 
 class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<String>) {
     private val logger = logger<MypyTreeModelManager>()
     private val issues = mutableSetOf<MypyOutput>()
-    private val model = MypyTreeModel(MyBundle.message("mypy.toolwindow.name.empty"))
+    private val model = MypyTreeModel(MypyBundle.message("mypy.toolwindow.name.empty"))
 
     fun add(issue: MypyOutput) {
         issues.add(issue)
@@ -38,7 +38,7 @@ class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<Strin
 
     private fun resetRoot(targetsMaybe: List<String>? = null) {
         val targets = targetsMaybe ?: model.root.targets
-        model.setRoot(RootNode(MyBundle.message("mypy.toolwindow.root.message", 0, 0), targets))
+        model.setRoot(RootNode(MypyBundle.message("mypy.toolwindow.root.message", 0, 0), targets))
     }
 
     private fun addToTree(issue: MypyOutput) {
@@ -46,7 +46,7 @@ class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<Strin
         val issueNode = IssueNode(issue)
         model.append(issueNode, fileNode)
         model.updateRootText(
-            MyBundle.message(
+            MypyBundle.message(
                 "mypy.toolwindow.root.message", issues.size, model.getChildCount(model.root)
             )
         )

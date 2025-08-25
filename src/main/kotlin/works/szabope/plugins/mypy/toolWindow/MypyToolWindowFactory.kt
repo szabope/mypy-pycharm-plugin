@@ -7,7 +7,7 @@ import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.openapi.wm.ToolWindowType
 import com.intellij.ui.content.ContentFactory
 import org.jetbrains.annotations.VisibleForTesting
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.messages.IMypyScanResultListener
 import works.szabope.plugins.mypy.messages.MypyScanResultPublisher
 
@@ -21,7 +21,7 @@ internal open class MypyToolWindowFactory : ToolWindowFactory, DumbAware {
             .subscribe(MypyScanResultPublisher.SCAN_RESULT_TOPIC, IMypyScanResultListener {
                 panel.addScanResult(it)
             })
-        val content = ContentFactory.getInstance().createContent(panel, MyBundle.message("mypy.toolwindow.name"), false)
+        val content = ContentFactory.getInstance().createContent(panel, MypyBundle.message("mypy.toolwindow.name"), false)
         toolWindow.contentManager.addContent(content)
         toolWindow.setType(ToolWindowType.DOCKED, null)
     }
