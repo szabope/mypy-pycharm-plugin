@@ -22,6 +22,7 @@ kotlin {
 
 // Configure project's dependencies
 repositories {
+    mavenLocal() //TODO: do not release
     mavenCentral()
 
     maven {
