@@ -82,7 +82,7 @@ class MypyIncompleteConfigurationNotificationTest : AbstractToolWindowTestCase()
             triggerReconfiguration()
         }
         val notifications = ActionCenter.getNotifications(project).filter {
-            "Mypy Group" == it.groupId && MyBundle.message("mypy.settings.incomplete") == it.content && !it.isExpired
+            "Mypy Group" == it.groupId && MypyBundle.message("mypy.notification.incomplete_configuration") == it.content && !it.isExpired
         }
         return notifications.single()
     }

@@ -14,11 +14,11 @@
         <toolWindow id="Mypy " factoryClass="works.szabope.plugins.mypy.toolWindow.MypyToolWindowFactory"
                     anchor="bottom" canCloseContents="false" icon="/icons/mypyToolWindow.svg"/>
         <projectConfigurable
-                id="works.szabope.mypy.configurable"
-                instance="works.szabope.plugins.mypy.configurable.MypySettingConfigurable"
+                id="works.szabope.plugins.mypy.configurable.MypyConfigurable"
+                instance="works.szabope.plugins.mypy.configurable.MypyConfigurable"
                 parentId="tools"
-                key="mypy.configurable.name"
-                bundle="messages.MyBundle"/>
+                key="mypy.configuration.name"
+                bundle="messages.MypyBundle"/>
         <externalAnnotator language="Python" implementationClass="works.szabope.plugins.mypy.annotator.MypyAnnotator"/>
         <localInspection language="Python" level="ERROR" shortName="MypyInspection"
                          implementationClass="works.szabope.plugins.mypy.annotator.MypyInspection"

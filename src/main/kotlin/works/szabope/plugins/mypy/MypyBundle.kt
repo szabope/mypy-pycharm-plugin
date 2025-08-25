@@ -5,11 +5,11 @@ import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
 
 @NonNls
-private const val BUNDLE = "messages.MyBundle"
+private const val BUNDLE = "messages.MypyBundle"
 
-object MyBundle {
+object MypyBundle {
 
-    private val bundle = DynamicBundle(MyBundle.javaClass, BUNDLE)
+    private val bundle = DynamicBundle(MypyBundle.javaClass, BUNDLE)
 
     @JvmStatic
     fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =
