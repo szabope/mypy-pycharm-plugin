@@ -3,7 +3,7 @@
 junit = "4.13.2"
 kotlinProcess = "1.5.1"
 mockk = "1.14.4"
-myPluginCommon = "0.0.1"
+myPluginCommon = "0.0.4-SNAPSHOT" # TODO: do not release with snapshot deps
 
 # plugins
 changelog = "2.2.1"
