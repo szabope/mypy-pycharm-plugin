@@ -1,71 +1,62 @@
-<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <resource-bundle>messages.MyBundle</resource-bundle>
+    <resource-bundle>messages.MypyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Mypy " factoryClass="works.szabope.plugins.mypy.toolWindow.MypyToolWindowFactory"
                     anchor="bottom" canCloseContents="false" icon="/icons/mypyToolWindow.svg"/>
         <projectConfigurable
-                id="works.szabope.mypy.configurable"
-                instance="works.szabope.plugins.mypy.configurable.MypySettingConfigurable"
+                id="works.szabope.plugins.mypy.configurable.MypyConfigurable"
+                instance="works.szabope.plugins.mypy.configurable.MypyConfigurable"
                 parentId="tools"
-                key="mypy.configurable.name"
-                bundle="messages.MyBundle"/>
+                key="mypy.configuration.name"
+                bundle="messages.MypyBundle"/>
         <externalAnnotator language="Python" implementationClass="works.szabope.plugins.mypy.annotator.MypyAnnotator"/>
         <localInspection language="Python" level="ERROR" shortName="MypyInspection"
                          implementationClass="works.szabope.plugins.mypy.annotator.MypyInspection"
-                         groupBundle="messages.MyBundle" groupKey="mypy.inspection.group_name"
-                         bundle="messages.MyBundle" key="mypy.inspection.name" enabledByDefault="true"/>
+                         groupBundle="messages.MypyBundle" groupKey="mypy.inspection.group_name"
+                         bundle="messages.MypyBundle" key="mypy.inspection.name" enabledByDefault="true"/>
         <postStartupActivity implementation="works.szabope.plugins.mypy.activity.SettingsInitializationActivity"/>
         <notificationGroup displayType="STICKY_BALLOON" id="Mypy Group" toolWindowId="MyPy"/>
-        <applicationService serviceInterface="works.szabope.plugins.mypy.dialog.IDialogManager"
-                            serviceImplementation="works.szabope.plugins.mypy.dialog.DialogManager"
-                            testServiceImplementation="works.szabope.plugins.mypy.testutil.TestDialogManager"/>
     </extensions>
 
     <actions>
-        <group id="MyPyPluginActions" text="Mypy" popup="true">
-            <action id="RescanWithMypyAction"
-                    class="works.szabope.plugins.mypy.actions.RescanWithMypyAction"
+        <group id="works.szabope.plugins.mypy.MypyPluginActions" text="Mypy" popup="true">
+            <action id="works.szabope.plugins.mypy.action.RescanAction"
+                    class="works.szabope.plugins.mypy.action.RescanAction"
                     icon="AllIcons.Actions.Refresh"/>
-            <action id="MypyStopCheckAction"
-                    class="works.szabope.plugins.mypy.actions.StopCheckAction"
+            <action id="works.szabope.plugins.mypy.action.StopScanAction"
+                    class="works.szabope.plugins.mypy.action.StopScanAction"
                     icon="AllIcons.Actions.Suspend"/>
-            <action id="ScanCurrentlyFocusedOneInEditorAction"
-                    class="works.szabope.plugins.mypy.actions.ScanCurrentlyFocusedOneInEditorAction"
+            <action id="works.szabope.plugins.mypy.action.ScanCurrentlyFocusedOneInEditorAction"
+                    class="works.szabope.plugins.mypy.action.ScanCurrentlyFocusedOneInEditorAction"
                     icon="AllIcons.Actions.Execute"/>
             <separator/>
-            <action id="MyPyScrollToSourceAction"
-                    class="works.szabope.plugins.mypy.actions.ScrollToSourceDummyAction"
+            <action id="works.szabope.plugins.mypy.action.ScrollToSourceAction"
+                    class="works.szabope.plugins.common.action.ScrollToSourceDummyAction"
                     icon="AllIcons.General.AutoscrollToSource"/>
             <separator/>
-            <action id="MyPyExpandAllAction"
-                    class="works.szabope.plugins.mypy.actions.ExpandAllAction"
-                    icon="AllIcons.Actions.Expandall"/>
-            <action id="MyPyCollapseAllAction"
-                    class="works.szabope.plugins.mypy.actions.CollapseAllAction"
-                    icon="AllIcons.Actions.Collapseall"/>
-            <separator/>
+            <reference ref="ExpandAll"/>
+            <reference ref="CollapseAll"/>
             <!-- removed for now, as all hits are of the same severity -->
             <!-- <group id="Mypy.ErrorLevelDisplayOptions" icon="AllIcons.Actions.GroupBy" popup="true">-->
             <!--     <separator key="group.Mypy.ErrorLevelDisplayOptions.text"/>-->
             <!--     <group id="Mypy.ErrorLevelDisplayOptions.SeverityFilters"-->
-            <!--            class="works.szabope.plugins.mypy.actions.SeverityFiltersActionGroup"/>-->
+            <!--            class="works.szabope.plugins.mypy.action.SeverityFiltersActionGroup"/>-->
             <!-- </group>-->
             <!-- <separator/>-->
             <action id="works.szabope.plugins.mypy.action.OpenSettingsAction"
-                    class="works.szabope.plugins.mypy.actions.OpenSettingsAction"
+                    class="works.szabope.plugins.mypy.action.OpenSettingsAction"
                     icon="AllIcons.General.GearPlain"/>
         </group>
-        <action id="ScanWithMypyAction"
-                class="works.szabope.plugins.mypy.actions.ScanWithMypyAction"
+        <action id="works.szabope.plugins.mypy.action.ScanAction"
+                class="works.szabope.plugins.mypy.action.ScanAction"
                 icon="/icons/mypyScanAction.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <add-to-group group-id="EditorTabPopupMenu" anchor="last"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
             <add-to-group group-id="ChangesViewPopupMenu" anchor="last"/>
         </action>
-        <action id="works.szabope.plugins.mypy.actions.InstallMypyAction"
-                class="works.szabope.plugins.mypy.actions.InstallMypyAction"/>
+        <action id="works.szabope.plugins.mypy.action.InstallMypyAction"
+                class="works.szabope.plugins.mypy.action.InstallMypyAction"/>
     </actions>
 </idea-plugin>
