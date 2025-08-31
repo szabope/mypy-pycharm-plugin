@@ -1,6 +1,6 @@
 @file:Suppress("removal")
 
-package works.szabope.plugins.mypy.actions
+package works.szabope.plugins.mypy.action
 
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project

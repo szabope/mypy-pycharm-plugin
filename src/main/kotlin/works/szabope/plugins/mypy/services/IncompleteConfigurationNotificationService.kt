@@ -10,12 +10,12 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import works.szabope.plugins.mypy.MypyBundle
-import works.szabope.plugins.mypy.actions.InstallMypyAction
-import works.szabope.plugins.mypy.actions.OpenSettingsAction
+import works.szabope.plugins.mypy.action.InstallMypyAction
+import works.szabope.plugins.mypy.action.OpenSettingsAction
 import java.lang.ref.WeakReference
 
 @Service(Service.Level.PROJECT)
-class MypyIncompleteConfigurationNotificationService(private val project: Project) {
+class IncompleteConfigurationNotificationService(private val project: Project) {
 
     private var notification: WeakReference<Notification> = WeakReference(null)
 
@@ -34,13 +34,13 @@ class MypyIncompleteConfigurationNotificationService(private val project: Projec
                 }
             })
         if (canInstall) {
-            val installMypyAction = ActionManager.getInstance().getAction(InstallMypyAction.ID)
+            val installAction = ActionManager.getInstance().getAction(InstallMypyAction.ID)
             notification.addAction(
                 NotificationAction.create(
                     MypyBundle.message("mypy.intention.install_mypy.text"),
                 ) { event, _ ->
                     run {
-                        ActionUtil.performActionDumbAwareWithCallbacks(installMypyAction, event)
+                        ActionUtil.performActionDumbAwareWithCallbacks(installAction, event)
                         notification.expire()
                     }
                 })
@@ -52,6 +52,6 @@ class MypyIncompleteConfigurationNotificationService(private val project: Projec
 
     companion object {
         @JvmStatic
-        fun getInstance(project: Project): MypyIncompleteConfigurationNotificationService = project.service()
+        fun getInstance(project: Project): IncompleteConfigurationNotificationService = project.service()
     }
 }

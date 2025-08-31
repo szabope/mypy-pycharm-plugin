@@ -11,7 +11,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import works.szabope.plugins.mypy.actions.OpenSettingsAction
+import works.szabope.plugins.mypy.action.OpenSettingsAction
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
 

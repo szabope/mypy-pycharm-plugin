@@ -3,47 +3,27 @@
 
 package works.szabope.plugins.mypy.testutil
 
-import com.intellij.openapi.ui.DialogWrapper
 import com.jetbrains.python.packaging.PyExecutionException
-import com.jetbrains.python.packaging.PyPackageInstallationErrorDialog
-import org.junit.Assert.assertNull
-import works.szabope.plugins.mypy.dialog.IDialogManager
-import works.szabope.plugins.mypy.dialog.MypyDialog
+import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.test.dialog.AbstractTestDialogManager
+import works.szabope.plugins.common.test.dialog.TestDialogWrapper
 import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
 import works.szabope.plugins.mypy.dialog.MypyGeneralErrorDialog
+import works.szabope.plugins.mypy.dialog.MypyPackageInstallationErrorDialog
+import works.szabope.plugins.mypy.dialog.MypyParseErrorDialog
 
-class TestDialogManager : IDialogManager {
-    private val myHandlers = hashMapOf<Class<out DialogWrapper>, (MypyDialog) -> Int>()
+class TestDialogManager : AbstractTestDialogManager() {
+    override fun createPyPackageInstallationErrorDialog(exception: PyExecutionException) = TestDialogWrapper(
+        MypyPackageInstallationErrorDialog::class.java, exception
+    )
 
-    override fun showDialog(dialog: MypyDialog) {
-        dialog.show()
-        var exitCode = DialogWrapper.OK_EXIT_CODE
-        try {
-            val handler = myHandlers[dialog.getWrappedClass()]
-            if (handler != null) {
-                exitCode = handler(dialog)
-            } else {
-                throw IllegalStateException("The dialog is not expected here: " + dialog.javaClass)
-            }
-        } finally {
-            dialog.close(exitCode)
-        }
-    }
+    override fun createToolExecutionErrorDialog(configuration: ImmutableSettingsData, result: String, resultCode: Int) =
+        TestDialogWrapper(MypyExecutionErrorDialog::class.java, configuration, result, resultCode)
 
-    override fun createPyPackageInstallationErrorDialog(exception: PyExecutionException) =
-        TestDialogWrapper(PyPackageInstallationErrorDialog::class.java)
-
-    override fun createMypyExecutionErrorDialog(command: String, result: String, resultCode: Int) =
-        TestDialogWrapper(MypyExecutionErrorDialog::class.java)
+    override fun createToolOutputParseErrorDialog(
+        configuration: ImmutableSettingsData, targets: String, json: String, error: String
+    ) = TestDialogWrapper(MypyParseErrorDialog::class.java, configuration, targets, json, error)
 
     override fun createGeneralErrorDialog(failure: Throwable) =
         TestDialogWrapper(MypyGeneralErrorDialog::class.java, failure)
-
-    override fun onDialog(dialogClass: Class<out DialogWrapper>, handler: (MypyDialog) -> Int) {
-        assertNull(myHandlers.put(dialogClass, handler))
-    }
-
-    override fun cleanup() {
-        myHandlers.clear()
-    }
 }

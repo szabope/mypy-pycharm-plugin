@@ -1,4 +1,4 @@
-package works.szabope.plugins.mypy.actions
+package works.szabope.plugins.mypy.action
 
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
