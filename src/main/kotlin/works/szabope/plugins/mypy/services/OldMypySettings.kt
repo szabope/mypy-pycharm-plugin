@@ -3,7 +3,7 @@ package works.szabope.plugins.mypy.services
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import org.jetbrains.annotations.ApiStatus
-import org.jetbrains.annotations.TestOnly
+import works.szabope.plugins.common.services.BasicSettingsData
 
 @Service(Service.Level.PROJECT)
 @State(
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.TestOnly
 )
 class OldMypySettings : SimplePersistentStateComponent<OldMypySettings.OldMypySettingsState>(
     OldMypySettingsState()
-) {
+), BasicSettingsData {
 
     @ApiStatus.Internal
     class OldMypySettingsState : BaseState() {
@@ -23,17 +23,14 @@ class OldMypySettings : SimplePersistentStateComponent<OldMypySettings.OldMypySe
         var mypyArguments by string()
     }
 
-    val customMypyPath
+    override val executablePath: String?
         get() = state.customMypyPath
-    val mypyConfigFilePath
+    override val configFilePath: String?
         get() = state.mypyConfigFilePath
-    val mypyArguments
+    override val arguments: String?
         get() = state.mypyArguments
-
-    @TestOnly
-    fun reset() {
-        loadState(OldMypySettingsState())
-    }
+    override val scanBeforeCheckIn: Boolean
+        get() = false
 
     companion object {
         @JvmStatic

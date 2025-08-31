@@ -10,7 +10,7 @@ import works.szabope.plugins.common.configurable.GeneralConfigurable
 import works.szabope.plugins.common.trimToNull
 import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.MypyBundle
-import works.szabope.plugins.mypy.actions.InstallMypyAction
+import works.szabope.plugins.mypy.action.InstallMypyAction
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypySettings
 

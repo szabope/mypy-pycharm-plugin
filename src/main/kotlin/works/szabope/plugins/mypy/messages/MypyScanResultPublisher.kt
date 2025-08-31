@@ -3,13 +3,13 @@ package works.szabope.plugins.mypy.messages
 import com.intellij.util.messages.MessageBus
 import com.intellij.util.messages.Topic
 import com.intellij.util.messages.Topic.ProjectLevel
-import works.szabope.plugins.mypy.services.parser.MypyOutput
+import works.szabope.plugins.mypy.services.parser.MypyMessage
 
 class MypyScanResultPublisher(messageBus: MessageBus) {
 
     private val publisher = messageBus.syncPublisher(SCAN_RESULT_TOPIC)
 
-    fun publish(message: MypyOutput) {
+    fun publish(message: MypyMessage) {
         publisher.process(message)
     }
 

@@ -38,7 +38,7 @@ class MypyIgnoreIntention(private val line: Int) : PsiElementBaseIntentionAction
         try {
             val stringNode = element.context?.let { StringNodeInfo(it) }
             return stringNode != null && stringNode.isTripleQuoted && stringNode.content.contains('\n')
-        } catch (ignored: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             return false
         }
     }
