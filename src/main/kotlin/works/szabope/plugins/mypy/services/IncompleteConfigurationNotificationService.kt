@@ -21,7 +21,7 @@ class IncompleteConfigurationNotificationService(private val project: Project) {
 
     @Synchronized
     fun notify(canInstall: Boolean) {
-        val notification = NotificationGroupManager.getInstance().getNotificationGroup("Mypy Group")
+        val notification = NotificationGroupManager.getInstance().getNotificationGroup(MypyBundle.message("mypy.notification.group"))
             .createNotification(MypyBundle.message("mypy.notification.incomplete_configuration"), NotificationType.WARNING)
         val openSettingsAction = ActionManager.getInstance().getAction(OpenSettingsAction.ID)
         notification.addAction(

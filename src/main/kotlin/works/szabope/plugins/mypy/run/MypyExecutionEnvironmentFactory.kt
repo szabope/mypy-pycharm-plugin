@@ -25,11 +25,11 @@ class MypyExecutionEnvironmentFactory(private val project: Project) {
         configuration: ImmutableSettingsData, targets: Collection<VirtualFile>, vararg extraArgs: String
     ) = with(configuration) {
         val sb = StringBuilder()
-        configFilePath.nullize(true)?.let { ParametersListUtil.escape(it) }.let { sb.append(" --config-file \"$it\"") }
+        configFilePath.nullize(true)?.let { ParametersListUtil.escape(it) }?.let { sb.append(" --config-file $it") }
         arguments.nullize(true)?.let { ParametersListUtil.escape(it) }?.let { sb.append(" $it") }
         if (excludeNonProjectFiles) {
             Exclusions(project).findAll(targets).joinToString(",").nullize()
-                ?.let { sb.append(" --ignore-paths \"$this\"") }
+                ?.let { sb.append(" --ignore-paths \"$it\"") }
         }
         extraArgs.joinToString(" ").nullize(true)?.let { sb.append(" $it") }
         // in case of duplicated arguments, latter one wins

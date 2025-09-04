@@ -43,6 +43,6 @@ class InstallMypyAction : AbstractInstallToolAction(
     }
 
     companion object {
-        const val ID = "works.szabope.plugins.mypy.actions.InstallMypyAction"
+        const val ID = "works.szabope.plugins.mypy.action.InstallMypyAction"
     }
 }
