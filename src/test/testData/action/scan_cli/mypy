@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ "$1" = "-V" ]; then
+  echo "mypy 1.11.2 (compiled: yes)"
+else
+  my_dir=$(dirname "$(realpath -s "$0")")
+  for last; do :; done
+  expected_args="--ignore-paths /src/excluded_dir --show-column-numbers --show-absolute-path --output json $last"
+  if [ "$*" != "$expected_args" ]; then
+    >&2 echo "expected: $expected_args"
+    >&2 echo "received: $*"
+    exit 1
+  fi
+  cat "$my_dir/manualScan.json"
+fi

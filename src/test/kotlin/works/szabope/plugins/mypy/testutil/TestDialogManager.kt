@@ -1,6 +1,4 @@
 // inspired by idea/243.19420.21 git4idea.test.TestDialogManager
-@file:Suppress("removal")
-
 package works.szabope.plugins.mypy.testutil
 
 import com.jetbrains.python.packaging.PyExecutionException
