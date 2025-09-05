@@ -23,7 +23,6 @@ class MypySettings(internal val project: Project) :
         var autoScrollToSource by property(false)
         var excludeNonProjectFiles by property(true)
         var projectDirectory by string()
-        val customExclusions by list<String>()
         var scanBeforeCheckIn by property(false)
     }
 
@@ -74,10 +73,6 @@ class MypySettings(internal val project: Project) :
         set(value) {
             state.scanBeforeCheckIn = value
         }
-
-    val customExclusions
-        get() = state.customExclusions
-
 
     override suspend fun initSettings(oldSettings: BasicSettingsData?) {
         if (state.initialized) return
