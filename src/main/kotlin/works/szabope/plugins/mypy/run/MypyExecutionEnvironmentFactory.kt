@@ -10,7 +10,7 @@ import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyArgs
 
 class MypyExecutionEnvironmentFactory(private val project: Project) {
-    fun createEnvironment(
+    fun createEnvironment( //TODO: shadow
         configuration: ImmutableSettingsData, targets: Collection<VirtualFile>
     ) = if (configuration.useProjectSdk) {
         val parameters = buildScriptParameters(configuration, targets)
@@ -24,7 +24,7 @@ class MypyExecutionEnvironmentFactory(private val project: Project) {
     private fun buildScriptParameters(
         configuration: ImmutableSettingsData, targets: Collection<VirtualFile>, vararg extraArgs: String
     ) = with(configuration) {
-        val sb = StringBuilder()
+        val sb = StringBuilder(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS).append(" ")
         configFilePath.nullize(true)?.let { ParametersListUtil.escape(it) }?.let { sb.append(" --config-file $it") }
         arguments.nullize(true)?.let { ParametersListUtil.escape(it) }?.let { sb.append(" $it") }
         if (excludeNonProjectFiles) {
@@ -32,9 +32,7 @@ class MypyExecutionEnvironmentFactory(private val project: Project) {
                 ?.let { sb.append(" --ignore-paths \"$it\"") }
         }
         extraArgs.joinToString(" ").nullize(true)?.let { sb.append(" $it") }
-        // in case of duplicated arguments, latter one wins
-        sb.append(" ").append(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS).append(" ")
-        targets.joinToString(" ") { "\"${it.canonicalPath}\"" }.apply { sb.append(this) }
+        targets.joinToString(" ") { "\"${it.canonicalPath}\"" }.let { sb.append(" $it") }
         sb.toString()
     }
 }
