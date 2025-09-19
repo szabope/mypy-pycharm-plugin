@@ -1,38 +1,51 @@
 package works.szabope.plugins.mypy.run
 
+import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.execution.ParametersListUtil
 import com.intellij.util.text.nullize
 import works.szabope.plugins.common.run.CliExecutionEnvironmentFactory
 import works.szabope.plugins.common.run.Exclusions
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyArgs
+import java.nio.file.Path
+import kotlin.io.path.pathString
 
 class MypyExecutionEnvironmentFactory(private val project: Project) {
-    fun createEnvironment( //TODO: shadow
-        configuration: ImmutableSettingsData, targets: Collection<VirtualFile>
-    ) = if (configuration.useProjectSdk) {
-        val parameters = buildScriptParameters(configuration, targets)
-        MypySdkExecutionEnvironmentFactory(project).createEnvironment(configuration, parameters)
-    } else {
-        val parameters = buildScriptParameters(configuration, targets)
-        val command = "${ParametersListUtil.escape(configuration.executablePath!!)} $parameters"
-        CliExecutionEnvironmentFactory(project).createEnvironment(command)
+    fun createEnvironment(configuration: ImmutableSettingsData, targets: Map<VirtualFile, Path>): ExecutionEnvironment {
+        val shadowParameters = targets.flatMap { (shadowedOriginal, shadowCastingOne) ->
+            listOf("--shadow-file", shadowedOriginal.path, shadowCastingOne.pathString)
+        }
+        return createEnvironment(configuration, targets.keys, shadowParameters)
+    }
+
+    fun createEnvironment(
+        configuration: ImmutableSettingsData,
+        targets: Collection<VirtualFile>,
+        extraArgs: Collection<String> = emptyList()
+    ): ExecutionEnvironment {
+        val parameters = buildScriptParameters(configuration, targets, extraArgs)
+        return if (configuration.useProjectSdk) {
+            MypySdkExecutionEnvironmentFactory(project).createEnvironment(parameters, configuration.projectDirectory)
+        } else {
+            CliExecutionEnvironmentFactory(project).createEnvironment(
+                configuration.executablePath!!, parameters, configuration.projectDirectory
+            )
+        }
     }
 
     private fun buildScriptParameters(
-        configuration: ImmutableSettingsData, targets: Collection<VirtualFile>, vararg extraArgs: String
+        configuration: ImmutableSettingsData, targets: Collection<VirtualFile>, extraArgs: Collection<String>
     ) = with(configuration) {
-        val sb = StringBuilder(MypyArgs.MYPY_MANDATORY_COMMAND_ARGS).append(" ")
-        configFilePath.nullize(true)?.let { ParametersListUtil.escape(it) }?.let { sb.append(" --config-file $it") }
-        arguments.nullize(true)?.let { ParametersListUtil.escape(it) }?.let { sb.append(" $it") }
+        val params = MypyArgs.MYPY_MANDATORY_COMMAND_ARGS.split(" ").toMutableList()
+        configFilePath.nullize(true)?.let { params.add("--config-file"); params.add(it) }
+        arguments.nullize(true)?.let { params.add(" $it") }
         if (excludeNonProjectFiles) {
             Exclusions(project).findAll(targets).joinToString(",").nullize()
-                ?.let { sb.append(" --ignore-paths \"$it\"") }
+                ?.let { params.add("--ignore-paths"); params.add(it) }
         }
-        extraArgs.joinToString(" ").nullize(true)?.let { sb.append(" $it") }
-        targets.joinToString(" ") { "\"${it.canonicalPath}\"" }.let { sb.append(" $it") }
-        sb.toString()
+        params.addAll(extraArgs)
+        targets.map { requireNotNull(it.canonicalPath) }.let { params.addAll(it) }
+        params
     }
 }
