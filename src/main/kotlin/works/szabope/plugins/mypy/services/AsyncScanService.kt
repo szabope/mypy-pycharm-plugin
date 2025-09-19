@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import works.szabope.plugins.common.run.ProcessException
 import works.szabope.plugins.common.run.execute
 import works.szabope.plugins.common.services.ImmutableSettingsData
-import works.szabope.plugins.common.services.ScanService
 import works.szabope.plugins.common.services.tool.ToolOutputHandler
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
@@ -29,14 +28,14 @@ import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import javax.swing.event.HyperlinkEvent
 
 @Service(Service.Level.PROJECT)
-class AsyncScanService(private val project: Project, private val cs: CoroutineScope) : ScanService<MypyMessage> {
+class AsyncScanService(private val project: Project, private val cs: CoroutineScope) {
 
     private var manualScanJob: Job? = null
 
     val scanInProgress: Boolean
         get() = manualScanJob?.isActive == true
 
-    override fun scan(
+    fun scan(
         targets: Collection<VirtualFile>,
         configuration: ImmutableSettingsData,
         resultHandler: ToolOutputHandler<MypyMessage>

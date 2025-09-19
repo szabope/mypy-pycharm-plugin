@@ -6,19 +6,18 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder
 import com.intellij.openapi.project.Project
 import com.jetbrains.python.sdk.pythonSdk
-import works.szabope.plugins.common.services.ImmutableSettingsData
 
 class MypySdkExecutionEnvironmentFactory(private val project: Project) {
 
-    fun createEnvironment(configuration: ImmutableSettingsData, scriptParameters: String): ExecutionEnvironment {
+    fun createEnvironment(parameters: List<String>, workingDirectory: String? = null): ExecutionEnvironment {
         val configurationFactory = MypyConfigurationType.INSTANCE.configurationFactory
         val conf = configurationFactory.createConfiguration(project, "mypy")
         conf.sdk = project.pythonSdk
-        conf.workingDirectory = configuration.projectDirectory
+        conf.workingDirectory = workingDirectory
         conf.setAddContentRoots(true)
         conf.setAddSourceRoots(true)
         conf.scriptName = "mypy"
-        conf.scriptParameters = scriptParameters
+        conf.scriptParameters = parameters.joinToString(" ")
         conf.isModuleMode = true
         conf.collectOutputFromProcessHandler()
         val settings = RunManager.getInstance(project).createConfiguration(conf, configurationFactory)

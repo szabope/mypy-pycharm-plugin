@@ -16,8 +16,14 @@ import works.szabope.plugins.mypy.MypyBundle
 class ExecutableService(private val project: Project) {
 
     fun findExecutable(): String? {
-        val locateCommand = if (SystemInfo.isWindows) "where.exe mypy.exe" else "which mypy"
-        val environment = CliExecutionEnvironmentFactory(project).createEnvironment(locateCommand)
+        val commandAndArgs = if (SystemInfo.isWindows) {
+            Pair("where.exe", listOf("mypy.exe"))
+        } else {
+            Pair("which", listOf("mypy"))
+        }
+        val environment = CliExecutionEnvironmentFactory(project).createEnvironment(
+            commandAndArgs.first, commandAndArgs.second
+        )
         return runBlockingCancellable {
             execute(environment).mapCatching { it ->
                 val stdout = buildString { it.collect { appendLine(it) } }
@@ -28,7 +34,7 @@ class ExecutableService(private val project: Project) {
                 // ran but not found in PATH
                 return null
             }
-            thisLogger().debug(MypyBundle.message("mypy.autodetect.failed", locateCommand), error)
+            thisLogger().debug(MypyBundle.message("mypy.autodetect.failed", commandAndArgs), error)
         }
     }
 

@@ -15,9 +15,7 @@ class RescanAction : DumbAwareAction() {
         val latestScanTargets = treeService.getRootScanPaths()
         treeService.reinitialize(latestScanTargets)
         AsyncScanService.getInstance(project).scan(
-            latestScanTargets,
-            MypySettings.getInstance(project).getData(),
-            MypyPublishingToolOutputHandler(project)
+            latestScanTargets, MypySettings.getInstance(project).getData(), MypyPublishingToolOutputHandler(project)
         )
     }
 

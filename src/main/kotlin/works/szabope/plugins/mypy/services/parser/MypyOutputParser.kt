@@ -3,7 +3,7 @@ package works.szabope.plugins.mypy.services.parser
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
@@ -14,8 +14,8 @@ object MypyOutputParser {
 
     private val withUnknownKeys = Json { ignoreUnknownKeys = true }
 
-    suspend fun parse(stdout: Flow<String>): Flow<Result<MypyMessage>> {
-        return stdout.buffer(capacity = UNLIMITED).transform { emit(doParse(it)) }
+    fun parse(stdout: Flow<String>): Flow<Result<MypyMessage>> {
+        return stdout.buffer(capacity = UNLIMITED).map { doParse(it) }
     }
 
     /**

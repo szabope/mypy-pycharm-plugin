@@ -30,7 +30,7 @@ class MypyValidator(private val project: Project) {
         val mypyVersion = runWithModalProgressBlocking(
             project, MypyBundle.message("mypy.configuration.path_to_executable.version_validation_title")
         ) {
-            val environment = CliExecutionEnvironmentFactory(project).createEnvironment("$path -V")
+            val environment = CliExecutionEnvironmentFactory(project).createEnvironment(path, listOf("-V"))
             execute(environment).mapCatching { it ->
                 val stdout = buildString { it.collect { appendLine(it) } }
                 return@mapCatching "(\\d+.\\d+.\\d+)".toRegex().find(stdout)?.groups?.last()?.value
