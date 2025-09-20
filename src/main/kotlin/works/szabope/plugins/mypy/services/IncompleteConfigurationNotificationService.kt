@@ -21,15 +21,18 @@ class IncompleteConfigurationNotificationService(private val project: Project) {
 
     @Synchronized
     fun notify(canInstall: Boolean) {
-        val notification = NotificationGroupManager.getInstance().getNotificationGroup(MypyBundle.message("mypy.notification.group"))
-            .createNotification(MypyBundle.message("mypy.notification.incomplete_configuration"), NotificationType.WARNING)
+        val notification =
+            NotificationGroupManager.getInstance().getNotificationGroup(MypyBundle.message("mypy.notification.group"))
+                .createNotification(
+                    MypyBundle.message("mypy.notification.incomplete_configuration"), NotificationType.WARNING
+                )
         val openSettingsAction = ActionManager.getInstance().getAction(OpenSettingsAction.ID)
         notification.addAction(
             NotificationAction.create(
                 MypyBundle.message("mypy.intention.complete_configuration.text")
             ) { event, _ ->
                 run {
-                    ActionUtil.performActionDumbAwareWithCallbacks(openSettingsAction, event)
+                    ActionUtil.performAction(openSettingsAction, event)
                     notification.hideBalloon()
                 }
             })
@@ -40,7 +43,7 @@ class IncompleteConfigurationNotificationService(private val project: Project) {
                     MypyBundle.message("mypy.intention.install_mypy.text"),
                 ) { event, _ ->
                     run {
-                        ActionUtil.performActionDumbAwareWithCallbacks(installAction, event)
+                        ActionUtil.performAction(installAction, event)
                         notification.expire()
                     }
                 })
