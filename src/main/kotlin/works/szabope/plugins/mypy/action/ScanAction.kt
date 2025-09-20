@@ -10,7 +10,6 @@ import com.jetbrains.python.PythonFileType
 import com.jetbrains.python.pyi.PyiFileType
 import works.szabope.plugins.mypy.services.AsyncScanService
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.mypy.services.tool.MypyPublishingToolOutputHandler
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import works.szabope.plugins.mypy.toolWindow.MypyTreeService
 
@@ -22,9 +21,7 @@ open class ScanAction : DumbAwareAction() {
         val targets = listTargets(event) ?: return
         val project = event.project ?: return
         MypyTreeService.getInstance(project).reinitialize(targets)
-        AsyncScanService.getInstance(project).scan(
-            targets, MypySettings.getInstance(project).getData(), MypyPublishingToolOutputHandler(project)
-        )
+        AsyncScanService.getInstance(project).scan(targets, MypySettings.getInstance(project).getData())
         ToolWindowManager.getInstance(project).getToolWindow(MypyToolWindowPanel.ID)?.show()
     }
 

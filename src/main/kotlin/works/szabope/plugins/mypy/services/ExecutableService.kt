@@ -7,6 +7,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
+import kotlinx.coroutines.flow.first
 import works.szabope.plugins.common.run.CliExecutionEnvironmentFactory
 import works.szabope.plugins.common.run.ProcessException
 import works.szabope.plugins.common.run.execute
@@ -25,16 +26,13 @@ class ExecutableService(private val project: Project) {
             commandAndArgs.first, commandAndArgs.second
         )
         return runBlockingCancellable {
-            execute(environment).mapCatching { it ->
-                val stdout = buildString { it.collect { appendLine(it) } }
-                return@mapCatching stdout.lines().first()
-            }
-        }.processErrorAndGet { error ->
-            if (error is ProcessException && error.exitCode == 1) {
+            execute(environment).runCatching { first() }
+        }.processErrorAndGet {
+            if (it is ProcessException && it.exitCode == 1) {
                 // ran but not found in PATH
                 return null
             }
-            thisLogger().debug(MypyBundle.message("mypy.autodetect.failed", commandAndArgs), error)
+            thisLogger().debug(MypyBundle.message("mypy.autodetect.failed", commandAndArgs), it)
         }
     }
 

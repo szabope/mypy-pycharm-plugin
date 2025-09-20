@@ -10,20 +10,19 @@ import com.intellij.openapi.wm.ToolWindowManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import works.szabope.plugins.common.run.ProcessException
 import works.szabope.plugins.common.run.execute
 import works.szabope.plugins.common.services.ImmutableSettingsData
-import works.szabope.plugins.common.services.tool.ToolOutputHandler
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.run.MypyExecutionEnvironmentFactory
-import works.szabope.plugins.mypy.services.parser.MypyMessage
 import works.szabope.plugins.mypy.services.parser.MypyOutputParser
 import works.szabope.plugins.mypy.services.parser.MypyParseException
+import works.szabope.plugins.mypy.services.tool.MypyPublishingToolOutputHandler
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import javax.swing.event.HyperlinkEvent
 
@@ -35,40 +34,40 @@ class AsyncScanService(private val project: Project, private val cs: CoroutineSc
     val scanInProgress: Boolean
         get() = manualScanJob?.isActive == true
 
-    fun scan(
-        targets: Collection<VirtualFile>,
-        configuration: ImmutableSettingsData,
-        resultHandler: ToolOutputHandler<MypyMessage>
-    ) {
+    fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData) {
         val environment = MypyExecutionEnvironmentFactory(project).createEnvironment(configuration, targets)
         manualScanJob = cs.launch {
-            execute(environment).onFailure {
-                if (it is ProcessException) {
-                    showClickableBalloonError(MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                        DialogManager.showToolExecutionErrorDialog(
-                            configuration, it.stdErr, it.exitCode
-                        )
-                    }
-                } else {
-                    thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
-                }
-            }.onSuccess { raw ->
-                // mypy is not willing to distinguish between throwing an error and reporting one
-                // - can't rely on process status != 0; https://github.com/python/mypy/issues/6003
-                // - mypy exceptions _sometimes_ printed to stdout, mixing them into normal output, in which case even `-O json` is ignored
-                // - and sometimes after such and exception comes valuable json output
-                // so let's collect parse failures and report them
-                // If you have a better idea, please let me know.
-                val unparsableLinesOfStdout = StringBuilder()
-                MypyOutputParser.parse(raw).onEach { message ->
-                    message.onFailure {
-                        if (it is MypyParseException) {
+            // Why? See MypyParseException
+            // So let's collect parse failures and report them.
+            // If you have a better idea, please let me know.
+            val unparsableLinesOfStdout = StringBuilder()
+            execute(environment).transform { line ->
+                MypyOutputParser.parse(line).onFailure {
+                    when (it) {
+                        is MypyParseException -> {
                             unparsableLinesOfStdout.appendLine(it.sourceJson)
-                        } else {
+                        }
+
+                        else -> {
                             thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
                         }
                     }
-                }.filter { it.isSuccess }.map { it.getOrThrow() }.let { resultHandler.handle(it) }
+                }.onSuccess { emit(it) }
+            }.catch {
+                when (it) {
+                    is ProcessException -> {
+                        showClickableBalloonError(MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
+                            DialogManager.showToolExecutionErrorDialog(
+                                configuration, it.stdErr, it.exitCode
+                            )
+                        }
+                    }
+
+                    else -> {
+                        thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
+                    }
+                }
+            }.onCompletion {
                 if (unparsableLinesOfStdout.isNotEmpty()) {
                     showClickableBalloonError(MypyBundle.message("mypy.toolwindow.balloon.parse_error")) {
                         DialogManager.showToolOutputParseErrorDialog(
@@ -76,7 +75,7 @@ class AsyncScanService(private val project: Project, private val cs: CoroutineSc
                         )
                     }
                 }
-            }
+            }.let { MypyPublishingToolOutputHandler(project).handle(it) }
         }
     }
 
