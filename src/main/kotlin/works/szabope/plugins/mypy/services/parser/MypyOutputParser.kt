@@ -1,12 +1,15 @@
 package works.szabope.plugins.mypy.services.parser
 
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
+/**
+ * Created when a line of mypy output cannot be parsed for some reason.
+ * The goal is to handle cases when mypy fails to distinguish between throwing an error and reporting one.
+ *  - can't rely on process status != 0; https://github.com/python/mypy/issues/6003
+ *  - mypy exceptions _sometimes_ printed to stdout, mixing them into normal output, in which case even `-O json` is ignored
+ *  - and sometimes after such and exception comes valuable json output
+ */
 class MypyParseException(val sourceJson: String, override val cause: SerializationException) :
     SerializationException(cause.message, cause)
 
@@ -14,16 +17,12 @@ object MypyOutputParser {
 
     private val withUnknownKeys = Json { ignoreUnknownKeys = true }
 
-    fun parse(stdout: Flow<String>): Flow<Result<MypyMessage>> {
-        return stdout.buffer(capacity = UNLIMITED).map { doParse(it) }
-    }
-
     /**
      * @throws SerializationException mypy _sometimes_ prints its own errors to stdout, mixing them into normal output,
      * in which case even `-O json` is ignored.
      */
     @Throws(SerializationException::class)
-    private fun doParse(json: String): Result<MypyMessage> {
+    fun parse(json: String): Result<MypyMessage> {
         val result = try {
             withUnknownKeys.decodeFromString(MypyMessage.serializer(), json)
         } catch (e: SerializationException) {

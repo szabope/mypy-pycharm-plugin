@@ -1,11 +1,13 @@
 package works.szabope.plugins.mypy.configurable
 
+import com.intellij.collaboration.util.ResultUtil.processErrorAndGet
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.util.Version
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.ui.layout.ValidationInfoBuilder
+import kotlinx.coroutines.flow.first
 import works.szabope.plugins.common.run.CliExecutionEnvironmentFactory
 import works.szabope.plugins.common.run.ProcessException
 import works.szabope.plugins.common.run.execute
@@ -27,15 +29,14 @@ class MypyValidator(private val project: Project) {
         if (!file.canExecute()) {
             return builder.error(MypyBundle.message("mypy.configuration.path_to_executable.not_executable"))
         }
+        val environment = CliExecutionEnvironmentFactory(project).createEnvironment(path, listOf("-V"))
         val mypyVersion = runWithModalProgressBlocking(
             project, MypyBundle.message("mypy.configuration.path_to_executable.version_validation_title")
         ) {
-            val environment = CliExecutionEnvironmentFactory(project).createEnvironment(path, listOf("-V"))
-            execute(environment).mapCatching { it ->
-                val stdout = buildString { it.collect { appendLine(it) } }
-                return@mapCatching "(\\d+.\\d+.\\d+)".toRegex().find(stdout)?.groups?.last()?.value
+            execute(environment).runCatching {
+                first().let { "(\\d+.\\d+.\\d+)".toRegex().find(it)?.groups?.last()?.value }
             }
-        }.onFailure {
+        }.processErrorAndGet {
             if (it is ProcessException) {
                 return builder.error(
                     MypyBundle.message(
@@ -44,8 +45,7 @@ class MypyValidator(private val project: Project) {
                 )
             }
             thisLogger().error("Error while executing mypy", it)
-            return null
-        }.getOrNull()
+        }
         if (mypyVersion == null) {
             return builder.error(MypyBundle.message("mypy.configuration.path_to_executable.unknown_version"))
         }

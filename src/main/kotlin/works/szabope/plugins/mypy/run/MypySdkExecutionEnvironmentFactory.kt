@@ -19,10 +19,9 @@ class MypySdkExecutionEnvironmentFactory(private val project: Project) {
         conf.scriptName = "mypy"
         conf.scriptParameters = parameters.joinToString(" ")
         conf.isModuleMode = true
-        conf.collectOutputFromProcessHandler()
         val settings = RunManager.getInstance(project).createConfiguration(conf, configurationFactory)
         settings.isActivateToolWindowBeforeRun = false
         val executor = DefaultRunExecutor.getRunExecutorInstance()
-        return ExecutionEnvironmentBuilder.create(executor, settings).runner(MypyRunner.INSTANCE).build()
+        return ExecutionEnvironmentBuilder.create(executor, settings).build()
     }
 }

@@ -6,7 +6,10 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.transform
 import works.szabope.plugins.common.run.ProcessException
 import works.szabope.plugins.common.run.execute
 import works.szabope.plugins.common.services.ImmutableSettingsData
@@ -25,28 +28,34 @@ class SyncScanService(private val project: Project) {
     fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): Flow<MypyMessage> {
         val shadowedTargetMap = targets.associateWith { castShadowFor(it) }
         val environment = MypyExecutionEnvironmentFactory(project).createEnvironment(configuration, shadowedTargetMap)
-        return execute(environment).onFailure {
-            if (it is ProcessException) {
-                thisLogger().error(
-                    MypyBundle.message(
-                        "mypy.executable.error", configuration, it.exitCode, it.stdErr
-                    ), it
-                )
-            } else {
-                thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
-            }
-        }.getOrElse { flowOf() }.let { raw -> // transform
-            MypyOutputParser.parse(raw).onEach { message ->
-                message.onFailure {
-                    if (it is MypyParseException) {
+        return execute(environment).transform { line -> // transform
+            MypyOutputParser.parse(line).onFailure {
+                when (it) {
+                    is MypyParseException -> {
                         thisLogger().warn(
                             MypyBundle.message("mypy.executable.parsing-result-failed", configuration), it
                         )
-                    } else {
+                    }
+
+                    else -> {
                         thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
                     }
                 }
-            }.filter { it.isSuccess }.map { it.getOrThrow() }
+            }.onSuccess { emit(it) }
+        }.catch {
+            when (it) {
+                is ProcessException -> {
+                    thisLogger().error(
+                        MypyBundle.message(
+                            "mypy.executable.error", configuration, it.exitCode, it.stdErr
+                        ), it
+                    )
+                }
+
+                else -> {
+                    thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
+                }
+            }
         }.onCompletion { shadowedTargetMap.values.onEach { it.deleteIfExists() } }
     }
 
