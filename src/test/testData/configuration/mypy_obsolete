@@ -1,6 +1,0 @@
-#!/bin/bash
-if [ "$1" = "-V" ]; then
-  echo "mypy 1.10.2 (compiled: yes)"
-else
-  echo "This line should have never been reached"
-fi

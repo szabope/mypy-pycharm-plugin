@@ -37,13 +37,6 @@
             <separator/>
             <reference ref="ExpandAll"/>
             <reference ref="CollapseAll"/>
-            <!-- removed for now, as all hits are of the same severity -->
-            <!-- <group id="Mypy.ErrorLevelDisplayOptions" icon="AllIcons.Actions.GroupBy" popup="true">-->
-            <!--     <separator key="group.Mypy.ErrorLevelDisplayOptions.text"/>-->
-            <!--     <group id="Mypy.ErrorLevelDisplayOptions.SeverityFilters"-->
-            <!--            class="works.szabope.plugins.mypy.action.SeverityFiltersActionGroup"/>-->
-            <!-- </group>-->
-            <!-- <separator/>-->
             <action id="works.szabope.plugins.mypy.action.OpenSettingsAction"
                     class="works.szabope.plugins.mypy.action.OpenSettingsAction"
                     icon="AllIcons.General.GearPlain"/>
