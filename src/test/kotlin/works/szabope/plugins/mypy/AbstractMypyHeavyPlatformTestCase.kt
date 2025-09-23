@@ -3,8 +3,10 @@ package works.szabope.plugins.mypy
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
 import com.intellij.testFramework.HeavyPlatformTestCase
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import works.szabope.plugins.common.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.testutil.MypyPluginPackageManagementServiceStub
@@ -26,5 +28,11 @@ abstract class AbstractMypyHeavyPlatformTestCase : HeavyPlatformTestCase() {
             mypyPackageManagementServiceStub
         }
         super.setUp()
+    }
+
+    override fun tearDown() {
+        clearAllMocks()
+        unmockkAll()
+        super.tearDown()
     }
 }
