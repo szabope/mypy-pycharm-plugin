@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package works.szabope.plugins.mypy.initialization
 
 import com.intellij.openapi.application.runWriteActionAndWait
