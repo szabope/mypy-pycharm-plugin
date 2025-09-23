@@ -9,6 +9,12 @@ import kotlin.io.path.absolutePathString
 
 @TestDataPath($$"$CONTENT_ROOT/testData/annotation")
 class AnnotatorTest : AbstractMypyTestCase() {
+    companion object {
+        val DOESNT_MATTER = """|def<caret> lets_have_fun() -> [int]:
+                                |   return 'fun'
+                                |""".trimMargin()
+    }
+
     override fun getTestDataPath() = "src/test/testData/annotation"
 
     override fun setUp() {
@@ -17,15 +23,11 @@ class AnnotatorTest : AbstractMypyTestCase() {
     }
 
     fun `test MypyAnnotator does not fail with incomplete settings`() {
-        with(MypySettings.getInstance(myFixture.project)) {
+        with(MypySettings.getInstance(project)) {
             executablePath = null
             useProjectSdk = false
         }
-        myFixture.configureByText(
-            "a.py", """|def<caret> lets_have_fun() -> [int]:
-                                |   return 'fun'
-                                |""".trimMargin()
-        )
+        myFixture.configureByText("a.py", DOESNT_MATTER)
         assertEmpty(myFixture.filterAvailableIntentions(MypyBundle.message("mypy.intention.ignore.text")))
     }
 
@@ -37,12 +39,9 @@ class AnnotatorTest : AbstractMypyTestCase() {
             arguments = null
             useProjectSdk = false
         }
-        myFixture.configureByText(
-            "a.py", """|def<caret> lets_have_fun() -> [int]:
-                                |   return 'fun'
-                                |""".trimMargin()
-        )
-        val a = myFixture.doHighlighting().filter { it.toolId == MypyAnnotator::class.java}
-        assertEquals(1, a.size)
+        myFixture.configureByText("a.py", DOESNT_MATTER)
+        @Suppress("UnstableApiUsage") val mypyAnnotations =
+            myFixture.doHighlighting().filter { it.toolId == MypyAnnotator::class.java }
+        assertEquals(1, mypyAnnotations.size)
     }
 }

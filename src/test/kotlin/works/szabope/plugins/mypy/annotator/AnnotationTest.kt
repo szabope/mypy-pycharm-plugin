@@ -10,6 +10,13 @@ import kotlin.io.path.absolutePathString
 
 @TestDataPath($$"$CONTENT_ROOT/testData/annotation")
 class AnnotationTest : BasePlatformTestCase() {
+
+    companion object {
+        val DOESNT_MATTER = """|def<caret> lets_have_fun() -> [int]:
+                                |   return 'fun'
+                                |""".trimMargin()
+    }
+
     override fun getTestDataPath() = "src/test/testData/annotation"
 
     override fun setUp() {
@@ -76,5 +83,12 @@ class AnnotationTest : BasePlatformTestCase() {
         assertNotEmpty(myFixture.doHighlighting())
         val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text"))
         assertNotNull(intention)
+    }
+
+    fun `test annotations are processed even with mypy mixing non-json stuff into stdout`() {
+        myFixture.configureByText("errorMixedIntoStdOut.py", DOESNT_MATTER)
+        @Suppress("UnstableApiUsage") val mypyAnnotations =
+            myFixture.doHighlighting().filter { it.toolId == MypyAnnotator::class.java }
+        assertEquals(2, mypyAnnotations.size)
     }
 }
