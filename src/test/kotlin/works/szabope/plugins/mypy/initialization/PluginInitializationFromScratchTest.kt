@@ -1,5 +1,7 @@
-package works.szabope.plugins.mypy
+package works.szabope.plugins.mypy.initialization
 
+import works.szabope.plugins.mypy.AbstractToolWindowTestCase
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.testutil.getMypyConfigurationNotCompleteNotification
 
 class PluginInitializationFromScratchTest : AbstractToolWindowTestCase() {

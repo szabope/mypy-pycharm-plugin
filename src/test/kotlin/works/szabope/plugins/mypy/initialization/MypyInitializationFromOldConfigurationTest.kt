@@ -1,7 +1,8 @@
-package works.szabope.plugins.mypy
+package works.szabope.plugins.mypy.initialization
 
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
 import com.intellij.testFramework.PlatformTestUtil
+import works.szabope.plugins.mypy.AbstractMypyHeavyPlatformTestCase
 import works.szabope.plugins.mypy.services.MypySettings
 import java.nio.file.Path
 
