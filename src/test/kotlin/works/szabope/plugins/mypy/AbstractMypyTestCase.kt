@@ -24,7 +24,7 @@ abstract class AbstractMypyTestCase : BasePlatformTestCase() {
     private lateinit var mypyPackageManagementServiceStub: PluginPackageManagementService
 
     override fun setUp() {
-        // FIXME: this is a ducktape for
+        // FIXME: this is a duct tape for
         //  com.intellij.python.community.services.systemPython.searchPythonsPhysicallyNoCache
         //  accessing /usr/bin/python3(\.\d+)? which is not allowed from tests
         VfsRootAccess.allowRootAccess(testRootDisposable, "/usr/bin")
