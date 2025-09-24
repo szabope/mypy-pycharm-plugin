@@ -15,6 +15,7 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.workspaceModel.updateProjectModel
 import io.mockk.every
 import io.mockk.mockkObject
+import junit.framework.AssertionFailedError
 import org.jetbrains.concurrency.asPromise
 import works.szabope.plugins.common.test.dialog.TestDialogWrapper
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
@@ -67,12 +68,14 @@ class ScanCliTest : AbstractToolWindowTestCase() {
                 )
             )
         }
+        var assertionError: Error? = null
         dialogManager.onAnyDialog {
-            fail(it.toString())
+            assertionError = AssertionFailedError("Should not happen")
         }
         val target = workspaceModel.currentSnapshot.entities(ContentRootEntity::class.java).first().url.virtualFile!!
         scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
         PlatformTestUtil.waitWhileBusy { !ScanActionUtil.isReadyToScan(project) }
+        assertionError?.let { throw it }
         treeUtil.assertStructure("+Found 1 issue(s) in 1 file(s)\n")
         treeUtil.expandAll()
         treeUtil.assertStructure(
@@ -84,9 +87,9 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         runWriteActionAndWait { workspaceModel.updateProjectModel { model -> model.removeEntity(exclusionWorkspaceEntity) } }
     }
 
-    fun testFailingScan() {
+    fun `test mypy returning non-json result with exit code 0 results in Dialog of The Parse Error`() {
         myFixture.copyDirectoryToProject("/", "/")
-        setUpSettings("mypy_failing")
+        setUpSettings("mypy_non_json_output")
         toolWindowManager.onBalloon {
             it.listener?.hyperlinkUpdate(
                 HyperlinkEvent(
@@ -99,12 +102,26 @@ class ScanCliTest : AbstractToolWindowTestCase() {
             dialogShown.complete(it)
             DialogWrapper.OK_EXIT_CODE
         }
-//        setUpSettings("mypy_failing")
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
         scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
         PlatformTestUtil.assertPromiseSucceeds(dialogShown.asPromise())
         assertTrue(dialogShown.isDone && with(dialogShown.get()) { isShown() && getExitCode() == DialogWrapper.OK_EXIT_CODE })
+    }
+
+    // https://github.com/python/mypy/issues/6003
+    fun `test mypy returning with an exit code other that 0 does not matter, it's fine`() {
+        myFixture.copyDirectoryToProject("/", "/")
+        setUpSettings("mypy_exit_with_73")
+        var assertionError: Error? = null
+        toolWindowManager.onBalloon {
+            assertionError = AssertionFailedError("Should not happen")
+        }
+        val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
+            .first().url.virtualFile!!
+        scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
+        PlatformTestUtil.waitWhileBusy { !ScanActionUtil.isReadyToScan(project) }
+        assertionError?.let { throw it }
     }
 
     private fun setUpSettings(executable: String) {

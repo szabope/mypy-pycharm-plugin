@@ -15,6 +15,7 @@ import com.intellij.testFramework.common.waitUntilAssertSucceeds
 import com.intellij.testFramework.workspaceModel.updateProjectModel
 import io.mockk.every
 import io.mockk.mockkObject
+import junit.framework.AssertionFailedError
 import kotlinx.coroutines.runBlocking
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
 import works.szabope.plugins.mypy.action.ScanActionUtil.isReadyToScan
@@ -65,12 +66,14 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
                 )
             )
         }
+        var assertionError: Error? = null
         dialogManager.onAnyDialog {
-            fail(it.toString())
+            assertionError = AssertionFailedError("Should not happen")
         }
         val target = workspaceModel.currentSnapshot.entities(ContentRootEntity::class.java).first().url.virtualFile!!
         scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
         PlatformTestUtil.waitWhileBusy { !isReadyToScan(project) }
+        assertionError?.let { throw it }
         runBlocking {
             waitUntilAssertSucceeds {
                 treeUtil.assertStructure("+Found 1 issue(s) in 1 file(s)\n")

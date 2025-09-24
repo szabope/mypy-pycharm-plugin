@@ -56,11 +56,8 @@ class AsyncScanService(private val project: Project, private val cs: CoroutineSc
             }.catch {
                 when (it) {
                     is ProcessException -> {
-                        showClickableBalloonError(MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                            DialogManager.showToolExecutionErrorDialog(
-                                configuration, it.stdErr, it.exitCode
-                            )
-                        }
+                        // this is fine https://github.com/python/mypy/issues/6003
+                        thisLogger().debug("mypy exited with code ${it.exitCode}\nstderr: ${it.stdErr}")
                     }
 
                     else -> {
