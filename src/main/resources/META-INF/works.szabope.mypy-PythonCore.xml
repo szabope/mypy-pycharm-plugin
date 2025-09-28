@@ -52,7 +52,5 @@
         </action>
         <action id="works.szabope.plugins.mypy.action.InstallMypyAction"
                 class="works.szabope.plugins.mypy.action.InstallMypyAction"/>
-        <action id="works.szabope.plugins.mypy.action.AutodetectMypyAction"
-                class="works.szabope.plugins.mypy.action.AutodetectMypyAction"/>
     </actions>
 </idea-plugin>

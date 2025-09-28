@@ -6,6 +6,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import works.szabope.plugins.common.run.execute
 import works.szabope.plugins.common.services.ImmutableSettingsData
@@ -38,7 +39,7 @@ class SyncScanService(private val project: Project) {
                     }
                 }
             }.onSuccess { emit(it) }
-        }.catch {
+        }.buffer(capacity = Channel.UNLIMITED).catch {
             thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
         }.onCompletion { shadowedTargetMap.values.onEach { it.deleteIfExists() } }
     }
