@@ -10,11 +10,9 @@ import com.intellij.openapi.wm.ToolWindowManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import works.szabope.plugins.common.run.ProcessException
 import works.szabope.plugins.common.run.execute
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
@@ -41,7 +39,7 @@ class AsyncScanService(private val project: Project, private val cs: CoroutineSc
             // So let's collect parse failures and report them.
             // If you have a better idea, please let me know.
             val unparsableLinesOfStdout = StringBuilder()
-            execute(environment).transform { line ->
+            execute(environment, true).filter { it.isNotBlank() }.transform { line ->
                 MypyOutputParser.parse(line).onFailure {
                     when (it) {
                         is MypyParseException -> {
@@ -53,22 +51,13 @@ class AsyncScanService(private val project: Project, private val cs: CoroutineSc
                         }
                     }
                 }.onSuccess { emit(it) }
-            }.catch {
-                when (it) {
-                    is ProcessException -> {
-                        // this is fine https://github.com/python/mypy/issues/6003
-                        thisLogger().debug("mypy exited with code ${it.exitCode}\nstderr: ${it.stdErr}")
-                    }
-
-                    else -> {
-                        thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
-                    }
-                }
+            }.buffer(capacity = Channel.UNLIMITED).catch {
+                thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
             }.onCompletion {
                 if (unparsableLinesOfStdout.isNotEmpty()) {
                     showClickableBalloonError(MypyBundle.message("mypy.toolwindow.balloon.parse_error")) {
                         DialogManager.showToolOutputParseErrorDialog(
-                            configuration, targets.joinToString(" "), "", unparsableLinesOfStdout.toString()
+                            configuration, targets.joinToString("\n"), unparsableLinesOfStdout.toString(), ""
                         )
                     }
                 }

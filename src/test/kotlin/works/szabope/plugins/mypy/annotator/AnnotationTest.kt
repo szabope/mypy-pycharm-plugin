@@ -25,7 +25,7 @@ class AnnotationTest : BasePlatformTestCase() {
         with(MypySettings.getInstance(myFixture.project)) {
             executablePath = Paths.get(myFixture.testDataPath).resolve("mypy").absolutePathString()
             projectDirectory = Paths.get(testDataPath).absolutePathString()
-            arguments = null
+            arguments = ""
             useProjectSdk = false
         }
     }

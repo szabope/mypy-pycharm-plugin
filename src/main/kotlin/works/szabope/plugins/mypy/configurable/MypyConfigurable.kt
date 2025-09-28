@@ -10,6 +10,7 @@ import works.szabope.plugins.common.configurable.GeneralConfigurable
 import works.szabope.plugins.common.trimToNull
 import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.MypyBundle
+import works.szabope.plugins.mypy.action.AutodetectMypyAction
 import works.szabope.plugins.mypy.action.InstallMypyAction
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypySettings
@@ -19,6 +20,7 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
         MypyBundle.message("mypy.configuration.name"),
         MypyBundle.message("mypy.configuration.name"),
         ID,
+        AutodetectMypyAction.ID,
         InstallMypyAction.ID,
         MypyBundle.message("mypy.intention.install_mypy.text"),
         MypyBundle.message("mypy.configuration.mypy_picker_title"),
@@ -41,18 +43,15 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
     override val defaultArguments = MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
 
     override fun validateExecutable(
-        builder: ValidationInfoBuilder,
-        field: TextFieldWithBrowseButton
+        builder: ValidationInfoBuilder, field: TextFieldWithBrowseButton
     ) = MypyValidator(project).validateExecutable(field.text.trimToNull(), builder)
 
     override fun validateSdk(
-        builder: ValidationInfoBuilder,
-        button: JBRadioButton
+        builder: ValidationInfoBuilder, button: JBRadioButton
     ) = MypyValidator(project).validateSdk(builder)
 
     override fun validateConfigFilePath(
-        builder: ValidationInfoBuilder,
-        field: TextFieldWithBrowseButton
+        builder: ValidationInfoBuilder, field: TextFieldWithBrowseButton
     ) = MypyConfigFileValidator().validateConfigFilePath(field.text.trimToNull(), builder)
 
     companion object {

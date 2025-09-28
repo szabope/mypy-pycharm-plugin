@@ -8,7 +8,6 @@ import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.wm.ToolWindowManager
 import com.jetbrains.python.packaging.PyExecutionException
 import works.szabope.plugins.common.action.AbstractInstallToolAction
-import works.szabope.plugins.common.action.InstallationToolActionConfig
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
@@ -16,10 +15,7 @@ import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 
 
 class InstallMypyAction : AbstractInstallToolAction(
-    InstallationToolActionConfig(
-        MypyBundle.message("action.InstallMypyAction.in_progress"),
-        MypyBundle.message("action.InstallMypyAction.done_html")
-    )
+    MypyBundle.message("action.InstallMypyAction.in_progress"), MypyBundle.message("action.InstallMypyAction.done_html")
 ) {
     override fun getPackageManager(project: Project) = MypyPluginPackageManagementService.getInstance(project)
 

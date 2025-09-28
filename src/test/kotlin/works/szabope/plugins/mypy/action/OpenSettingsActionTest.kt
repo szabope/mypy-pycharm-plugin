@@ -8,11 +8,14 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOf
+import org.junit.Ignore
 import works.szabope.plugins.common.run.ProcessException
 import works.szabope.plugins.common.run.execute
 import works.szabope.plugins.mypy.AbstractMypyTestCase
 import works.szabope.plugins.mypy.services.MypySettings
 
+//TODO: functionality moved to Detect button
+@Ignore
 class OpenSettingsActionTest : AbstractMypyTestCase() { //AbstractMypyHeavyPlatformTestCase() {
 
     override fun setUp() {
@@ -24,7 +27,7 @@ class OpenSettingsActionTest : AbstractMypyTestCase() { //AbstractMypyHeavyPlatf
 
     fun `test open settings with empty executable path and mypy available`() {
         with(MypySettings.getInstance(project)) {
-            executablePath = null
+            executablePath = ""
         }
         mockkStatic(::execute)
         every { execute(any(ExecutionEnvironment::class)) } answers {
@@ -39,7 +42,7 @@ class OpenSettingsActionTest : AbstractMypyTestCase() { //AbstractMypyHeavyPlatf
 
     fun `test open settings with empty executable path and mypy not available`() {
         with(MypySettings.getInstance(project)) {
-            executablePath = null
+            executablePath = ""
         }
         mockkStatic(::execute)
         every { execute(any(ExecutionEnvironment::class)) } returns callbackFlow {

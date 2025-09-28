@@ -24,7 +24,7 @@ class AnnotatorTest : AbstractMypyTestCase() {
 
     fun `test MypyAnnotator does not fail with incomplete settings`() {
         with(MypySettings.getInstance(project)) {
-            executablePath = null
+            executablePath = ""
             useProjectSdk = false
         }
         myFixture.configureByText("a.py", DOESNT_MATTER)
@@ -36,7 +36,7 @@ class AnnotatorTest : AbstractMypyTestCase() {
             executablePath = Paths.get(testDataPath).resolve("white space/mypy").absolutePathString()
             configFilePath = Paths.get(testDataPath).resolve("white space/mypy.ini").absolutePathString()
             projectDirectory = Paths.get(testDataPath).absolutePathString()
-            arguments = null
+            arguments = ""
             useProjectSdk = false
         }
         myFixture.configureByText("a.py", DOESNT_MATTER)

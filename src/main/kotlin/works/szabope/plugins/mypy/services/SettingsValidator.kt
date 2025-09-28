@@ -8,9 +8,10 @@ class SettingsValidator(private val project: Project) {
 
     fun isComplete(configuration: ImmutableSettingsData): Boolean {
         return if (configuration.useProjectSdk) {
-            project.pythonSdk != null && MypyPluginPackageManagementService.getInstance(project).isInstalled()
+            project.pythonSdk != null && MypyPluginPackageManagementService.getInstance(project)
+                .checkInstalledRequirement().isSuccess
         } else {
-            configuration.executablePath != null
+            configuration.executablePath.isNotBlank()
         }
     }
 }

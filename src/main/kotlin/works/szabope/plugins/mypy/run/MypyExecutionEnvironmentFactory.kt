@@ -3,6 +3,7 @@ package works.szabope.plugins.mypy.run
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.execution.ParametersListUtil
 import com.intellij.util.text.nullize
 import works.szabope.plugins.common.run.CliExecutionEnvironmentFactory
 import works.szabope.plugins.common.run.Exclusions
@@ -29,7 +30,7 @@ class MypyExecutionEnvironmentFactory(private val project: Project) {
             MypySdkExecutionEnvironmentFactory(project).createEnvironment(parameters, configuration.projectDirectory)
         } else {
             CliExecutionEnvironmentFactory(project).createEnvironment(
-                configuration.executablePath!!, parameters, configuration.projectDirectory
+                configuration.executablePath, parameters, configuration.projectDirectory
             )
         }
     }
@@ -39,7 +40,7 @@ class MypyExecutionEnvironmentFactory(private val project: Project) {
     ) = with(configuration) {
         val params = MypyArgs.MYPY_MANDATORY_COMMAND_ARGS.split(" ").toMutableList()
         configFilePath.nullize(true)?.let { params.add("--config-file"); params.add(it) }
-        arguments.nullize(true)?.let { params.add(" $it") }
+        arguments.nullize(true)?.let { params.addAll(ParametersListUtil.parse(it)) }
         if (excludeNonProjectFiles) {
             Exclusions(project).findAll(targets).joinToString(",").nullize()
                 ?.let { params.add("--ignore-paths"); params.add(it) }

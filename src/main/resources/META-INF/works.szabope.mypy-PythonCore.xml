@@ -16,11 +16,12 @@
                          groupBundle="messages.MypyBundle" groupKey="mypy.inspection.group_name"
                          bundle="messages.MypyBundle" key="mypy.inspection.name" enabledByDefault="true"/>
         <postStartupActivity implementation="works.szabope.plugins.mypy.activity.SettingsInitializationActivity"/>
-        <notificationGroup displayType="STICKY_BALLOON" id="Mypy Group" toolWindowId="MyPy"/>
+        <notificationGroup displayType="STICKY_BALLOON" id="Mypy group" toolWindowId="MyPy" bundle="messages.MypyBundle"
+                           key="notification.group.mypy.group"/>
     </extensions>
 
     <actions>
-        <group id="works.szabope.plugins.mypy.MypyPluginActions" text="Mypy" popup="true">
+        <group id="works.szabope.plugins.mypy.MypyPluginActions" popup="true">
             <action id="works.szabope.plugins.mypy.action.RescanAction"
                     class="works.szabope.plugins.mypy.action.RescanAction"
                     icon="AllIcons.Actions.Refresh"/>
@@ -51,5 +52,7 @@
         </action>
         <action id="works.szabope.plugins.mypy.action.InstallMypyAction"
                 class="works.szabope.plugins.mypy.action.InstallMypyAction"/>
+        <action id="works.szabope.plugins.mypy.action.AutodetectMypyAction"
+                class="works.szabope.plugins.mypy.action.AutodetectMypyAction"/>
     </actions>
 </idea-plugin>

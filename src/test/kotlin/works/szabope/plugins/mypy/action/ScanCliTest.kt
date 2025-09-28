@@ -129,9 +129,9 @@ class ScanCliTest : AbstractToolWindowTestCase() {
             executablePath = Paths.get(testDataPath).resolve(executable).absolutePathString()
             projectDirectory = Paths.get(testDataPath).absolutePathString()
             useProjectSdk = false
-            configFilePath = null
+            configFilePath = ""
             scanBeforeCheckIn = false
-            arguments = null
+            arguments = ""
             excludeNonProjectFiles = true
         }
     }

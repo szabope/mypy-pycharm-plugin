@@ -98,12 +98,12 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
 
     private fun setUpSettings() {
         with(MypySettings.getInstance(project)) {
-            executablePath = null
+            executablePath = ""
             projectDirectory = Paths.get(testDataPath).absolutePathString()
             useProjectSdk = true
-            configFilePath = null
+            configFilePath = ""
             scanBeforeCheckIn = false
-            arguments = null
+            arguments = ""
             excludeNonProjectFiles = true
         }
     }

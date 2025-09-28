@@ -4,13 +4,15 @@ import com.intellij.collaboration.util.ResultUtil.processErrorAndGet
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ValidationInfo
-import com.intellij.openapi.util.Version
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.ui.layout.ValidationInfoBuilder
+import com.jetbrains.python.packaging.PyPackage
 import kotlinx.coroutines.flow.first
 import works.szabope.plugins.common.run.CliExecutionEnvironmentFactory
 import works.szabope.plugins.common.run.ProcessException
 import works.szabope.plugins.common.run.execute
+import works.szabope.plugins.common.services.PluginPackageManagementService.PluginPackageManagementException.PackageNotInstalledException
+import works.szabope.plugins.common.services.PluginPackageManagementService.PluginPackageManagementException.PackageVersionObsoleteException
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import java.io.File
@@ -49,27 +51,23 @@ class MypyValidator(private val project: Project) {
         if (mypyVersion == null) {
             return builder.error(MypyBundle.message("mypy.configuration.path_to_executable.unknown_version"))
         }
-        return validateVersion(builder, Version.parseVersion(mypyVersion)!!)
+        if (!MypyPluginPackageManagementService.getInstance(project).getRequirement()
+                .match(PyPackage("mypy", mypyVersion))
+        ) {
+            return builder.error(MypyBundle.message("mypy.configuration.mypy_invalid_version"))
+        }
+        return null
     }
 
     fun validateSdk(builder: ValidationInfoBuilder): ValidationInfo? {
         if (MypyPluginPackageManagementService.getInstance(project).isWSL()) {
             return builder.error(MypyBundle.message("mypy.configuration.wsl_not_supported"))
         }
-        val installedPackage =
-            MypyPluginPackageManagementService.getInstance(project).getInstalledVersion() ?: return builder.error(
-                MypyBundle.message("mypy.configuration.mypy_not_installed")
-            )
-        return validateVersion(builder, installedPackage)
-    }
-
-    private fun validateVersion(builder: ValidationInfoBuilder, version: Version): ValidationInfo? {
-        if (!MypyPluginPackageManagementService.getInstance(project).isVersionSupported(version)) {
-            return builder.error(
-                MypyBundle.message(
-                    "mypy.configuration.mypy_invalid_version", "${version.major}.${version.minor}.${version.bugfix}"
-                )
-            )
+        MypyPluginPackageManagementService.getInstance(project).checkInstalledRequirement().onFailure {
+            when (it) {
+                is PackageNotInstalledException -> return builder.error(MypyBundle.message("mypy.configuration.mypy_not_installed"))
+                is PackageVersionObsoleteException -> return builder.error(MypyBundle.message("mypy.configuration.mypy_invalid_version"))
+            }
         }
         return null
     }

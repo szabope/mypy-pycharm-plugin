@@ -6,11 +6,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.transform
-import works.szabope.plugins.common.run.ProcessException
+import kotlinx.coroutines.flow.*
 import works.szabope.plugins.common.run.execute
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
@@ -28,7 +24,7 @@ class SyncScanService(private val project: Project) {
     fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): Flow<MypyMessage> {
         val shadowedTargetMap = targets.associateWith { castShadowFor(it) }
         val environment = MypyExecutionEnvironmentFactory(project).createEnvironment(configuration, shadowedTargetMap)
-        return execute(environment).transform { line -> // transform
+        return execute(environment, true).filter { it.isNotBlank() }.transform { line -> // transform
             MypyOutputParser.parse(line).onFailure {
                 when (it) {
                     is MypyParseException -> {
@@ -43,19 +39,7 @@ class SyncScanService(private val project: Project) {
                 }
             }.onSuccess { emit(it) }
         }.catch {
-            when (it) {
-                is ProcessException -> {
-                    thisLogger().error(
-                        MypyBundle.message(
-                            "mypy.executable.error", configuration, it.exitCode, it.stdErr
-                        ), it
-                    )
-                }
-
-                else -> {
-                    thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
-                }
-            }
+            thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
         }.onCompletion { shadowedTargetMap.values.onEach { it.deleteIfExists() } }
     }
 

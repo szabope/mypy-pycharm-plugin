@@ -22,7 +22,7 @@ class IncompleteConfigurationNotificationService(private val project: Project) {
     @Synchronized
     fun notify(canInstall: Boolean) {
         val notification =
-            NotificationGroupManager.getInstance().getNotificationGroup(MypyBundle.message("mypy.notification.group"))
+            NotificationGroupManager.getInstance().getNotificationGroup(MypyBundle.message("notification.group.mypy.group"))
                 .createNotification(
                     MypyBundle.message("mypy.notification.incomplete_configuration"), NotificationType.WARNING
                 )

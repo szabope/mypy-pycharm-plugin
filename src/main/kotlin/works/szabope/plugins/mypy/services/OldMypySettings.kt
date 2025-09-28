@@ -30,7 +30,7 @@ class OldMypySettings : SimplePersistentStateComponent<OldMypySettings.OldMypySe
     override val arguments: String?
         get() = state.mypyArguments
     override val scanBeforeCheckIn: Boolean
-        get() = false
+        get() = throw UnsupportedOperationException("Old Mypy plugin never supported this")
 
     companion object {
         @JvmStatic

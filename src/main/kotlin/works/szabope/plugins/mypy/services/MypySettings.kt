@@ -15,7 +15,6 @@ class MypySettings(internal val project: Project) :
 
     @ApiStatus.Internal
     class MypyState : BaseState() {
-        var initialized by property(false)
         var mypyExecutable by string()
         var useProjectSdk by property(true)
         var configFilePath by string()
@@ -33,19 +32,19 @@ class MypySettings(internal val project: Project) :
         }
 
     override var executablePath
-        get() = state.mypyExecutable
+        get() = state.mypyExecutable ?: ""
         set(value) {
             state.mypyExecutable = value
         }
 
     override var configFilePath
-        get() = state.configFilePath
+        get() = state.configFilePath ?: ""
         set(value) {
             state.configFilePath = value
         }
 
     override var arguments
-        get() = state.arguments
+        get() = state.arguments ?: ""
         set(value) {
             state.arguments = value
         }
@@ -74,16 +73,18 @@ class MypySettings(internal val project: Project) :
             state.scanBeforeCheckIn = value
         }
 
-    override suspend fun initSettings(oldSettings: BasicSettingsData?) {
-        if (state.initialized) return
-        if (oldSettings != null) {
-            executablePath = oldSettings.executablePath
-            if (executablePath != null && project.pythonSdk == null) {
-                useProjectSdk = false
-            }
-            configFilePath = oldSettings.configFilePath
-            arguments = oldSettings.arguments
-            scanBeforeCheckIn = oldSettings.scanBeforeCheckIn
+    override suspend fun initSettings(oldSettings: BasicSettingsData) {
+        if (state.mypyExecutable == null && oldSettings.executablePath != null) {
+            executablePath = oldSettings.executablePath!!
+        }
+        if (executablePath.isNotBlank() && project.pythonSdk == null) {
+            useProjectSdk = false
+        }
+        if (state.configFilePath == null && oldSettings.configFilePath != null) {
+            configFilePath = oldSettings.configFilePath!!
+        }
+        if (state.arguments == null && oldSettings.arguments != null) {
+            arguments = oldSettings.arguments!!
         }
     }
 
@@ -98,7 +99,7 @@ class MypySettings(internal val project: Project) :
     )
 
     @TestOnly
-    override fun reset() {
+    fun reset() {
         loadState(MypyState())
     }
 
