@@ -2,6 +2,8 @@ package works.szabope.plugins.mypy.action
 
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.WriteIntentReadAction
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.DumbAwareAction
 import works.szabope.plugins.mypy.services.AsyncScanService
 import works.szabope.plugins.mypy.services.MypySettings
@@ -13,6 +15,7 @@ class RescanAction : DumbAwareAction() {
         val treeService = MypyTreeService.getInstance(project)
         val latestScanTargets = treeService.getRootScanPaths()
         treeService.reinitialize(latestScanTargets)
+        WriteIntentReadAction.run { FileDocumentManager.getInstance().saveAllDocuments() }
         AsyncScanService.getInstance(project).scan(latestScanTargets, MypySettings.getInstance(project).getData())
     }
 

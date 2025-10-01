@@ -1,16 +1,17 @@
 package works.szabope.plugins.mypy.configurable
 
-import com.intellij.collaboration.util.ResultUtil.processErrorAndGet
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.execution.target.TargetedCommandLineBuilder
+import com.intellij.execution.target.local.LocalTargetEnvironment
+import com.intellij.execution.target.local.LocalTargetEnvironmentRequest
+import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.ui.layout.ValidationInfoBuilder
 import com.jetbrains.python.packaging.PyPackage
-import kotlinx.coroutines.flow.first
-import works.szabope.plugins.common.run.CliExecutionEnvironmentFactory
-import works.szabope.plugins.common.run.ProcessException
-import works.szabope.plugins.common.run.execute
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import works.szabope.plugins.common.services.PluginPackageManagementService.PluginPackageManagementException.PackageNotInstalledException
 import works.szabope.plugins.common.services.PluginPackageManagementService.PluginPackageManagementException.PackageVersionObsoleteException
 import works.szabope.plugins.mypy.MypyBundle
@@ -31,23 +32,9 @@ class MypyValidator(private val project: Project) {
         if (!file.canExecute()) {
             return builder.error(MypyBundle.message("mypy.configuration.path_to_executable.not_executable"))
         }
-        val environment = CliExecutionEnvironmentFactory(project).createEnvironment(path, listOf("-V"))
         val mypyVersion = runWithModalProgressBlocking(
             project, MypyBundle.message("mypy.configuration.path_to_executable.version_validation_title")
-        ) {
-            execute(environment).runCatching {
-                first().let { "(\\d+.\\d+.\\d+)".toRegex().find(it)?.groups?.last()?.value }
-            }
-        }.processErrorAndGet {
-            if (it is ProcessException) {
-                return builder.error(
-                    MypyBundle.message(
-                        "mypy.configuration.path_to_executable.exited_with_error", path, it.exitCode, it.stdErr
-                    )
-                )
-            }
-            thisLogger().error("Error while executing mypy", it)
-        }
+        ) { getVersionForExecutable(path) }
         if (mypyVersion == null) {
             return builder.error(MypyBundle.message("mypy.configuration.path_to_executable.unknown_version"))
         }
@@ -56,7 +43,33 @@ class MypyValidator(private val project: Project) {
         ) {
             return builder.error(MypyBundle.message("mypy.configuration.mypy_invalid_version"))
         }
+
         return null
+    }
+
+    suspend fun getVersionForExecutable(pathToExecutable: String): String? {
+        val targetEnvRequest = LocalTargetEnvironmentRequest()
+        val targetEnvironment = LocalTargetEnvironment(LocalTargetEnvironmentRequest())
+
+        val commandLineBuilder = TargetedCommandLineBuilder(targetEnvRequest)
+        commandLineBuilder.setExePath(pathToExecutable)
+        commandLineBuilder.addParameters("-V")
+
+        val targetCMD = commandLineBuilder.build()
+
+        val process = targetEnvironment.createProcess(targetCMD)
+
+        return runCatching {
+            withContext(Dispatchers.IO) {
+                coroutineToIndicator {
+                    val processHandler = CapturingProcessHandler(
+                        process, targetCMD.charset, targetCMD.getCommandPresentation(targetEnvironment)
+                    )
+                    val processOutput = processHandler.runProcess(5000, true).stdout
+                    "(\\d+.\\d+.\\d+)".toRegex().find(processOutput)?.groups?.last()?.value
+                }
+            }
+        }.getOrNull()
     }
 
     fun validateSdk(builder: ValidationInfoBuilder): ValidationInfo? {

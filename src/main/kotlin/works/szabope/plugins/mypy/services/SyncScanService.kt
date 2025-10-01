@@ -8,10 +8,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import works.szabope.plugins.common.run.execute
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
-import works.szabope.plugins.mypy.run.MypyExecutionEnvironmentFactory
 import works.szabope.plugins.mypy.services.parser.MypyMessage
 import works.szabope.plugins.mypy.services.parser.MypyOutputParser
 import works.szabope.plugins.mypy.services.parser.MypyParseException
@@ -23,9 +21,11 @@ import kotlin.io.path.writeText
 class SyncScanService(private val project: Project) {
 
     fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): Flow<MypyMessage> {
-        val shadowedTargetMap = targets.associateWith { castShadowFor(it) }
-        val environment = MypyExecutionEnvironmentFactory(project).createEnvironment(configuration, shadowedTargetMap)
-        return execute(environment, true).filter { it.isNotBlank() }.transform { line -> // transform
+        val shadowedTargetMap = targets.associateWith { copyTempFrom(it) }
+        return with(MypyExecutor(project)) {
+            val parameters = buildMypyParameters(configuration, shadowedTargetMap)
+            execute(configuration, parameters)
+        }.filter { it.isNotBlank() }.asFlow().transform { line -> // transform
             MypyOutputParser.parse(line).onFailure {
                 when (it) {
                     is MypyParseException -> {
@@ -44,7 +44,7 @@ class SyncScanService(private val project: Project) {
         }.onCompletion { shadowedTargetMap.values.onEach { it.deleteIfExists() } }
     }
 
-    private fun castShadowFor(file: VirtualFile): Path {
+    private fun copyTempFrom(file: VirtualFile): Path {
         val document = requireNotNull(FileDocumentManager.getInstance().getCachedDocument(file)) {
             MypyBundle.message("mypy.please_report_this_issue")
         }

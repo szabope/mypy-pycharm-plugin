@@ -3,6 +3,8 @@ package works.szabope.plugins.mypy.action
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.application.WriteIntentReadAction
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindowManager
@@ -21,6 +23,7 @@ open class ScanAction : DumbAwareAction() {
         val targets = listTargets(event) ?: return
         val project = event.project ?: return
         MypyTreeService.getInstance(project).reinitialize(targets)
+        WriteIntentReadAction.run { FileDocumentManager.getInstance().saveAllDocuments() }
         AsyncScanService.getInstance(project).scan(targets, MypySettings.getInstance(project).getData())
         ToolWindowManager.getInstance(project).getToolWindow(MypyToolWindowPanel.ID)?.show()
     }

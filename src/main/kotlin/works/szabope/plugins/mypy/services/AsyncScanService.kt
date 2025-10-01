@@ -13,11 +13,9 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import works.szabope.plugins.common.run.execute
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
-import works.szabope.plugins.mypy.run.MypyExecutionEnvironmentFactory
 import works.szabope.plugins.mypy.services.parser.MypyOutputParser
 import works.szabope.plugins.mypy.services.parser.MypyParseException
 import works.szabope.plugins.mypy.services.tool.MypyPublishingToolOutputHandler
@@ -33,13 +31,16 @@ class AsyncScanService(private val project: Project, private val cs: CoroutineSc
         get() = manualScanJob?.isActive == true
 
     fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData) {
-        val environment = MypyExecutionEnvironmentFactory(project).createEnvironment(configuration, targets)
         manualScanJob = cs.launch {
             // Why? See MypyParseException
             // So let's collect parse failures and report them.
             // If you have a better idea, please let me know.
             val unparsableLinesOfStdout = StringBuilder()
-            execute(environment, true).filter { it.isNotBlank() }.transform { line ->
+
+            with(MypyExecutor(project)) {
+                val parameters = buildMypyParameters(configuration, targets)
+                execute(configuration, parameters)
+            }.filter { it.isNotBlank() }.asFlow().transform { line ->
                 MypyOutputParser.parse(line).onFailure {
                     when (it) {
                         is MypyParseException -> {
