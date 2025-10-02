@@ -6,42 +6,43 @@ import com.intellij.execution.target.local.LocalTargetEnvironment
 import com.intellij.execution.target.local.LocalTargetEnvironmentRequest
 import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
-import com.intellij.ui.layout.ValidationInfoBuilder
 import com.jetbrains.python.packaging.PyPackage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import works.szabope.plugins.common.services.PluginPackageManagementService.PluginPackageManagementException.PackageNotInstalledException
-import works.szabope.plugins.common.services.PluginPackageManagementService.PluginPackageManagementException.PackageVersionObsoleteException
+import works.szabope.plugins.common.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import java.io.File
 
 class MypyValidator(private val project: Project) {
-    fun validateExecutable(path: String?, builder: ValidationInfoBuilder): ValidationInfo? {
+    fun validateExecutablePath(path: String?): String? {
         val path = path ?: return null
         require(path.isNotBlank())
         val file = File(path)
         if (!file.exists()) {
-            return builder.error(MypyBundle.message("mypy.configuration.path_to_executable.not_exists"))
+            return MypyBundle.message("mypy.configuration.path_to_executable.not_exists")
         }
         if (file.isDirectory) {
-            return builder.error(MypyBundle.message("mypy.configuration.path_to_executable.is_directory"))
+            return MypyBundle.message("mypy.configuration.path_to_executable.is_directory")
         }
         if (!file.canExecute()) {
-            return builder.error(MypyBundle.message("mypy.configuration.path_to_executable.not_executable"))
+            return MypyBundle.message("mypy.configuration.path_to_executable.not_executable")
         }
+        return null
+    }
+
+    fun validateMypyVersion(path: String): String? {
         val mypyVersion = runWithModalProgressBlocking(
             project, MypyBundle.message("mypy.configuration.path_to_executable.version_validation_title")
         ) { getVersionForExecutable(path) }
         if (mypyVersion == null) {
-            return builder.error(MypyBundle.message("mypy.configuration.path_to_executable.unknown_version"))
+            return MypyBundle.message("mypy.configuration.path_to_executable.unknown_version")
         }
         if (!MypyPluginPackageManagementService.getInstance(project).getRequirement()
                 .match(PyPackage("mypy", mypyVersion))
         ) {
-            return builder.error(MypyBundle.message("mypy.configuration.mypy_invalid_version"))
+            return MypyBundle.message("mypy.configuration.mypy_invalid_version")
         }
 
         return null
@@ -72,14 +73,14 @@ class MypyValidator(private val project: Project) {
         }.getOrNull()
     }
 
-    fun validateSdk(builder: ValidationInfoBuilder): ValidationInfo? {
+    fun validateSdk(): String? {
         if (MypyPluginPackageManagementService.getInstance(project).isWSL()) {
-            return builder.error(MypyBundle.message("mypy.configuration.wsl_not_supported"))
+            return MypyBundle.message("mypy.configuration.wsl_not_supported")
         }
         MypyPluginPackageManagementService.getInstance(project).checkInstalledRequirement().onFailure {
             when (it) {
-                is PackageNotInstalledException -> return builder.error(MypyBundle.message("mypy.configuration.mypy_not_installed"))
-                is PackageVersionObsoleteException -> return builder.error(MypyBundle.message("mypy.configuration.mypy_invalid_version"))
+                is PluginPackageManagementService.PluginPackageManagementException.PackageNotInstalledException -> return MypyBundle.message("mypy.configuration.mypy_not_installed")
+                is PluginPackageManagementService.PluginPackageManagementException.PackageVersionObsoleteException -> return MypyBundle.message("mypy.configuration.mypy_invalid_version")
             }
         }
         return null

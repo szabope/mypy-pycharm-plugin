@@ -42,15 +42,19 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
 
     override fun validateExecutable(
         builder: ValidationInfoBuilder, field: TextFieldWithBrowseButton
-    ) = MypyValidator(project).validateExecutable(field.text.trimToNull(), builder)
+    ) = with(MypyValidator(project)) {
+        field.text.trimToNull()?.let { path ->
+            validateExecutablePath(path) ?: validateMypyVersion(path)
+        }
+    }?.let { builder.error(it) }
 
     override fun validateSdk(
         builder: ValidationInfoBuilder, button: JBRadioButton
-    ) = MypyValidator(project).validateSdk(builder)
+    ) = MypyValidator(project).validateSdk()?.let { builder.error(it) }
 
     override fun validateConfigFilePath(
         builder: ValidationInfoBuilder, field: TextFieldWithBrowseButton
-    ) = MypyConfigFileValidator().validateConfigFilePath(field.text.trimToNull(), builder)
+    ) = MypyConfigFileValidator().validateConfigFilePath(field.text.trimToNull())?.let { builder.error(it) }
 
     companion object {
         const val ID = "Settings.Mypy"
