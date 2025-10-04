@@ -3,10 +3,7 @@
 package works.szabope.plugins.mypy.testutil
 
 import com.intellij.openapi.actionSystem.*
-import com.intellij.openapi.actionSystem.ex.ActionUtil
 import com.intellij.openapi.actionSystem.ex.ActionUtil.performAction
-import com.intellij.openapi.actionSystem.ex.ActionUtil.performActionDumbAwareWithCallbacks
-import com.intellij.openapi.actionSystem.ex.ActionUtil.performDumbAwareUpdate
 import com.intellij.openapi.actionSystem.ex.ActionUtil.updateAction
 import org.junit.Assert
 import works.szabope.plugins.mypy.action.InstallMypyAction
@@ -21,26 +18,26 @@ fun scan(context: DataContext) {
     val action = ActionManager.getInstance().getAction(ScanAction.ID)
     val event = AnActionEvent.createEvent(context, null, "", ActionUiKind.NONE, null)
     PerformWithDocumentsCommitted.commitDocumentsIfNeeded(action, event)
-    performDumbAwareUpdate(action, event, false)
+    updateAction(action, event)
     Assert.assertTrue(event.presentation.isEnabled)
-    performActionDumbAwareWithCallbacks(action, event)
+    performAction(action, event)
 }
 
 fun stopScan(context: DataContext) {
-    val action = ActionUtil.getAction(StopScanAction.ID)!! as StopScanAction
-    val actionEvent = AnActionEvent.createEvent(context, null, ActionPlaces.EDITOR_TAB, ActionUiKind.NONE, null)
-    action.update(actionEvent)
-    Assert.assertTrue(actionEvent.presentation.isEnabled)
-    action.actionPerformed(actionEvent)
+    val action = ActionManager.getInstance().getAction(StopScanAction.ID)
+    val event = AnActionEvent.createEvent(context, null, ActionPlaces.EDITOR_TAB, ActionUiKind.NONE, null)
+    updateAction(action, event)
+    Assert.assertTrue(event.presentation.isEnabled)
+    performAction(action, event)
 }
 
 fun installMypy(context: DataContext) {
     val action = ActionManager.getInstance().getAction(InstallMypyAction.ID)
     val event = AnActionEvent.createEvent(context, null, ActionPlaces.NOTIFICATION, ActionUiKind.NONE, null)
     PerformWithDocumentsCommitted.commitDocumentsIfNeeded(action, event)
-    performDumbAwareUpdate(action, event, false)
+    updateAction(action, event)
     Assert.assertTrue(event.presentation.isEnabled)
-    performActionDumbAwareWithCallbacks(action, event)
+    performAction(action, event)
 }
 
 fun markExcluded(context: DataContext) {
