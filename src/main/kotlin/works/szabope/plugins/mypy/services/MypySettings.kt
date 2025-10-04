@@ -32,21 +32,24 @@ class MypySettings(internal val project: Project) :
         }
 
     override var executablePath
-        get() = state.mypyExecutable ?: ""
+        get() = state.mypyExecutable?.trim() ?: ""
         set(value) {
-            state.mypyExecutable = value
+            // workaround for string() normalizes empty string to null
+            state.mypyExecutable = value.ifBlank { " " }
         }
 
     override var configFilePath
-        get() = state.configFilePath ?: ""
+        get() = state.configFilePath?.trim() ?: ""
         set(value) {
-            state.configFilePath = value
+            // workaround for string() normalizes empty string to null
+            state.configFilePath = value.ifBlank { " " }
         }
 
     override var arguments
-        get() = state.arguments ?: ""
+        get() = state.arguments?.trim() ?: ""
         set(value) {
-            state.arguments = value
+            // workaround for string() normalizes empty string to null
+            state.arguments = value.ifBlank { " " }
         }
 
     override var isAutoScrollToSource
