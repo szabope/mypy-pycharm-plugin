@@ -2,5 +2,5 @@
 if [ "$1" = "-V" ]; then
   echo "mypy 1.11.2 (compiled: yes)"
 else
-  exit 73
+  exit 1
 fi

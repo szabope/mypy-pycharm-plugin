@@ -22,9 +22,7 @@ import works.szabope.plugins.mypy.action.ScanActionUtil.isReadyToScan
 import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.testutil.*
-import java.net.URI
 import java.nio.file.Paths
-import javax.swing.event.HyperlinkEvent
 import kotlin.io.path.absolutePathString
 
 @TestDataPath($$"$CONTENT_ROOT/testData/action/scan_sdk")
@@ -59,15 +57,8 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
             }
         }
 
-        toolWindowManager.onBalloon {
-            it.listener?.hyperlinkUpdate(
-                HyperlinkEvent(
-                    "dumb", HyperlinkEvent.EventType.ACTIVATED, URI("http://localhost").toURL()
-                )
-            )
-        }
         var assertionError: Error? = null
-        dialogManager.onAnyDialog {
+        toolWindowManager.onBalloon {
             assertionError = AssertionFailedError("Should not happen")
         }
         val target = workspaceModel.currentSnapshot.entities(ContentRootEntity::class.java).first().url.virtualFile!!

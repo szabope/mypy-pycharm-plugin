@@ -1,6 +1,7 @@
 package works.szabope.plugins.mypy.services
 
 import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.process.ProcessOutput
 import com.intellij.execution.util.ExecUtil
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
@@ -20,7 +21,7 @@ import kotlin.io.path.pathString
 
 class MypyExecutor(private val project: Project) {
 
-    fun execute(configuration: ImmutableSettingsData, parameters: List<String> = emptyList()): List<String> {
+    fun execute(configuration: ImmutableSettingsData, parameters: List<String> = emptyList()): ProcessOutput {
         return if (configuration.useProjectSdk) {
             val pythonSdk = requireNotNull(project.pythonSdk) {
                 thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"))
@@ -33,7 +34,7 @@ class MypyExecutor(private val project: Project) {
             commandLine.withExePath(configuration.executablePath)
             commandLine.withParameters(parameters)
             ExecUtil.execAndGetOutput(commandLine)
-        }.stdout.lines()
+        }
     }
 
     fun buildMypyParameters(configuration: ImmutableSettingsData, shadowMap: Map<VirtualFile, Path>): List<String> {

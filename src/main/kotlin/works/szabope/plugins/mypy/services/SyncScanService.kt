@@ -6,10 +6,12 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.transform
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
+import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.services.parser.MypyMessage
 import works.szabope.plugins.mypy.services.parser.MypyOutputParser
 import works.szabope.plugins.mypy.services.parser.MypyParseException
@@ -22,11 +24,24 @@ class SyncScanService(private val project: Project) {
 
     fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): Flow<MypyMessage> {
         val shadowedTargetMap = targets.associateWith { copyTempFrom(it) }
-        return with(MypyExecutor(project)) {
-            val parameters = buildMypyParameters(configuration, shadowedTargetMap)
-            execute(configuration, parameters)
-        }.filter { it.isNotBlank() }.asFlow().transform { line -> // transform
-            MypyOutputParser.parse(line).onFailure {
+        val output = try {
+            with(MypyExecutor(project)) {
+                val parameters = buildMypyParameters(configuration, shadowedTargetMap)
+                execute(configuration, parameters)
+            }
+        } finally {
+            shadowedTargetMap.values.onEach { it.deleteIfExists() }
+        }
+        // exit code 1 should be fine https://github.com/python/mypy/issues/6003
+        if (output.exitCode > 1) {
+            showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
+                DialogManager.showToolExecutionErrorDialog(
+                    configuration, output.stderr, output.exitCode
+                )
+            }
+        }
+        return output.stdoutLines.asFlow().transform { line -> // transform
+            MypyOutputParser.parse(line).onSuccess { emit(it) }.onFailure {
                 when (it) {
                     is MypyParseException -> {
                         thisLogger().warn(
@@ -38,10 +53,8 @@ class SyncScanService(private val project: Project) {
                         thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
                     }
                 }
-            }.onSuccess { emit(it) }
-        }.buffer(capacity = Channel.UNLIMITED).catch {
-            thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
-        }.onCompletion { shadowedTargetMap.values.onEach { it.deleteIfExists() } }
+            }
+        }
     }
 
     private fun copyTempFrom(file: VirtualFile): Path {

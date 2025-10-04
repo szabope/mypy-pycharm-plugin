@@ -4,12 +4,8 @@ import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.target.TargetedCommandLineBuilder
 import com.intellij.execution.target.local.LocalTargetEnvironment
 import com.intellij.execution.target.local.LocalTargetEnvironmentRequest
-import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.jetbrains.python.packaging.PyPackage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import works.szabope.plugins.common.services.PluginPackageManagementService
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
@@ -33,12 +29,8 @@ class MypyValidator(private val project: Project) {
     }
 
     fun validateMypyVersion(path: String): String? {
-        val mypyVersion = runWithModalProgressBlocking(
-            project, MypyBundle.message("mypy.configuration.path_to_executable.version_validation_title")
-        ) { getVersionForExecutable(path) }
-        if (mypyVersion == null) {
-            return MypyBundle.message("mypy.configuration.path_to_executable.unknown_version")
-        }
+        val mypyVersion = getVersionForExecutable(path)
+            ?: return MypyBundle.message("mypy.configuration.path_to_executable.unknown_version")
         if (!MypyPluginPackageManagementService.getInstance(project).getRequirement()
                 .match(PyPackage("mypy", mypyVersion))
         ) {
@@ -48,7 +40,7 @@ class MypyValidator(private val project: Project) {
         return null
     }
 
-    suspend fun getVersionForExecutable(pathToExecutable: String): String? {
+    private fun getVersionForExecutable(pathToExecutable: String): String? {
         val targetEnvRequest = LocalTargetEnvironmentRequest()
         val targetEnvironment = LocalTargetEnvironment(LocalTargetEnvironmentRequest())
 
@@ -61,15 +53,11 @@ class MypyValidator(private val project: Project) {
         val process = targetEnvironment.createProcess(targetCMD)
 
         return runCatching {
-            withContext(Dispatchers.IO) {
-                coroutineToIndicator {
-                    val processHandler = CapturingProcessHandler(
-                        process, targetCMD.charset, targetCMD.getCommandPresentation(targetEnvironment)
-                    )
-                    val processOutput = processHandler.runProcess(5000, true).stdout
-                    "(\\d+.\\d+.\\d+)".toRegex().find(processOutput)?.groups?.last()?.value
-                }
-            }
+            val processHandler = CapturingProcessHandler(
+                process, targetCMD.charset, targetCMD.getCommandPresentation(targetEnvironment)
+            )
+            val processOutput = processHandler.runProcess(5000, true).stdout
+            "(\\d+.\\d+.\\d+)".toRegex().find(processOutput)?.groups?.last()?.value
         }.getOrNull()
     }
 
@@ -79,8 +67,13 @@ class MypyValidator(private val project: Project) {
         }
         MypyPluginPackageManagementService.getInstance(project).checkInstalledRequirement().onFailure {
             when (it) {
-                is PluginPackageManagementService.PluginPackageManagementException.PackageNotInstalledException -> return MypyBundle.message("mypy.configuration.mypy_not_installed")
-                is PluginPackageManagementService.PluginPackageManagementException.PackageVersionObsoleteException -> return MypyBundle.message("mypy.configuration.mypy_invalid_version")
+                is PluginPackageManagementService.PluginPackageManagementException.PackageNotInstalledException -> return MypyBundle.message(
+                    "mypy.configuration.mypy_not_installed"
+                )
+
+                is PluginPackageManagementService.PluginPackageManagementException.PackageVersionObsoleteException -> return MypyBundle.message(
+                    "mypy.configuration.mypy_invalid_version"
+                )
             }
         }
         return null

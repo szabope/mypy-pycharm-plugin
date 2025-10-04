@@ -20,6 +20,7 @@ import org.jetbrains.concurrency.asPromise
 import works.szabope.plugins.common.test.dialog.TestDialogWrapper
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
 import works.szabope.plugins.mypy.dialog.DialogManager
+import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
 import works.szabope.plugins.mypy.dialog.MypyParseErrorDialog
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.testutil.TestDialogManager
@@ -61,15 +62,8 @@ class ScanCliTest : AbstractToolWindowTestCase() {
             }
         }
 
-        toolWindowManager.onBalloon {
-            it.listener?.hyperlinkUpdate(
-                HyperlinkEvent(
-                    "dumb", HyperlinkEvent.EventType.ACTIVATED, URI("http://localhost").toURL()
-                )
-            )
-        }
         var assertionError: Error? = null
-        dialogManager.onAnyDialog {
+        toolWindowManager.onBalloon {
             assertionError = AssertionFailedError("Should not happen")
         }
         val target = workspaceModel.currentSnapshot.entities(ContentRootEntity::class.java).first().url.virtualFile!!
@@ -110,9 +104,9 @@ class ScanCliTest : AbstractToolWindowTestCase() {
     }
 
     // https://github.com/python/mypy/issues/6003
-    fun `test mypy returning with an exit code other that 0 does not matter, it's fine`() {
+    fun `test mypy returning with an exit code 1 is fine`() {
         myFixture.copyDirectoryToProject("/", "/")
-        setUpSettings("mypy_exit_with_73")
+        setUpSettings("mypy_exit_with_1")
         var assertionError: Error? = null
         toolWindowManager.onBalloon {
             assertionError = AssertionFailedError("Should not happen")
@@ -122,6 +116,28 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
         PlatformTestUtil.waitWhileBusy { !ScanActionUtil.isReadyToScan(project) }
         assertionError?.let { throw it }
+    }
+
+    fun `test mypy returning with an exit code 2 results in dialog`() {
+        myFixture.copyDirectoryToProject("/", "/")
+        setUpSettings("mypy_exit_with_2")
+        toolWindowManager.onBalloon {
+            it.listener?.hyperlinkUpdate(
+                HyperlinkEvent(
+                    "dumb", HyperlinkEvent.EventType.ACTIVATED, URI("http://localhost").toURL()
+                )
+            )
+        }
+        val dialogShown = CompletableFuture<TestDialogWrapper>()
+        dialogManager.onDialog(MypyExecutionErrorDialog::class.java) {
+            dialogShown.complete(it)
+            DialogWrapper.OK_EXIT_CODE
+        }
+        val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
+            .first().url.virtualFile!!
+        scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
+        PlatformTestUtil.assertPromiseSucceeds(dialogShown.asPromise())
+        assertTrue(dialogShown.isDone && with(dialogShown.get()) { isShown() && getExitCode() == DialogWrapper.OK_EXIT_CODE })
     }
 
     private fun setUpSettings(executable: String) {

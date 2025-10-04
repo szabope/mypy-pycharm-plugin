@@ -31,6 +31,7 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
             }
         ),
         MypyBundle.message("mypy.configuration.path_to_executable.empty_warning"),
+        MypyBundle.message("mypy.configuration.path_to_executable.version_validation_title"),
         MypyBundle.message("mypy.configuration.use_project_sdk"),
         MypyBundle.message("mypy.configuration.config_file.comment"),
         MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
@@ -40,13 +41,11 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
     override val packageManager get() = MypyPluginPackageManagementService.getInstance(project)
     override val defaultArguments = MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
 
-    override fun validateExecutable(
-        builder: ValidationInfoBuilder, field: TextFieldWithBrowseButton
-    ) = with(MypyValidator(project)) {
-        field.text.trimToNull()?.let { path ->
+    override fun validateExecutable(path: String?) = with(MypyValidator(project)) {
+        path?.trimToNull()?.let { path ->
             validateExecutablePath(path) ?: validateMypyVersion(path)
         }
-    }?.let { builder.error(it) }
+    }
 
     override fun validateSdk(
         builder: ValidationInfoBuilder, button: JBRadioButton

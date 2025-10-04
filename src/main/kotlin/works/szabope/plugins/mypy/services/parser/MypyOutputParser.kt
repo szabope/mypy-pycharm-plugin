@@ -5,8 +5,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * Created when a line of mypy output cannot be parsed for some reason.
- * The goal is to handle cases when mypy fails to distinguish between throwing an error and reporting one.
- *  - can't rely on process status != 0; https://github.com/python/mypy/issues/6003
+ * The goal is to handle cases when mypy fails to distinguish between throwing an exception and reporting a hit.
  *  - mypy exceptions _sometimes_ printed to stdout, mixing them into normal output, in which case even `-O json` is ignored
  *  - and sometimes after such and exception comes valuable json output
  */
