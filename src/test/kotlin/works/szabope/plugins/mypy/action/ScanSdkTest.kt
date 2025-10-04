@@ -33,11 +33,11 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
     @Suppress("removal")
     fun testManualScan() = withMockSdk("${Paths.get(testDataPath).absolutePathString()}/MockSdk") {
         myFixture.copyDirectoryToProject("/", "/")
-        installMypy(with(project) { getProjectContext() })
+        installMypy(dataContext(project) { add(CommonDataKeys.PROJECT, project) })
         setUpSettings()
         val excludedDir = TempFileSystem.getInstance().findFileByPath("/src/excluded_dir")!!
-        val exclusionContext = with(project) {
-            getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(excludedDir)) }
+        val exclusionContext = dataContext(project) {
+            add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(excludedDir))
         }
         markExcluded(exclusionContext)
         var assertionError: Error? = null
@@ -45,7 +45,7 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
             assertionError = AssertionFailedError("Should not happen")
         }
         val target = TempFileSystem.getInstance().findFileByPath("/src")!!
-        scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
+        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
         PlatformTestUtil.waitWhileBusy { !isReadyToScan(project) }
         assertionError?.let { throw it }
         runBlocking {

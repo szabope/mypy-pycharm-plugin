@@ -7,7 +7,7 @@ import kotlinx.coroutines.runBlocking
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
 import works.szabope.plugins.mypy.services.AsyncScanService
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.mypy.testutil.getContext
+import works.szabope.plugins.mypy.testutil.dataContext
 import works.szabope.plugins.mypy.testutil.scan
 import works.szabope.plugins.mypy.testutil.stopScan
 import java.nio.file.Paths
@@ -32,8 +32,8 @@ class StopScanTest : AbstractToolWindowTestCase() {
      */
     fun `test that we can stop an external process that runs an infinite loop`() {
         val file = myFixture.configureByText("a.py", "doesn't matter").virtualFile
-        scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(file)) } })
-        stopScan(with(project) { getContext() })
+        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(file)) })
+        stopScan(dataContext(project) {})
         runBlocking { waitUntil { !AsyncScanService.getInstance(project).scanInProgress } }
     }
 }
