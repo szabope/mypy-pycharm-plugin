@@ -43,8 +43,8 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         myFixture.copyDirectoryToProject("/", "/")
         val excludedDir = TempFileSystem.getInstance().findFileByPath("/src/excluded_dir")!!
         setUpSettings("mypy")
-        val exclusionContext = with(project) {
-            getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(excludedDir)) }
+        val exclusionContext = dataContext(project) {
+            add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(excludedDir))
         }
         markExcluded(exclusionContext)
         var assertionError: Error? = null
@@ -52,7 +52,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
             assertionError = AssertionFailedError("Should not happen: $it")
         }
         val target = TempFileSystem.getInstance().findFileByPath("/src")!!
-        scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
+        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
         PlatformTestUtil.waitWhileBusy { !ScanActionUtil.isReadyToScan(project) }
         assertionError?.let { throw it }
         treeUtil.assertStructure("+Found 1 issue(s) in 1 file(s)\n")
@@ -83,7 +83,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         }
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
-        scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
+        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
         PlatformTestUtil.assertPromiseSucceeds(dialogShown.asPromise())
         assertTrue(dialogShown.isDone && with(dialogShown.get()) { isShown() && getExitCode() == DialogWrapper.OK_EXIT_CODE })
     }
@@ -98,7 +98,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         }
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
-        scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
+        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
         PlatformTestUtil.waitWhileBusy { !ScanActionUtil.isReadyToScan(project) }
         assertionError?.let { throw it }
     }
@@ -120,7 +120,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         }
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
-        scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
+        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
         PlatformTestUtil.assertPromiseSucceeds(dialogShown.asPromise())
         assertTrue(dialogShown.isDone && with(dialogShown.get()) { isShown() && getExitCode() == DialogWrapper.OK_EXIT_CODE })
     }

@@ -48,7 +48,7 @@ class MypyInitializationWithRemotePythonSdkTest : AbstractMypyHeavyPlatformTestC
     }
 
     fun `test plugin initialized for project with python sdk results in notification`() {
-        val actions = with(project) { getMypyConfigurationNotCompleteNotification() }.actions
+        val actions = getMypyConfigurationNotCompleteNotification(project).actions
         assertEquals(1, actions.size)
     }
 

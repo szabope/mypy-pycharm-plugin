@@ -7,7 +7,7 @@ import works.szabope.plugins.mypy.testutil.getMypyConfigurationNotCompleteNotifi
 class PluginInitializationFromScratchTest : AbstractToolWindowTestCase() {
 
     fun `test plugin initialized from scratch (no python sdk) results in notification`() {
-        val actions = with(project) { getMypyConfigurationNotCompleteNotification() }.actions
+        val actions = getMypyConfigurationNotCompleteNotification(project).actions
         assertEquals(
             MypyBundle.message("mypy.intention.complete_configuration.text"),
             actions.single().templatePresentation.text
