@@ -1,18 +1,10 @@
 package works.szabope.plugins.mypy.action
 
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.application.runWriteActionAndWait
-import com.intellij.platform.backend.workspace.WorkspaceModel
-import com.intellij.platform.backend.workspace.virtualFile
-import com.intellij.platform.workspace.jps.entities.ContentRootEntity
-import com.intellij.platform.workspace.jps.entities.ExcludeUrlEntity
-import com.intellij.platform.workspace.storage.EntitySource
-import com.intellij.platform.workspace.storage.WorkspaceEntity
-import com.intellij.platform.workspace.storage.url.VirtualFileUrl
+import com.intellij.openapi.vfs.ex.temp.TempFileSystem
 import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.common.waitUntilAssertSucceeds
-import com.intellij.testFramework.workspaceModel.updateProjectModel
 import io.mockk.every
 import io.mockk.mockkObject
 import junit.framework.AssertionFailedError
@@ -38,30 +30,21 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
         super.setUp()
     }
 
+    @Suppress("removal")
     fun testManualScan() = withMockSdk("${Paths.get(testDataPath).absolutePathString()}/MockSdk") {
         myFixture.copyDirectoryToProject("/", "/")
         installMypy(with(project) { getProjectContext() })
         setUpSettings()
-        val workspaceModel = WorkspaceModel.getInstance(project)
-        val excludedDir = workspaceModel.currentSnapshot.entities(ContentRootEntity::class.java).first().url.append(
-            "/excluded_dir"
-        )
-        val excludedEntity = ExcludeUrlEntity(excludedDir, object : EntitySource {
-            override val virtualFileUrl: VirtualFileUrl?
-                get() = excludedDir
-        })
-        lateinit var exclusionWorkspaceEntity: WorkspaceEntity
-        runWriteActionAndWait {
-            workspaceModel.updateProjectModel { model ->
-                exclusionWorkspaceEntity = model.addEntity(excludedEntity)
-            }
+        val excludedDir = TempFileSystem.getInstance().findFileByPath("/src/excluded_dir")!!
+        val exclusionContext = with(project) {
+            getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(excludedDir)) }
         }
-
+        markExcluded(exclusionContext)
         var assertionError: Error? = null
         toolWindowManager.onBalloon {
             assertionError = AssertionFailedError("Should not happen")
         }
-        val target = workspaceModel.currentSnapshot.entities(ContentRootEntity::class.java).first().url.virtualFile!!
+        val target = TempFileSystem.getInstance().findFileByPath("/src")!!
         scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
         PlatformTestUtil.waitWhileBusy { !isReadyToScan(project) }
         assertionError?.let { throw it }
@@ -78,13 +61,7 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
                 )
             }
         }
-        runWriteActionAndWait {
-            workspaceModel.updateProjectModel { model ->
-                model.removeEntity(
-                    exclusionWorkspaceEntity
-                )
-            }
-        }
+        unmark(exclusionContext)
     }
 
     private fun setUpSettings() {

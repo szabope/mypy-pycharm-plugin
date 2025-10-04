@@ -4,7 +4,7 @@ if [ "$1" = "-V" ]; then
 else
   my_dir=$(dirname "$(realpath -s "$0")")
   for last; do :; done
-  expected_args="-m mypy --show-column-numbers --show-absolute-path --output json --ignore-paths /src/excluded_dir $last"
+  expected_args="-m mypy --show-column-numbers --show-absolute-path --output json --exclude excluded_dir $last"
   if [ "$*" != "$expected_args" ]; then
     >&2 echo "expected: $expected_args"
     >&2 echo "received: $*"

@@ -1,18 +1,13 @@
 package works.szabope.plugins.mypy.action
 
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.application.runWriteActionAndWait
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.vfs.ex.temp.TempFileSystem
 import com.intellij.platform.backend.workspace.WorkspaceModel
 import com.intellij.platform.backend.workspace.virtualFile
 import com.intellij.platform.workspace.jps.entities.ContentRootEntity
-import com.intellij.platform.workspace.jps.entities.ExcludeUrlEntity
-import com.intellij.platform.workspace.storage.EntitySource
-import com.intellij.platform.workspace.storage.WorkspaceEntity
-import com.intellij.platform.workspace.storage.url.VirtualFileUrl
 import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.testFramework.TestDataPath
-import com.intellij.testFramework.workspaceModel.updateProjectModel
 import io.mockk.every
 import io.mockk.mockkObject
 import junit.framework.AssertionFailedError
@@ -23,9 +18,7 @@ import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
 import works.szabope.plugins.mypy.dialog.MypyParseErrorDialog
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.mypy.testutil.TestDialogManager
-import works.szabope.plugins.mypy.testutil.getContext
-import works.szabope.plugins.mypy.testutil.scan
+import works.szabope.plugins.mypy.testutil.*
 import java.net.URI
 import java.nio.file.Paths
 import java.util.concurrent.CompletableFuture
@@ -45,28 +38,20 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         super.setUp()
     }
 
+    @Suppress("removal")
     fun testManualScan() {
         myFixture.copyDirectoryToProject("/", "/")
+        val excludedDir = TempFileSystem.getInstance().findFileByPath("/src/excluded_dir")!!
         setUpSettings("mypy")
-        val workspaceModel = WorkspaceModel.getInstance(project)
-        val excludedDir =
-            workspaceModel.currentSnapshot.entities(ContentRootEntity::class.java).first().url.append("/excluded_dir")
-        val excludedEntity = ExcludeUrlEntity(excludedDir, object : EntitySource {
-            override val virtualFileUrl: VirtualFileUrl?
-                get() = excludedDir
-        })
-        lateinit var exclusionWorkspaceEntity: WorkspaceEntity
-        runWriteActionAndWait {
-            workspaceModel.updateProjectModel { model ->
-                exclusionWorkspaceEntity = model.addEntity(excludedEntity)
-            }
+        val exclusionContext = with(project) {
+            getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(excludedDir)) }
         }
-
+        markExcluded(exclusionContext)
         var assertionError: Error? = null
         toolWindowManager.onBalloon {
-            assertionError = AssertionFailedError("Should not happen")
+            assertionError = AssertionFailedError("Should not happen: $it")
         }
-        val target = workspaceModel.currentSnapshot.entities(ContentRootEntity::class.java).first().url.virtualFile!!
+        val target = TempFileSystem.getInstance().findFileByPath("/src")!!
         scan(with(project) { getContext { it.add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) } })
         PlatformTestUtil.waitWhileBusy { !ScanActionUtil.isReadyToScan(project) }
         assertionError?.let { throw it }
@@ -78,7 +63,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
                    |  Bracketed expression "[...]" is not valid as a type [valid-type] (0:-1) Did you mean "List[...]"?
                    |""".trimMargin()
         )
-        runWriteActionAndWait { workspaceModel.updateProjectModel { model -> model.removeEntity(exclusionWorkspaceEntity) } }
+        unmark(exclusionContext)
     }
 
     fun `test mypy returning non-json result with exit code 0 results in Dialog of The Parse Error`() {
