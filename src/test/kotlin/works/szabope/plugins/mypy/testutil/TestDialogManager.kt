@@ -2,13 +2,11 @@
 package works.szabope.plugins.mypy.testutil
 
 import com.jetbrains.python.packaging.PyExecutionException
+import works.szabope.plugins.common.dialog.PluginDialog
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.common.test.dialog.AbstractTestDialogManager
 import works.szabope.plugins.common.test.dialog.TestDialogWrapper
-import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
-import works.szabope.plugins.mypy.dialog.MypyGeneralErrorDialog
-import works.szabope.plugins.mypy.dialog.MypyPackageInstallationErrorDialog
-import works.szabope.plugins.mypy.dialog.MypyParseErrorDialog
+import works.szabope.plugins.mypy.dialog.*
 
 class TestDialogManager : AbstractTestDialogManager() {
     override fun createPyPackageInstallationErrorDialog(exception: PyExecutionException) = TestDialogWrapper(
@@ -17,6 +15,9 @@ class TestDialogManager : AbstractTestDialogManager() {
 
     override fun createToolExecutionErrorDialog(configuration: ImmutableSettingsData, result: String, resultCode: Int) =
         TestDialogWrapper(MypyExecutionErrorDialog::class.java, configuration, result, resultCode)
+
+    override fun createFailedToExecuteErrorDialog(message: String): PluginDialog =
+        TestDialogWrapper(FailedToExecuteErrorDialog::class.java, message)
 
     override fun createToolOutputParseErrorDialog(
         configuration: ImmutableSettingsData, targets: String, json: String, error: String

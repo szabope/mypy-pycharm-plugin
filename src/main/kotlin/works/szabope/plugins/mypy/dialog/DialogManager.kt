@@ -26,6 +26,9 @@ class DialogManager : IDialogManager {
         resultCode: Int
     ) = MypyExecutionErrorDialog(configuration, result, resultCode).toMypyDialog()
 
+    override fun createFailedToExecuteErrorDialog(message: String) =
+        FailedToExecuteErrorDialog(message).toMypyDialog()
+
     override fun createToolOutputParseErrorDialog(
         configuration: ImmutableSettingsData,
         targets: String,

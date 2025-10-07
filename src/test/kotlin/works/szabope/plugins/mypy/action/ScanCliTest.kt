@@ -15,6 +15,7 @@ import org.jetbrains.concurrency.asPromise
 import works.szabope.plugins.common.test.dialog.TestDialogWrapper
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
 import works.szabope.plugins.mypy.dialog.DialogManager
+import works.szabope.plugins.mypy.dialog.FailedToExecuteErrorDialog
 import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
 import works.szabope.plugins.mypy.dialog.MypyParseErrorDialog
 import works.szabope.plugins.mypy.services.MypySettings
@@ -115,6 +116,36 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         }
         val dialogShown = CompletableFuture<TestDialogWrapper>()
         dialogManager.onDialog(MypyExecutionErrorDialog::class.java) {
+            dialogShown.complete(it)
+            DialogWrapper.OK_EXIT_CODE
+        }
+        val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
+            .first().url.virtualFile!!
+        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
+        PlatformTestUtil.assertPromiseSucceeds(dialogShown.asPromise())
+        assertTrue(dialogShown.isDone && with(dialogShown.get()) { isShown() && getExitCode() == DialogWrapper.OK_EXIT_CODE })
+    }
+
+    fun `test executable path does not exist results in dialog`() {
+        myFixture.copyDirectoryToProject("/", "/")
+        with(MypySettings.getInstance(project)) {
+            executablePath = "/does/not/exist"
+            projectDirectory = Paths.get(testDataPath).absolutePathString()
+            useProjectSdk = false
+            configFilePath = ""
+            scanBeforeCheckIn = false
+            arguments = ""
+            excludeNonProjectFiles = true
+        }
+        toolWindowManager.onBalloon {
+            it.listener?.hyperlinkUpdate(
+                HyperlinkEvent(
+                    "dumb", HyperlinkEvent.EventType.ACTIVATED, URI("http://localhost").toURL()
+                )
+            )
+        }
+        val dialogShown = CompletableFuture<TestDialogWrapper>()
+        dialogManager.onDialog(FailedToExecuteErrorDialog::class.java) {
             dialogShown.complete(it)
             DialogWrapper.OK_EXIT_CODE
         }

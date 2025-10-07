@@ -3,31 +3,39 @@ package works.szabope.plugins.mypy.dialog
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.util.NlsContexts.DetailedDescription
 import com.intellij.openapi.util.NlsContexts.DialogTitle
-import com.intellij.ui.dsl.builder.Align
-import com.intellij.ui.dsl.builder.COLUMNS_LARGE
-import com.intellij.ui.dsl.builder.RowLayout
+import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.util.ui.JBUI
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
+import java.awt.Dimension
 
 data class MypyErrorDescription(
-    @DetailedDescription val details: String, @DetailedDescription val message: String? = null
+    @DetailedDescription val details: String?, @DetailedDescription val message: String? = null
 )
 
 class MypyPackageInstallationErrorDialog(message: String) : MypyErrorDialog(
     MypyBundle.message("mypy.dialog.installation_error.title"),
-    MypyErrorDescription(MypyBundle.message("mypy.dialog.installation_error.details", message))
+    MypyErrorDescription(message, MypyBundle.message("mypy.dialog.installation_error.message"))
 )
 
-
-class MypyExecutionErrorDialog(configuration: ImmutableSettingsData, result: String, resultCode: Int) : MypyErrorDialog(
-    MypyBundle.message("mypy.dialog.execution_error.title"), MypyErrorDescription(
-        MypyBundle.message("mypy.dialog.execution_error.content", configuration, result),
-        MypyBundle.message("mypy.dialog.execution_error.status_code", resultCode)
+class FailedToExecuteErrorDialog(message: String) : MypyErrorDialog(
+    MypyBundle.message("mypy.dialog.failed_to_execute.title"), MypyErrorDescription(
+        message, MypyBundle.message("mypy.dialog.failed_to_execute.message")
     )
 )
 
-class MypyParseErrorDialog(configuration: ImmutableSettingsData, targets: String, json: String, error: String) : MypyErrorDialog(
+class MypyExecutionErrorDialog(
+    configuration: ImmutableSettingsData, result: String, resultCode: Int?
+) : MypyErrorDialog(
+    MypyBundle.message("mypy.dialog.execution_error.title"), MypyErrorDescription(
+        MypyBundle.message("mypy.dialog.execution_error.content", configuration, result),
+        resultCode?.let { MypyBundle.message("mypy.dialog.execution_error.status_code", it) })
+)
+
+class MypyParseErrorDialog(
+    configuration: ImmutableSettingsData, targets: String, json: String, error: String
+) : MypyErrorDialog(
     MypyBundle.message("mypy.dialog.parse_error.title"), MypyErrorDescription(
         MypyBundle.message("mypy.dialog.parse_error.details", configuration, targets, json),
         MypyBundle.message("mypy.dialog.parse_error.message", error)
@@ -47,19 +55,24 @@ open class MypyErrorDialog(
 ) : DialogWrapper(false) {
 
     init {
+        setTitle(title)
         super.init()
-        super.setTitle(title)
-        super.setErrorText(description.message)
+        setErrorText(description.message)
+        contentPanel.maximumSize = Dimension(JBUI.scale(800), contentPanel.preferredSize.height)
     }
 
-    override fun createCenterPanel() = panel {
-        row {
-            textArea().applyToComponent {
-                text = description.details
-                isEditable = false
-                columns = COLUMNS_LARGE
-                lineWrap = true
-            }.align(Align.FILL)
-        }.layout(RowLayout.PARENT_GRID)
+    override fun createCenterPanel() = description.details?.let { details ->
+        panel {
+            row {
+                textArea().applyToComponent {
+                    text = details
+                    isEditable = false
+                    lineWrap = true
+                    wrapStyleWord = true
+                }.also {
+                    setSize(JBUI.scale(800), 0)
+                }.align(AlignX.FILL)
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package works.szabope.plugins.mypy.services
 
+import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -8,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.transform
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
@@ -29,6 +31,13 @@ class SyncScanService(private val project: Project) {
                 val parameters = buildMypyParameters(configuration, shadowedTargetMap)
                 execute(configuration, parameters)
             }
+        } catch (e: ProcessNotCreatedException) {
+            showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")) {
+                DialogManager.showFailedToExecuteErrorDialog(
+                    e.message ?: MypyBundle.message("mypy.please_report_this_issue")
+                )
+            }
+            return emptyFlow()
         } finally {
             shadowedTargetMap.values.onEach { it.deleteIfExists() }
         }
