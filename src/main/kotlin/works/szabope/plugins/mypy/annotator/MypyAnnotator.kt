@@ -44,9 +44,8 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMe
             profile.getErrorLevel(it, file).severity
         } ?: HighlightSeverity.ERROR
         runBlockingCancellable {
-            annotationResult.map { issue ->
-                val psiElement = requireNotNull(file.findElementFor(issue)) { "Mypy result mismatch for $issue" }
-                Pair(issue, psiElement)
+            annotationResult.map {
+                it to requireNotNull(file.findElementFor(it)) { "Mypy result mismatch for $it" }
             }.collect { (issue, psiElement) ->
                 holder.newAnnotation(severity, issue.message).range(psiElement.textRange)
                     .withFix(MypyIgnoreIntention(issue.line)).create()

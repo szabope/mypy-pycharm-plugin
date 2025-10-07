@@ -6,7 +6,7 @@ import com.intellij.execution.target.local.LocalTargetEnvironment
 import com.intellij.execution.target.local.LocalTargetEnvironmentRequest
 import com.intellij.openapi.project.Project
 import com.jetbrains.python.packaging.PyPackage
-import works.szabope.plugins.common.services.PluginPackageManagementService
+import works.szabope.plugins.common.services.PluginPackageManagementException
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import java.io.File
@@ -67,11 +67,11 @@ class MypyValidator(private val project: Project) {
         }
         MypyPluginPackageManagementService.getInstance(project).checkInstalledRequirement().onFailure {
             when (it) {
-                is PluginPackageManagementService.PluginPackageManagementException.PackageNotInstalledException -> return MypyBundle.message(
+                is PluginPackageManagementException.PackageNotInstalledException -> return MypyBundle.message(
                     "mypy.configuration.mypy_not_installed"
                 )
 
-                is PluginPackageManagementService.PluginPackageManagementException.PackageVersionObsoleteException -> return MypyBundle.message(
+                is PluginPackageManagementException.PackageVersionObsoleteException -> return MypyBundle.message(
                     "mypy.configuration.mypy_invalid_version"
                 )
             }

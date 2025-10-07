@@ -7,9 +7,11 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.common.waitUntilAssertSucceeds
 import io.mockk.every
 import io.mockk.mockkObject
+import junit.framework.Assert
 import junit.framework.AssertionFailedError
 import kotlinx.coroutines.runBlocking
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.action.ScanActionUtil.isReadyToScan
 import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.services.MypySettings
@@ -42,7 +44,10 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
         markExcluded(exclusionContext)
         var assertionError: Error? = null
         toolWindowManager.onBalloon {
-            assertionError = AssertionFailedError("Should not happen")
+            val expected = MypyBundle.message("action.InstallMypyAction.done_html")
+            if (expected != it.htmlBody) {
+                assertionError = AssertionFailedError(Assert.format("Should not happen", expected, it.htmlBody))
+            }
         }
         val target = TempFileSystem.getInstance().findFileByPath("/src")!!
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })

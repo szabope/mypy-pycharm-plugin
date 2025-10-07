@@ -9,7 +9,6 @@ import com.jetbrains.python.packaging.PyRequirement
 import com.jetbrains.python.packaging.pyRequirement
 import com.jetbrains.python.packaging.requirement.PyRequirementRelation
 import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
-import works.szabope.plugins.common.services.PluginPackageManagementService
 
 @Service(Service.Level.PROJECT)
 class MypyPluginPackageManagementService(override val project: Project) : AbstractPluginPackageManagementService() {
@@ -22,7 +21,7 @@ class MypyPluginPackageManagementService(override val project: Project) : Abstra
         const val MINIMUM_VERSION = "1.11"
 
         @JvmStatic
-        fun getInstance(project: Project): PluginPackageManagementService =
+        fun getInstance(project: Project): AbstractPluginPackageManagementService =
             project.service<MypyPluginPackageManagementService>()
     }
 }

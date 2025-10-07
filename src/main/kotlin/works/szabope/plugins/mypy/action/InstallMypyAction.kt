@@ -6,8 +6,8 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.wm.ToolWindowManager
-import com.jetbrains.python.packaging.PyExecutionException
 import works.szabope.plugins.common.action.AbstractInstallToolAction
+import works.szabope.plugins.common.services.PluginPackageManagementException
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
@@ -21,7 +21,7 @@ class InstallMypyAction : AbstractInstallToolAction(
 
     override fun handleFailure(failure: Throwable) {
         when (failure) {
-            is PyExecutionException -> {
+            is PluginPackageManagementException.InstallationFailedException -> {
                 DialogManager.showPyPackageInstallationErrorDialog(failure)
             }
 

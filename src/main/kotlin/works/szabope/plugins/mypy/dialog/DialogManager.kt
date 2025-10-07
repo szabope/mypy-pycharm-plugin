@@ -4,11 +4,11 @@
 package works.szabope.plugins.mypy.dialog
 
 import com.intellij.openapi.ui.DialogWrapper
-import com.jetbrains.python.packaging.PyExecutionException
 import works.szabope.plugins.common.dialog.IDialogManager
 import works.szabope.plugins.common.dialog.IDialogManager.IShowDialog
 import works.szabope.plugins.common.dialog.PluginDialog
 import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.services.PluginPackageManagementException
 
 private fun DialogWrapper.toMypyDialog() = object : PluginDialog {
     override fun show() = this@toMypyDialog.show()
@@ -17,8 +17,8 @@ private fun DialogWrapper.toMypyDialog() = object : PluginDialog {
 class DialogManager : IDialogManager {
     override fun showDialog(dialog: PluginDialog) = dialog.show()
 
-    override fun createPyPackageInstallationErrorDialog(exception: PyExecutionException) =
-        MypyPackageInstallationErrorDialog(exception.message!!).toMypyDialog()
+    override fun createPyPackageInstallationErrorDialog(exception: PluginPackageManagementException.InstallationFailedException) =
+        MypyPackageInstallationErrorDialog(exception.message).toMypyDialog()
 
     override fun createToolExecutionErrorDialog(
         configuration: ImmutableSettingsData,

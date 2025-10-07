@@ -12,7 +12,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import works.szabope.plugins.common.services.PluginPackageManagementService
+import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
 import works.szabope.plugins.common.test.sdk.PythonMockSdk
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypySettings
@@ -21,7 +21,7 @@ import works.szabope.plugins.mypy.testutil.MypyPluginPackageManagementServiceStu
 abstract class AbstractMypyTestCase : BasePlatformTestCase() {
 
     // local variables are not supported in mockk answer, yet
-    private lateinit var mypyPackageManagementServiceStub: PluginPackageManagementService
+    private lateinit var mypyPackageManagementServiceStub: AbstractPluginPackageManagementService
 
     override fun setUp() {
         // FIXME: this is a duct tape for

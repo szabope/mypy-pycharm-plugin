@@ -7,14 +7,14 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import works.szabope.plugins.common.services.PluginPackageManagementService
+import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.testutil.MypyPluginPackageManagementServiceStub
 
 abstract class AbstractMypyHeavyPlatformTestCase : HeavyPlatformTestCase() {
 
     // local variables are not supported in mockk answer, yet
-    private lateinit var mypyPackageManagementServiceStub: PluginPackageManagementService
+    private lateinit var mypyPackageManagementServiceStub: AbstractPluginPackageManagementService
 
     override fun setUp() {
         VfsRootAccess.allowRootAccess(testRootDisposable, "/usr/bin")
