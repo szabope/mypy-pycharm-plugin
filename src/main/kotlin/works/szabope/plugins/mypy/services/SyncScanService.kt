@@ -1,6 +1,5 @@
 package works.szabope.plugins.mypy.services
 
-import com.intellij.collaboration.util.ResultUtil.processErrorAndGet
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -11,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.transform
+import works.szabope.plugins.common.processErrorAndGet
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
