@@ -8,10 +8,11 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ex.ActionUtil
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.action.InstallMypyAction
-import works.szabope.plugins.mypy.action.OpenSettingsAction
+import works.szabope.plugins.mypy.configurable.MypyConfigurable
 import java.lang.ref.WeakReference
 
 @Service(Service.Level.PROJECT)
@@ -21,31 +22,25 @@ class IncompleteConfigurationNotificationService(private val project: Project) {
 
     @Synchronized
     fun notify(canInstall: Boolean) {
-        val notification =
-            NotificationGroupManager.getInstance().getNotificationGroup(MypyBundle.message("notification.group.mypy.group"))
-                .createNotification(
-                    MypyBundle.message("mypy.notification.incomplete_configuration"), NotificationType.WARNING
-                )
-        val openSettingsAction = ActionManager.getInstance().getAction(OpenSettingsAction.ID)
+        val notification = NotificationGroupManager.getInstance()
+            .getNotificationGroup(MypyBundle.message("notification.group.mypy.group")).createNotification(
+                MypyBundle.message("mypy.notification.incomplete_configuration"), NotificationType.WARNING
+            )
         notification.addAction(
             NotificationAction.create(
                 MypyBundle.message("mypy.intention.complete_configuration.text")
-            ) { event, _ ->
-                run {
-                    ActionUtil.performAction(openSettingsAction, event)
-                    notification.hideBalloon()
-                }
+            ) { _, notification ->
+                notification.hideBalloon()
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, MypyConfigurable::class.java)
             })
         if (canInstall) {
             val installAction = ActionManager.getInstance().getAction(InstallMypyAction.ID)
             notification.addAction(
                 NotificationAction.create(
                     MypyBundle.message("mypy.intention.install_mypy.text"),
-                ) { event, _ ->
-                    run {
-                        ActionUtil.performAction(installAction, event)
-                        notification.expire()
-                    }
+                ) { event, notification ->
+                    ActionUtil.performAction(installAction, event)
+                    notification.expire()
                 })
         }
         this.notification.get()?.expire()
