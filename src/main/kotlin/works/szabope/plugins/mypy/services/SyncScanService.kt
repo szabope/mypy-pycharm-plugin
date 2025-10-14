@@ -1,6 +1,6 @@
 package works.szabope.plugins.mypy.services
 
-import com.intellij.execution.process.ProcessNotCreatedException
+import com.intellij.collaboration.util.ResultUtil.processErrorAndGet
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -26,21 +26,16 @@ class SyncScanService(private val project: Project) {
 
     fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): Flow<MypyMessage> {
         val shadowedTargetMap = targets.associateWith { copyTempFrom(it) }
-        val output = try {
-            with(MypyExecutor(project)) {
-                val parameters = buildMypyParameters(configuration, shadowedTargetMap)
-                execute(configuration, parameters)
+        val parameters = with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
+        val output = MypyExecutor(project).execute(configuration, parameters)
+            .also { shadowedTargetMap.values.onEach { it.deleteIfExists() } }.processErrorAndGet {
+                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")) {
+                    DialogManager.showFailedToExecuteErrorDialog(
+                        it.message ?: MypyBundle.message("mypy.please_report_this_issue")
+                    )
+                }
+                return emptyFlow()
             }
-        } catch (e: ProcessNotCreatedException) {
-            showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")) {
-                DialogManager.showFailedToExecuteErrorDialog(
-                    e.message ?: MypyBundle.message("mypy.please_report_this_issue")
-                )
-            }
-            return emptyFlow()
-        } finally {
-            shadowedTargetMap.values.onEach { it.deleteIfExists() }
-        }
         // exit code 1 should be fine https://github.com/python/mypy/issues/6003
         if (output.exitCode > 1) {
             showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {

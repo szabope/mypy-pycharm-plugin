@@ -1,6 +1,6 @@
 package works.szabope.plugins.mypy.services
 
-import com.intellij.execution.process.ProcessNotCreatedException
+import com.intellij.collaboration.util.ResultUtil.processErrorAndGet
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -34,19 +34,18 @@ class AsyncScanService(private val project: Project, private val cs: CoroutineSc
             // So let's collect parse failures and report them.
             // If you have a better idea, please let me know.
             val unparsableLinesOfStdout = StringBuilder()
-            val output = try {
-                with(MypyExecutor(project)) {
-                    val parameters = buildMypyParameters(configuration, targets)
-                    execute(configuration, parameters)
-                }
-            } catch (e: ProcessNotCreatedException) {
-                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")) {
+            val parameters = with(project) { buildMypyParamList(configuration, targets) }
+            val output = MypyExecutor(project).execute(configuration, parameters).processErrorAndGet {
+                showClickableBalloonError(
+                    project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")
+                ) {
                     DialogManager.showFailedToExecuteErrorDialog(
-                        e.message ?: MypyBundle.message("mypy.please_report_this_issue")
+                        it.message ?: MypyBundle.message("mypy.please_report_this_issue")
                     )
                 }
                 return@launch
             }
+
             // exit code 1 should be fine https://github.com/python/mypy/issues/6003
             if (output.exitCode > 1) {
                 showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
