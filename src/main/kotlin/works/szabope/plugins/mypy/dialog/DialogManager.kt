@@ -1,6 +1,4 @@
 // inspired by idea/243.19420.21 git4idea.DialogManager
-@file:Suppress("removal")
-
 package works.szabope.plugins.mypy.dialog
 
 import com.intellij.openapi.ui.DialogWrapper
