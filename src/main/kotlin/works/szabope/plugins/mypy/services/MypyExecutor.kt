@@ -20,6 +20,7 @@ import works.szabope.plugins.mypy.MypyArgs
 import works.szabope.plugins.mypy.MypyBundle
 import java.nio.file.Path
 import kotlin.io.path.pathString
+import kotlin.time.Duration
 
 class MypyExecutor(private val project: Project) {
 
@@ -28,7 +29,14 @@ class MypyExecutor(private val project: Project) {
             val pythonSdk = requireNotNull(project.pythonSdk) {
                 thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"))
             }
-            PythonExecuteUtils.executePyModuleScript(project, pythonSdk, "mypy", parameters)
+
+            PythonExecuteUtils.executePyModuleScript(
+                project,
+                pythonSdk,
+                "mypy",
+                parameters,
+                timeout = Duration.INFINITE
+            )
         } else {
             val commandLine = GeneralCommandLine()
             commandLine.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
