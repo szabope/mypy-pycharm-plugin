@@ -15,9 +15,8 @@ internal class SettingsInitializationActivity : ProjectActivity {
         // we trust in old settings validity
         settings.initSettings(OldMypySettings.getInstance(project))
         if (!SettingsValidator(project).isComplete(settings.getData())) {
-            val notificationService = IncompleteConfigurationNotificationService.getInstance(project)
             val canInstall = MypyPluginPackageManagementService.getInstance(project).canInstall()
-            notificationService.notify(canInstall)
+            IncompleteConfigurationNotifier.notify(project, canInstall)
         }
     }
 }
