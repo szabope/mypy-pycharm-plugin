@@ -13,10 +13,7 @@ import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 
-
-class InstallMypyAction : AbstractInstallToolAction(
-    MypyBundle.message("action.InstallMypyAction.in_progress"), MypyBundle.message("action.InstallMypyAction.done_html")
-) {
+class InstallMypyAction : AbstractInstallToolAction(MypyBundle.message("action.InstallMypyAction.done_html")) {
     override fun getPackageManager(project: Project) = MypyPluginPackageManagementService.getInstance(project)
 
     override fun handleFailure(failure: Throwable) {

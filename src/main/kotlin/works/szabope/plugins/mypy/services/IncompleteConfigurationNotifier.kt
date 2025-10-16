@@ -9,9 +9,7 @@ import works.szabope.plugins.mypy.action.InstallMypyAction
 import works.szabope.plugins.mypy.action.OpenSettingsAction
 
 class IncompleteConfigurationNotifier {
-
     companion object {
-
         @JvmStatic
         fun notify(project: Project, canInstall: Boolean) {
             val openSettingsAction = ActionManager.getInstance().getAction(OpenSettingsAction.ID)
