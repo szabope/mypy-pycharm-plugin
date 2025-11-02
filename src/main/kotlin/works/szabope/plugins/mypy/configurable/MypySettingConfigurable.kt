@@ -21,8 +21,8 @@ import com.intellij.ui.dsl.builder.*
 import com.intellij.ui.layout.ComponentPredicate
 import org.jetbrains.annotations.ApiStatus
 import trimToNull
-import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.actions.InstallMypyAction
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypySettings
@@ -30,7 +30,7 @@ import javax.swing.JButton
 
 //TODO: on configuration becoming complete, make notification disappear if any
 internal class MypySettingConfigurable(private val project: Project) : BoundSearchableConfigurable(
-    MyBundle.message("mypy.configurable.name"), MyBundle.message("mypy.configurable.name"), _id = ID
+    MypyBundle.message("mypy.configurable.name"), MypyBundle.message("mypy.configurable.name"), _id = ID
 ), Configurable.NoScroll {
 
     private val settings
@@ -55,14 +55,14 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
         return panel {
             indent {
                 row {
-                    label(MyBundle.message("mypy.settings.path_to_executable.label"))
+                    label(MypyBundle.message("mypy.settings.path_to_executable.label"))
                     val pathToExecutableField = cell(pathToExecutableComponent)
                     pathToExecutableField.align(Align.FILL).bindText(
                         getter = { settings.mypyExecutable.orEmpty() },
                         setter = { settings.mypyExecutable = it.trimToNull() },
                     ).validationOnInput { field ->
                         if (field.text.isBlank()) {
-                            val message = MyBundle.message("mypy.settings.path_to_executable.empty_warning")
+                            val message = MypyBundle.message("mypy.settings.path_to_executable.empty_warning")
                             return@validationOnInput warning(message)
                         }
                         null
@@ -72,9 +72,9 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         }
                         null
                     }.resizableColumn()
-                    button(MyBundle.message("mypy.settings.autodetect.label")) {
+                    button(MypyBundle.message("mypy.settings.autodetect.label")) {
                         runWithModalProgressBlocking(
-                            project, MyBundle.message("mypy.settings.autodetect.in_progress")
+                            project, MypyBundle.message("mypy.settings.autodetect.in_progress")
                         ) {
                             pathToExecutableComponent.text = settings.autodetectExecutable() ?: ""
                         }
@@ -86,12 +86,12 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         }
                     }).align(AlignX.RIGHT + AlignY.CENTER)
                 }.rowComment(
-                    MyBundle.message(
+                    MypyBundle.message(
                         "mypy.settings.path_to_executable.comment", MypyArgs.MYPY_MANDATORY_COMMAND_ARGS
                     ), maxLineLength = MAX_LINE_LENGTH_WORD_WRAP
                 ).layout(RowLayout.PARENT_GRID)
                 row {
-                    label(MyBundle.message("mypy.settings.config_file.label"))
+                    label(MypyBundle.message("mypy.settings.config_file.label"))
                     textFieldWithBrowseButton(project = project).align(Align.FILL).bindText(
                         getter = { settings.configFilePath.orEmpty() },
                         setter = { settings.configFilePath = it.trimToNull() },
@@ -102,21 +102,21 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         null
                     }
                 }.rowComment(
-                    MyBundle.message("mypy.settings.config_file.comment"), maxLineLength = MAX_LINE_LENGTH_WORD_WRAP
+                    MypyBundle.message("mypy.settings.config_file.comment"), maxLineLength = MAX_LINE_LENGTH_WORD_WRAP
                 ).layout(RowLayout.PARENT_GRID)
                 row {
-                    label(MyBundle.message("mypy.settings.arguments.label"))
+                    label(MypyBundle.message("mypy.settings.arguments.label"))
                     textField().align(Align.FILL).bindText(
                         getter = { settings.arguments.orEmpty() },
                         setter = { settings.arguments = it.trimToNull() },
                     )
                 }.rowComment(
-                    MyBundle.message(
+                    MypyBundle.message(
                         "mypy.settings.arguments.hint_recommended", MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
                     ), maxLineLength = MAX_LINE_LENGTH_WORD_WRAP
                 ).layout(RowLayout.PARENT_GRID)
                 row {
-                    label(MyBundle.message("mypy.settings.project_directory.label"))
+                    label(MypyBundle.message("mypy.settings.project_directory.label"))
                     val projectDirectoryField = textFieldWithBrowseButton(
                         project = project, fileChooserDescriptor = directoryChooserDescriptor
                     )
@@ -125,7 +125,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                         setter = { settings.projectDirectory = it.trimToNull() },
                     ).validationOnInput { field ->
                         if (field.text.isBlank()) {
-                            val message = MyBundle.message("mypy.settings.path_to_project_directory.empty_warning")
+                            val message = MypyBundle.message("mypy.settings.path_to_project_directory.empty_warning")
                             return@validationOnInput warning(message)
                         }
                         null
@@ -137,7 +137,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     }
                 }.layout(RowLayout.PARENT_GRID)
                 row {
-                    checkBox(MyBundle.message("mypy.settings.exclude_non_project_files.label")).bindSelected(
+                    checkBox(MypyBundle.message("mypy.settings.exclude_non_project_files.label")).bindSelected(
                         getter = { settings.isExcludeNonProjectFiles },
                         setter = { settings.isExcludeNonProjectFiles = it })
                 }.layout(RowLayout.PARENT_GRID)
@@ -145,7 +145,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                     val buttonClicked = AtomicBooleanProperty(false)
                     val action = ActionManager.getInstance().getAction(InstallMypyAction.ID)
                     lateinit var result: Cell<JButton>
-                    result = button(MyBundle.message("mypy.intention.install_mypy.text")) {
+                    result = button(MypyBundle.message("mypy.intention.install_mypy.text")) {
                         val dataContext = DataManager.getInstance().getDataContext(result.component)
                         val event = AnActionEvent.createEvent(
                             action, dataContext, null, ActionPlaces.UNKNOWN, ActionUiKind.NONE, null
@@ -154,7 +154,7 @@ internal class MypySettingConfigurable(private val project: Project) : BoundSear
                             buttonClicked.set(false)
                             if (pathToExecutableComponent.text.isBlank()) {
                                 runWithModalProgressBlocking(
-                                    project, MyBundle.message("mypy.settings.autodetect.in_progress")
+                                    project, MypyBundle.message("mypy.settings.autodetect.in_progress")
                                 ) {
                                     pathToExecutableComponent.text = settings.autodetectExecutable() ?: ""
                                 }

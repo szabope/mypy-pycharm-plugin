@@ -7,30 +7,30 @@ import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.COLUMNS_LARGE
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 
 data class MypyErrorDescription(
     @DetailedDescription val details: String, @DetailedDescription val message: String? = null
 )
 
 class MypyPackageInstallationErrorDialog(message: String) : MypyErrorDialog(
-    MyBundle.message("mypy.dialog.installation_error.title"),
-    MypyErrorDescription(MyBundle.message("mypy.dialog.installation_error.details", message))
+    MypyBundle.message("mypy.dialog.installation_error.title"),
+    MypyErrorDescription(MypyBundle.message("mypy.dialog.installation_error.details", message))
 )
 
 
 class MypyExecutionErrorDialog(command: String, result: String, resultCode: Int) : MypyErrorDialog(
-    MyBundle.message("mypy.dialog.execution_error.title"), MypyErrorDescription(
-        MyBundle.message("mypy.dialog.execution_error.status_code", resultCode, result),
-        MyBundle.message("mypy.dialog.execution_error.message", command)
+    MypyBundle.message("mypy.dialog.execution_error.title"), MypyErrorDescription(
+        MypyBundle.message("mypy.dialog.execution_error.status_code", resultCode, result),
+        MypyBundle.message("mypy.dialog.execution_error.message", command)
     )
 )
 
 class MypyGeneralErrorDialog(throwable: Throwable) : MypyErrorDialog(
-    MyBundle.message("mypy.dialog.general_error.title"), MypyErrorDescription(
-        MyBundle.message(
+    MypyBundle.message("mypy.dialog.general_error.title"), MypyErrorDescription(
+        MypyBundle.message(
             "mypy.dialog.general_error.details", throwable.message!!, throwable.stackTraceToString()
-        ), MyBundle.message("mypy.please_report_this_issue")
+        ), MypyBundle.message("mypy.please_report_this_issue")
     )
 )
 

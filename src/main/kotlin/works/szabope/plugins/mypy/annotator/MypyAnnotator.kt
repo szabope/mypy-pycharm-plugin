@@ -5,22 +5,20 @@ import com.intellij.codeInsight.daemon.HighlightDisplayKey
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.util.DocumentUtil
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.MypyService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.parser.MypyOutput
 import works.szabope.plugins.mypy.toRunConfiguration
 
 internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo, List<MypyOutput>>() {
-
-    private val logger = logger<MypyAnnotator>()
 
     class MypyAnnotatorInfo(val file: VirtualFile, val project: Project)
 
@@ -39,9 +37,9 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
     }
 
     override fun apply(file: PsiFile, annotationResult: List<MypyOutput>, holder: AnnotationHolder) {
-        logger.debug("Mypy returned ${annotationResult.size} issues for ${file.virtualFile.canonicalPath}")
+        thisLogger().debug("Mypy returned ${annotationResult.size} issues for ${file.virtualFile.canonicalPath}")
         val profile = InspectionProjectProfileManager.getInstance(file.project).currentProfile
-        val severity = HighlightDisplayKey.findById(MyBundle.message("mypy.inspection.id"))?.let {
+        val severity = HighlightDisplayKey.findById(MypyBundle.message("mypy.inspection.id"))?.let {
             profile.getErrorLevel(it, file).severity
         } ?: HighlightSeverity.ERROR
 
@@ -53,7 +51,7 @@ internal class MypyAnnotator : ExternalAnnotator<MypyAnnotator.MypyAnnotatorInfo
     }
 
     override fun getPairedBatchInspectionShortName(): String {
-        return MyBundle.message("mypy.inspection.id")
+        return MypyBundle.message("mypy.inspection.id")
     }
 
     private fun PsiFile.findElementFor(issue: MypyOutput): PsiElement? {

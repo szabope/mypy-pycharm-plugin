@@ -8,18 +8,18 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.startOffset
 import com.jetbrains.python.psi.PyUtil.StringNodeInfo
 import com.jetbrains.python.psi.impl.PyPsiUtils
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 
 /**
  * Intention action to append `# type: ignore` comment to suppress Mypy annotations.
  */
 class MypyIgnoreIntention(private val line: Int) : PsiElementBaseIntentionAction(), IntentionAction {
     override fun getText(): String {
-        return MyBundle.message("mypy.intention.ignore.text")
+        return MypyBundle.message("mypy.intention.ignore.text")
     }
 
     override fun getFamilyName(): String {
-        return MyBundle.message("mypy.intention.ignore.family_name")
+        return MypyBundle.message("mypy.intention.ignore.family_name")
     }
 
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement): Boolean {

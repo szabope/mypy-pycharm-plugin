@@ -11,8 +11,8 @@ import com.intellij.openapi.wm.ToolWindowManager
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.TestOnly
-import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.IDialogManager
 import works.szabope.plugins.mypy.services.cli.Cli
 import works.szabope.plugins.mypy.services.cli.PythonEnvironmentAwareCli
@@ -137,13 +137,13 @@ class MypySettings(internal val project: Project) :
         require(path.isNotBlank())
         val file = File(path)
         if (!file.exists()) {
-            return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.not_exists"))
+            return SettingsValidationProblem(MypyBundle.message("mypy.settings.path_to_executable.not_exists"))
         }
         if (file.isDirectory) {
-            return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.is_directory"))
+            return SettingsValidationProblem(MypyBundle.message("mypy.settings.path_to_executable.is_directory"))
         }
         if (!file.canExecute()) {
-            return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.not_executable"))
+            return SettingsValidationProblem(MypyBundle.message("mypy.settings.path_to_executable.not_executable"))
         }
 
         val stdout = StringBuilder()
@@ -152,7 +152,7 @@ class MypySettings(internal val project: Project) :
         }
         if (processResult.resultCode != 0) {
             return SettingsValidationProblem(
-                MyBundle.message(
+                MypyBundle.message(
                     "mypy.settings.path_to_executable.exited_with_error",
                     path,
                     processResult.resultCode,
@@ -162,7 +162,7 @@ class MypySettings(internal val project: Project) :
         }
         val mypyVersion = "(\\d+.\\d+.\\d+)".toRegex().find(stdout)?.groups?.last()?.value
         if (mypyVersion == null) {
-            return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_executable.unknown_version"))
+            return SettingsValidationProblem(MypyBundle.message("mypy.settings.path_to_executable.unknown_version"))
         }
         return validateVersion(Version.parseVersion(mypyVersion)!!)
     }
@@ -170,7 +170,7 @@ class MypySettings(internal val project: Project) :
     private fun validateVersion(version: Version): SettingsValidationProblem? {
         if (!MypyPluginPackageManagementService.getInstance(project).isVersionSupported(version)) {
             return SettingsValidationProblem(
-                MyBundle.message(
+                MypyBundle.message(
                     "mypy.settings.mypy_invalid_version",
                     "${version.major}.${version.minor}.${version.bugfix}",
                     MypyPluginPackageManagementService.MINIMUM_VERSION
@@ -185,10 +185,10 @@ class MypySettings(internal val project: Project) :
             require(path.isNotBlank())
             val file = File(path)
             if (!file.exists()) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_config_file.not_exists"))
+                return SettingsValidationProblem(MypyBundle.message("mypy.settings.path_to_config_file.not_exists"))
             }
             if (file.isDirectory) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_config_file.is_directory"))
+                return SettingsValidationProblem(MypyBundle.message("mypy.settings.path_to_config_file.is_directory"))
             }
         }
         return null
@@ -199,10 +199,10 @@ class MypySettings(internal val project: Project) :
             require(path.isNotBlank())
             val file = File(path)
             if (!file.exists()) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_project_directory.not_exist"))
+                return SettingsValidationProblem(MypyBundle.message("mypy.settings.path_to_project_directory.not_exist"))
             }
             if (!file.isDirectory) {
-                return SettingsValidationProblem(MyBundle.message("mypy.settings.path_to_project_directory.is_not_directory"))
+                return SettingsValidationProblem(MypyBundle.message("mypy.settings.path_to_project_directory.is_not_directory"))
             }
         }
         return null
@@ -218,7 +218,7 @@ class MypySettings(internal val project: Project) :
             1 -> null
             else -> {
                 ToolWindowManager.getInstance(project).notifyByBalloon(
-                    MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error"), null
+                    MypyToolWindowPanel.ID, MessageType.ERROR, MypyBundle.message("mypy.toolwindow.balloon.error"), null
                 ) {
                     if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
                         IDialogManager.showMypyExecutionErrorDialog(

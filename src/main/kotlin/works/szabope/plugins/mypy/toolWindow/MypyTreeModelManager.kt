@@ -1,20 +1,19 @@
 package works.szabope.plugins.mypy.toolWindow
 
-import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.ui.treeStructure.Tree
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.parser.MypyOutput
 
 class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<String>) {
-    private val logger = logger<MypyTreeModelManager>()
     private val issues = mutableSetOf<MypyOutput>()
-    private val model = MypyTreeModel(MyBundle.message("mypy.toolwindow.name.empty"))
+    private val model = MypyTreeModel(MypyBundle.message("mypy.toolwindow.name.empty"))
 
     fun add(issue: MypyOutput) {
         issues.add(issue)
         if (isDisplayed(issue)) {
             addToTree(issue)
-            logger.debug("Issue added to tree: $issue")
+            thisLogger().debug("Issue added to tree: $issue")
         }
     }
 
@@ -38,7 +37,7 @@ class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<Strin
 
     private fun resetRoot(targetsMaybe: List<String>? = null) {
         val targets = targetsMaybe ?: model.root.targets
-        model.setRoot(RootNode(MyBundle.message("mypy.toolwindow.root.message", 0, 0), targets))
+        model.setRoot(RootNode(MypyBundle.message("mypy.toolwindow.root.message", 0, 0), targets))
     }
 
     private fun addToTree(issue: MypyOutput) {
@@ -46,7 +45,7 @@ class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<Strin
         val issueNode = IssueNode(issue)
         model.append(issueNode, fileNode)
         model.updateRootText(
-            MyBundle.message(
+            MypyBundle.message(
                 "mypy.toolwindow.root.message", issues.size, model.getChildCount(model.root)
             )
         )
@@ -55,7 +54,7 @@ class MypyTreeModelManager(private val displayedSeverityLevels: MutableSet<Strin
     private fun isDisplayed(issue: MypyOutput): Boolean {
         val result = displayedSeverityLevels.contains(issue.severity)
         if (!result) { // severity filters are turned off since mypy reporting everything as error makes them useless
-            logger.warn("Received issue with severity ${issue.severity} which isn't supported.")
+            thisLogger().warn("Received issue with severity ${issue.severity} which isn't supported.")
         }
         return result
     }
