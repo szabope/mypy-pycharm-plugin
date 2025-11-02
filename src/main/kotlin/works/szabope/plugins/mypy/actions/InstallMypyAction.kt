@@ -13,7 +13,7 @@ import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.jetbrains.python.packaging.PyExecutionException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.IDialogManager
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypySettings
@@ -25,11 +25,13 @@ class InstallMypyAction : DumbAwareAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        runWithModalProgressBlocking(project, MyBundle.message("action.InstallMypyAction.in_progress")) {
+        runWithModalProgressBlocking(project, MypyBundle.message("action.InstallMypyAction.in_progress")) {
             withContext(Dispatchers.EDT) {
                 MypyPluginPackageManagementService.getInstance(project).installRequirement().onSuccess {
                     @Suppress("DialogTitleCapitalization") ToolWindowManager.getInstance(project).notifyByBalloon(
-                        MypyToolWindowPanel.ID, MessageType.INFO, MyBundle.message("action.InstallMypyAction.done_html")
+                        MypyToolWindowPanel.ID,
+                        MessageType.INFO,
+                        MypyBundle.message("action.InstallMypyAction.done_html")
                     )
                     with(OldMypySettings.getInstance(project)) {
                         MypySettings.getInstance(project)

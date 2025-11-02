@@ -1,6 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <resource-bundle>messages.MyBundle</resource-bundle>
+    <resource-bundle>messages.MypyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Mypy " factoryClass="works.szabope.plugins.mypy.toolWindow.MypyToolWindowFactory"
@@ -10,12 +10,12 @@
                 instance="works.szabope.plugins.mypy.configurable.MypySettingConfigurable"
                 parentId="tools"
                 key="mypy.configurable.name"
-                bundle="messages.MyBundle"/>
+                bundle="messages.MypyBundle"/>
         <externalAnnotator language="Python" implementationClass="works.szabope.plugins.mypy.annotator.MypyAnnotator"/>
         <localInspection language="Python" level="ERROR" shortName="MypyInspection"
                          implementationClass="works.szabope.plugins.mypy.annotator.MypyInspection"
-                         groupBundle="messages.MyBundle" groupKey="mypy.inspection.group_name"
-                         bundle="messages.MyBundle" key="mypy.inspection.name" enabledByDefault="true"/>
+                         groupBundle="messages.MypyBundle" groupKey="mypy.inspection.group_name"
+                         bundle="messages.MypyBundle" key="mypy.inspection.name" enabledByDefault="true"/>
         <postStartupActivity implementation="works.szabope.plugins.mypy.activity.SettingsInitializationActivity"/>
         <notificationGroup displayType="STICKY_BALLOON" id="Mypy Group" toolWindowId="MyPy"/>
         <applicationService serviceInterface="works.szabope.plugins.mypy.dialog.IDialogManager"

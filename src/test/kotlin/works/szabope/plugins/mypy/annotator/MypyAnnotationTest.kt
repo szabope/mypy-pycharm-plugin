@@ -3,7 +3,7 @@ package works.szabope.plugins.mypy.annotator
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.MypySettings
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
@@ -28,7 +28,7 @@ class MypyAnnotationTest : BasePlatformTestCase() {
                                 |   return 'fun'
                                 |""".trimMargin()
         )
-        val intention = myFixture.findSingleIntention(MyBundle.message("mypy.intention.ignore.text"))
+        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text"))
         assertNotNull(intention)
         myFixture.launchAction(intention)
         myFixture.checkResult(
@@ -45,7 +45,7 @@ class MypyAnnotationTest : BasePlatformTestCase() {
                                 |   return 'fun'
                                 |""".trimMargin()
         )
-        val intention = myFixture.findSingleIntention(MyBundle.message("mypy.intention.ignore.text"))
+        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text"))
         assertNotNull(intention)
         myFixture.launchAction(intention)
         myFixture.checkResult(
@@ -64,7 +64,7 @@ class MypyAnnotationTest : BasePlatformTestCase() {
                                 |   intention should not be available""${'"'}""".trimMargin()
         )
         assertNotEmpty(myFixture.doHighlighting())
-        assertEmpty(myFixture.filterAvailableIntentions(MyBundle.message("mypy.intention.ignore.text")))
+        assertEmpty(myFixture.filterAvailableIntentions(MypyBundle.message("mypy.intention.ignore.text")))
     }
 
     fun `test single line triple-quoted string annotated with intention available`() {
@@ -73,7 +73,7 @@ class MypyAnnotationTest : BasePlatformTestCase() {
                                 |   return <caret>f""${'"'}this one here {x}""${'"'}""".trimMargin()
         )
         assertNotEmpty(myFixture.doHighlighting())
-        val intention = myFixture.findSingleIntention(MyBundle.message("mypy.intention.ignore.text"))
+        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text"))
         assertNotNull(intention)
     }
 }

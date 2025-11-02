@@ -2,7 +2,7 @@ package works.szabope.plugins.mypy.annotator
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.MypySettings
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
@@ -24,7 +24,7 @@ class MypyAnnotatorTest : BasePlatformTestCase() {
                                 |   return 'fun'
                                 |""".trimMargin()
         )
-        assertEmpty(myFixture.filterAvailableIntentions(MyBundle.message("mypy.intention.ignore.text")))
+        assertEmpty(myFixture.filterAvailableIntentions(MypyBundle.message("mypy.intention.ignore.text")))
     }
 
     fun `test MypyAnnotator does not fail if mypy executable path has a space in it`() {
@@ -39,6 +39,6 @@ class MypyAnnotatorTest : BasePlatformTestCase() {
                                 |   return 'fun'
                                 |""".trimMargin()
         )
-        assertNotEmpty(myFixture.filterAvailableIntentions(MyBundle.message("mypy.intention.ignore.text")))
+        assertNotEmpty(myFixture.filterAvailableIntentions(MypyBundle.message("mypy.intention.ignore.text")))
     }
 }

@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
-import works.szabope.plugins.mypy.MyBundle
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel.Companion.MYPY_SEVERITY_FILTER_VALUES
 
 class SeverityFiltersActionGroup : DumbAware, ActionGroup() {
@@ -19,22 +19,22 @@ class SeverityFiltersActionGroup : DumbAware, ActionGroup() {
         return when (severity) {
             "ERROR" -> SeverityFilterActionConfig(
                 severity,
-                MyBundle.message("action.MyPyDisplayErrorsAction.text"),
-                MyBundle.message("action.MyPyDisplayErrorsAction.description"),
+                MypyBundle.message("action.MyPyDisplayErrorsAction.text"),
+                MypyBundle.message("action.MyPyDisplayErrorsAction.description"),
                 AllIcons.General.Error
             )
 
             "WARNING" -> SeverityFilterActionConfig(
                 severity,
-                MyBundle.message("action.MypyDisplayWarningsAction.text"),
-                MyBundle.message("action.MypyDisplayWarningsAction.description"),
+                MypyBundle.message("action.MypyDisplayWarningsAction.text"),
+                MypyBundle.message("action.MypyDisplayWarningsAction.description"),
                 AllIcons.General.Warning
             )
 
             "NOTE" -> SeverityFilterActionConfig(
                 severity,
-                MyBundle.message("action.MypyDisplayNoteAction.text"),
-                MyBundle.message("action.MypyDisplayNoteAction.description"),
+                MypyBundle.message("action.MypyDisplayNoteAction.text"),
+                MypyBundle.message("action.MypyDisplayNoteAction.description"),
                 AllIcons.General.Information
             )
 

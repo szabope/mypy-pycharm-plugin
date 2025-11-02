@@ -2,7 +2,7 @@ package works.szabope.plugins.mypy.services
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
@@ -21,8 +21,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import trimToNull
-import works.szabope.plugins.mypy.MyBundle
 import works.szabope.plugins.mypy.MypyArgs
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.IDialogManager
 import works.szabope.plugins.mypy.services.cli.PythonEnvironmentAwareCli
 import works.szabope.plugins.mypy.services.parser.CollectingMypyOutputHandler
@@ -37,8 +37,6 @@ import kotlin.io.path.writeText
 
 @Service(Service.Level.PROJECT)
 class MypyService(private val project: Project, private val cs: CoroutineScope) {
-
-    private val logger = logger<MypyService>()
 
     private var manualScanJob: Job? = null
 
@@ -58,7 +56,6 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         fun getError() = (stderr + "\n" + handlerError).trimToNull()
     }
 
-    @Suppress("UnstableApiUsage")
     fun scan(file: VirtualFile, runConfiguration: RunConfiguration): List<MypyOutput> {
         val targetPath = file.path
         val fileDocumentManager = FileDocumentManager.getInstance()
@@ -75,7 +72,14 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
             val result =
                 runBlockingCancellable { execute(command = command, runConfiguration.projectDirectory, handler) }
             result.getError()?.also {
-                logger.warn(MyBundle.message("mypy.executable.error", command.joinToString(" "), result.resultCode, it))
+                thisLogger().warn(
+                    MypyBundle.message(
+                        "mypy.executable.error",
+                        command.joinToString(" "),
+                        result.resultCode,
+                        it
+                    )
+                )
             }
             return handler.getResults()
         } finally {
@@ -88,10 +92,10 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
         val handler = PublishingMypyOutputHandler(project)
         manualScanJob = cs.launch {
             val result = execute(command = command, runConfiguration.projectDirectory, handler)
-            logger.debug("${handler.resultCount} issues found")
+            thisLogger().debug("${handler.resultCount} issues found")
             if (result.getError() != null) {
                 ToolWindowManager.getInstance(project).notifyByBalloon(
-                    MypyToolWindowPanel.ID, MessageType.ERROR, MyBundle.message("mypy.toolwindow.balloon.error"), null
+                    MypyToolWindowPanel.ID, MessageType.ERROR, MypyBundle.message("mypy.toolwindow.balloon.error"), null
                 ) {
                     if (it.eventType == HyperlinkEvent.EventType.ACTIVATED) {
                         IDialogManager.showMypyExecutionErrorDialog(
@@ -141,7 +145,7 @@ class MypyService(private val project: Project, private val cs: CoroutineScope) 
     private suspend fun execute(
         vararg command: String, workDir: String, stdoutHandler: IMypyOutputHandler
     ): MypyStatus {
-        logger.debug("Executing command: ${command.joinToString(" ") } with workDir: $workDir")
+        thisLogger().debug("Executing command: ${command.joinToString(" ")} with workDir: $workDir")
         return PythonEnvironmentAwareCli(project).execute(command = command, workDir, stdoutHandler::handle).let {
             MypyStatus(it.resultCode, it.stderr, stdoutHandler.getError())
         }
