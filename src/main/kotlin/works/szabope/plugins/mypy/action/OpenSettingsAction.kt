@@ -6,9 +6,10 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.wm.ToolWindowManager
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.configurable.MypyConfigurable
 
-class OpenSettingsAction : AnAction() {
+class OpenSettingsAction : AnAction(MypyBundle.message("mypy.intention.complete_configuration.text")) {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         ToolWindowManager.getInstance(project).invokeLater {
