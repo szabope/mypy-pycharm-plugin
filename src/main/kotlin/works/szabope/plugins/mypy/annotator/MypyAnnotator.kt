@@ -15,7 +15,6 @@ import com.intellij.util.DocumentUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.SettingsValidator
 import works.szabope.plugins.mypy.services.SyncScanService
@@ -40,7 +39,7 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMe
 
     override fun apply(file: PsiFile, annotationResult: Flow<MypyMessage>, holder: AnnotationHolder) {
         val profile = InspectionProjectProfileManager.getInstance(file.project).currentProfile
-        val severity = HighlightDisplayKey.findById(MypyBundle.message("mypy.inspection.id"))?.let {
+        val severity = HighlightDisplayKey.findById(MypyInspectionId)?.let {
             profile.getErrorLevel(it, file).severity
         } ?: HighlightSeverity.ERROR
         runBlockingCancellable {
@@ -54,7 +53,7 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMe
     }
 
     override fun getPairedBatchInspectionShortName(): String {
-        return MypyBundle.message("mypy.inspection.id")
+        return MypyInspectionId
     }
 
     private fun PsiFile.findElementFor(issue: MypyMessage): PsiElement? {
