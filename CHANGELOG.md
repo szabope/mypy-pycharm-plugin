@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [1.0.26] - 2025-11-02
+
+- Changelog update - `v1.0.25` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/106
+- rename message bundle to make it more unique by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/109
+
+## [1.0.25] - 2025-10-12
+
+- Changelog update - `v1.0.24` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/103
+- fix missing mypy inspection description by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/105
+
+## [1.0.24] - 2025-09-24
+
+- make plugin use local light package management service by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/101
+- Changelog update - `v1.0.23` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/99
+- make PythonCore optional by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/102
+
 ## [1.0.23] - 2025-08-12
 
 - Changelog update - `v1.0.22` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/95
@@ -165,7 +181,10 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.23...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.26...HEAD
+[1.0.26]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.25...v1.0.26
+[1.0.25]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.24...v1.0.25
+[1.0.24]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.23...v1.0.24
 [1.0.23]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.22...v1.0.23
 [1.0.22]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.21...v1.0.22
 [1.0.21]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.20...v1.0.21
