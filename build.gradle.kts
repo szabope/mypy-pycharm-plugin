@@ -30,8 +30,8 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/szabope/pycharm-plugin-base")
         credentials {
-            username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("USERNAME")
-            password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("TOKEN")
+            username = providers.gradleProperty("gpr.user").orNull ?: providers.environmentVariable("GPR_USERNAME").orNull
+            password = providers.gradleProperty("gpr.key").orNull ?: providers.environmentVariable("GPR_TOKEN").orNull
         }
     }
 
