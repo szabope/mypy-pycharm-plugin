@@ -21,6 +21,7 @@ class MypyPluginPackageManagementService(override val project: Project) : Abstra
         const val MINIMUM_VERSION = "1.11"
 
         @JvmStatic
-        fun getInstance(project: Project): MypyPluginPackageManagementService = project.service()
+        fun getInstance(project: Project): AbstractPluginPackageManagementService =
+            project.service<MypyPluginPackageManagementService>()
     }
 }

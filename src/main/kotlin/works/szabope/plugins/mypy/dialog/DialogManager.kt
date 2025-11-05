@@ -1,25 +1,42 @@
 // inspired by idea/243.19420.21 git4idea.DialogManager
-@file:Suppress("removal")
-
 package works.szabope.plugins.mypy.dialog
 
 import com.intellij.openapi.ui.DialogWrapper
-import com.jetbrains.python.packaging.PyExecutionException
+import works.szabope.plugins.common.dialog.IDialogManager
+import works.szabope.plugins.common.dialog.IDialogManager.IShowDialog
+import works.szabope.plugins.common.dialog.PluginDialog
+import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.services.PluginPackageManagementException
 
-private fun DialogWrapper.toMypyDialog() = object : MypyDialog {
-    override fun getWrappedClass(): Class<out DialogWrapper> = this@toMypyDialog::class.java
+private fun DialogWrapper.toMypyDialog() = object : PluginDialog {
     override fun show() = this@toMypyDialog.show()
-    override fun close(exitCode: Int) = this@toMypyDialog.close(exitCode)
 }
 
 class DialogManager : IDialogManager {
-    override fun showDialog(dialog: MypyDialog) = dialog.show()
+    override fun showDialog(dialog: PluginDialog) = dialog.show()
 
-    override fun createPyPackageInstallationErrorDialog(exception: PyExecutionException) =
-        MypyPackageInstallationErrorDialog(exception.message!!).toMypyDialog()
+    override fun createPyPackageInstallationErrorDialog(exception: PluginPackageManagementException.InstallationFailedException) =
+        MypyPackageInstallationErrorDialog(exception.message).toMypyDialog()
 
-    override fun createMypyExecutionErrorDialog(command: String, result: String, resultCode: Int) =
-        MypyExecutionErrorDialog(command, result, resultCode).toMypyDialog()
+    override fun createToolExecutionErrorDialog(
+        configuration: ImmutableSettingsData,
+        result: String,
+        resultCode: Int
+    ) = MypyExecutionErrorDialog(configuration, result, resultCode).toMypyDialog()
+
+    override fun createFailedToExecuteErrorDialog(message: String) =
+        FailedToExecuteErrorDialog(message).toMypyDialog()
+
+    override fun createToolOutputParseErrorDialog(
+        configuration: ImmutableSettingsData,
+        targets: String,
+        json: String,
+        error: String
+    ) = MypyParseErrorDialog(configuration, targets, json, error).toMypyDialog()
 
     override fun createGeneralErrorDialog(failure: Throwable) = MypyGeneralErrorDialog(failure).toMypyDialog()
+
+    companion object : IShowDialog {
+        override val dialogManager: IDialogManager by lazy { DialogManager() }
+    }
 }

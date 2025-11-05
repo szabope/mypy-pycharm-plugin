@@ -5,6 +5,5 @@
     <vendor url="https://github.com/szabope">Peter Szabo</vendor>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
-    <depends>org.jetbrains.plugins.terminal</depends>
     <depends optional="true" config-file="works.szabope.mypy-PythonCore.xml">com.intellij.modules.python</depends>
 </idea-plugin>

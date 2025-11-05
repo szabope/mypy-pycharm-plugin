@@ -23,18 +23,17 @@ It is the rework of [Roberto Leinardi](https://github.com/szabope/mypy-pycharm-p
 https://www.jetbrains.com/help/pycharm/managing-plugins.html#Managing_Plugins.topic
 
 ## Configuration
-Configuration is done on a project basis. Regardless of whether it is set up via the automated way or manually, mypy executable setting validation **executes the candidate** with `-V` to validate its version.
+Configuration is done on a project basis. `mypy` executable validation **executes the candidate** with `-V` to validate its version.
 
 ### Automated configuration
 Upon project load, the plugin looks for existing settings for Leinardi's mypy plugin and makes a copy of them. Executable only set if the version of mypy is supported.\
-If such configuration was not found, the plugin tries to detect the executable by running `where mypy.exe` on Windows, `which mypy` otherwise.\
-Incomplete configuration triggers a notification (`Install mypy` only shown if applicable):\
+In case such configuration was not found `Use project SDK` option is selected. 
+If there is no python SDK set for the project or `mypy` is not installed for it, the user gets notified:
 ![mypy_plugin_incomplete_configuration_screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/3b600281f84ecec09d345ec7541c39c6b705ddff/art/mypy_not_set.png)
 
 ### Manual configuration
 You can modify settings at [Tools](https://www.jetbrains.com/help/pycharm/settings-tools.html#Settings_Tools.topic) / **Mypy**.
-
-![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/3b600281f84ecec09d345ec7541c39c6b705ddff/art/settings.png)
+![mypy plugin screenshot](https://raw.githubusercontent.com/szabope/mypy-pycharm-plugin/829f08ceec6ba06c8b7b25a9c819b5c7fc9350ef/art/settings.png)
 
 ### Inspection severity
 Mypy severity level is set to `Error` by default. You can change this in [inspection settings](https://www.jetbrains.com/help/pycharm/inspections-settings.html#Inspections_Settings.topic).
@@ -67,7 +66,7 @@ You can exclude containing directory:
  - make sure that `Settings > Tools > Mypy > Exclude non-project files` is checked, so all directories that are marked as excluded will also be excluded from mypy scan.
  - `Mark Directory as > Excluded`
 
-For more mypy configuration options, please see `mypy -h`
+For further mypy configuration options, please see `mypy -h`
 
 You may get more insight into the plugin here: [Debug](https://github.com/szabope/mypy-pycharm-plugin?tab=readme-ov-file#debug) 
 
