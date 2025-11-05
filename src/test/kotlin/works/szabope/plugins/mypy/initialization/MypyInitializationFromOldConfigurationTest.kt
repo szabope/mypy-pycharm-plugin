@@ -26,6 +26,7 @@ class MypyInitializationFromOldConfigurationTest : AbstractMypyHeavyPlatformTest
         UIUtil.dispatchAllInvocationEvents()
         DumbService.getInstance(project).waitForSmartMode()
         with(MypySettings.getInstance(project)) {
+            thisLogger().info("Problematic assertion coming")
             assertFalse(useProjectSdk)
             assertEquals("$PROJECT_PATH/.venv/bin/mypy", executablePath)
             assertEquals("--show-column-numbers", arguments)

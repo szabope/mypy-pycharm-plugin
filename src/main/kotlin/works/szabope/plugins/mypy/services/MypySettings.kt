@@ -1,6 +1,7 @@
 package works.szabope.plugins.mypy.services
 
 import com.intellij.openapi.components.*
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.jetbrains.python.sdk.pythonSdk
 import org.jetbrains.annotations.ApiStatus
@@ -89,6 +90,7 @@ class MypySettings(internal val project: Project) :
         if (state.arguments == null && oldSettings.arguments != null) {
             arguments = oldSettings.arguments!!
         }
+        thisLogger().info("Settings initialized with ${getData()}")
     }
 
     override fun getData() = MypyExecutorConfiguration(
