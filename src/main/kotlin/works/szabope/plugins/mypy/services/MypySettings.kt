@@ -1,10 +1,8 @@
 package works.szabope.plugins.mypy.services
 
 import com.intellij.openapi.components.*
-import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.jetbrains.python.sdk.pythonSdk
-import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.TestOnly
 import works.szabope.plugins.common.services.BasicSettingsData
 import works.szabope.plugins.common.services.Settings
@@ -14,7 +12,8 @@ import works.szabope.plugins.common.services.Settings
 class MypySettings(internal val project: Project) :
     SimplePersistentStateComponent<MypySettings.MypyState>(MypyState()), Settings {
 
-    @ApiStatus.Internal
+    private var initialized = false
+
     class MypyState : BaseState() {
         var mypyExecutable by string()
         var useProjectSdk by property(true)
@@ -90,7 +89,7 @@ class MypySettings(internal val project: Project) :
         if (state.arguments == null && oldSettings.arguments != null) {
             arguments = oldSettings.arguments!!
         }
-        thisLogger().info("Settings initialized with ${getData()}")
+        initialized = true
     }
 
     override fun getData() = MypyExecutorConfiguration(
@@ -107,6 +106,8 @@ class MypySettings(internal val project: Project) :
     fun reset() {
         loadState(MypyState())
     }
+
+    fun isInitialized() = initialized
 
     companion object {
         @JvmStatic
