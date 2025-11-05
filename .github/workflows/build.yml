@@ -122,7 +122,7 @@ jobs:
         env:
           GPR_USERNAME: ${{secrets.GPR_USERNAME}}
           GPR_TOKEN: ${{secrets.GPR_TOKEN}}
-        run: ./gradlew check
+        run: ./gradlew check --info --stacktrace
 
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
