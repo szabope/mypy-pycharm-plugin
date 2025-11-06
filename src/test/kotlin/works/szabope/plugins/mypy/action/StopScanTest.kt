@@ -1,11 +1,9 @@
 package works.szabope.plugins.mypy.action
 
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.testFramework.TestDataPath
-import com.intellij.testFramework.common.waitUntil
-import kotlinx.coroutines.runBlocking
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
-import works.szabope.plugins.mypy.services.AsyncScanService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.testutil.dataContext
 import works.szabope.plugins.mypy.testutil.scan
@@ -34,6 +32,6 @@ class StopScanTest : AbstractToolWindowTestCase() {
         val file = myFixture.configureByText("a.py", "doesn't matter").virtualFile
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(file)) })
         stopScan(dataContext(project) {})
-        runBlocking { waitUntil { !AsyncScanService.getInstance(project).scanInProgress } }
+        PlatformTestUtil.waitWhileBusy { ScanJobRegistry.INSTANCE.isActive() }
     }
 }

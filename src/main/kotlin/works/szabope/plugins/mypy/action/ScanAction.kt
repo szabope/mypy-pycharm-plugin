@@ -3,15 +3,23 @@ package works.szabope.plugins.mypy.action
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.application.WriteIntentReadAction
 import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.progress.currentThreadCoroutineScope
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindowManager
 import com.jetbrains.python.PythonFileType
 import com.jetbrains.python.pyi.PyiFileType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import works.szabope.plugins.mypy.services.AsyncScanService
 import works.szabope.plugins.mypy.services.MypySettings
+import works.szabope.plugins.mypy.services.SettingsValidator
+import works.szabope.plugins.mypy.services.parser.MypyMessageConverter
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import works.szabope.plugins.mypy.toolWindow.MypyTreeService
 
@@ -22,32 +30,45 @@ open class ScanAction : DumbAwareAction() {
     override fun actionPerformed(event: AnActionEvent) {
         val targets = listTargets(event) ?: return
         val project = event.project ?: return
-        MypyTreeService.getInstance(project).reinitialize(targets)
+        val treeService = MypyTreeService.getInstance(project)
+        treeService.reinitialize(targets)
         WriteIntentReadAction.run { FileDocumentManager.getInstance().saveAllDocuments() }
-        AsyncScanService.getInstance(project).scan(targets, MypySettings.getInstance(project).getData())
+        val job = currentThreadCoroutineScope().launch(Dispatchers.IO) {
+            val configuration = MypySettings.getInstance(project).getData()
+            AsyncScanService.getInstance(project).scan(targets, configuration).forEach {
+                val mypyMessage = MypyMessageConverter.convert(it)
+                withContext(Dispatchers.EDT) {
+                    treeService.add(mypyMessage)
+                }
+            }
+            treeService.lock()
+        }
+        ScanJobRegistry.INSTANCE.set(job)
         ToolWindowManager.getInstance(project).getToolWindow(MypyToolWindowPanel.ID)?.show()
     }
 
     override fun update(event: AnActionEvent) {
-        event.presentation.isEnabled =
-            isEligibleForScanning(listTargets(event)) && event.project?.let { ScanActionUtil.isReadyToScan(it) } == true
+        val targets = listTargets(event) ?: return
+        event.presentation.isEnabled = event.project?.let { isReadyToScan(it, targets) } == true
     }
 
     override fun getActionUpdateThread(): ActionUpdateThread {
         return ActionUpdateThread.BGT
     }
 
-    protected open fun listTargets(event: AnActionEvent): List<VirtualFile>? {
+    protected open fun listTargets(event: AnActionEvent): Collection<VirtualFile>? {
         return event.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)?.asList()
     }
 
-    private fun isEligibleForScanning(targets: List<VirtualFile>?): Boolean {
-        return targets?.isNotEmpty() == true && targets.map { isEligible(it) }.all { it }
+    private fun isReadyToScan(project: Project, targets: Collection<VirtualFile>): Boolean {
+        return targets.isNotEmpty() && !ScanJobRegistry.INSTANCE.isActive() && MypySettings.getInstance(project)
+            .getData().let { SettingsValidator(project).isComplete(it) } && isEligibleTargets(targets)
     }
 
-    private fun isEligible(virtualFile: VirtualFile): Boolean {
-        return virtualFile.fileType in SUPPORTED_FILE_TYPES || virtualFile.isDirectory
-    }
+    private fun isEligibleTargets(targets: Collection<VirtualFile>) = targets.map { isEligible(it) }.all { it }
+
+    private fun isEligible(virtualFile: VirtualFile) =
+        virtualFile.fileType in SUPPORTED_FILE_TYPES || virtualFile.isDirectory
 
     companion object {
         const val ID = "works.szabope.plugins.mypy.action.ScanAction"

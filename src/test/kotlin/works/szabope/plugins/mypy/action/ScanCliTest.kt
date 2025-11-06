@@ -54,7 +54,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         }
         val target = TempFileSystem.getInstance().findFileByPath("/src")!!
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
-        PlatformTestUtil.waitWhileBusy { !ScanActionUtil.isReadyToScan(project) }
+        PlatformTestUtil.waitWhileBusy { ScanJobRegistry.INSTANCE.isActive() }
         assertionError?.let { throw it }
         treeUtil.assertStructure("+Found 1 issue(s) in 1 file(s)\n")
         treeUtil.expandAll()
@@ -100,7 +100,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
-        PlatformTestUtil.waitWhileBusy { !ScanActionUtil.isReadyToScan(project) }
+        PlatformTestUtil.waitWhileBusy { ScanJobRegistry.INSTANCE.isActive() }
         assertionError?.let { throw it }
     }
 
