@@ -6,6 +6,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transform
@@ -27,7 +28,7 @@ class AsyncScanService(private val project: Project) {
         val unparsableLinesOfStdout = StringBuilder()
         val parameters = with(project) { buildMypyParamList(configuration, targets) }
         val stdErr = StringBuilder()
-        return MypyExecutor(project).execute(configuration, parameters).transform { line ->
+        return MypyExecutor(project).execute(configuration, parameters).filter { it.text.isNotBlank() }.transform { line ->
             if (line.isError) {
                 stdErr.append(line.text)
                 return@transform
@@ -35,7 +36,7 @@ class AsyncScanService(private val project: Project) {
             MypyOutputParser.parse(line.text).onSuccess { emit(it) }.onFailure {
                 when (it) {
                     is MypyParseException -> {
-                        unparsableLinesOfStdout.appendLine(it.sourceJson)
+                        unparsableLinesOfStdout.appendLine("${it.sourceJson} failed with ${it.message}")
                     }
 
                     else -> {
@@ -48,13 +49,10 @@ class AsyncScanService(private val project: Project) {
                 throw it
             }
             if (it is ToolExecutionTerminatedException) {
-                // exit code 1 should be fine https://github.com/python/mypy/issues/6003
-                if (it.exitCode > 1) {
-                    showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                        DialogManager.showToolExecutionErrorDialog(
-                            configuration, stdErr.toString(), it.exitCode
-                        )
-                    }
+                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
+                    DialogManager.showToolExecutionErrorDialog(
+                        configuration, stdErr.toString(), it.exitCode
+                    )
                 }
             } else if (it != null) {
                 // Unexpected exception
@@ -69,7 +67,7 @@ class AsyncScanService(private val project: Project) {
             if (unparsableLinesOfStdout.isNotEmpty()) {
                 showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.parse_error")) {
                     DialogManager.showToolOutputParseErrorDialog(
-                        configuration, targets.joinToString("\n"), unparsableLinesOfStdout.toString(), ""
+                        configuration, targets.joinToString("\n"), unparsableLinesOfStdout.toString(), "" //TODO: this looks ugly -> make it less ugly
                     )
                 }
             }

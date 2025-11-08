@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.transform
 import works.szabope.plugins.common.run.ToolExecutionTerminatedException
@@ -28,38 +29,36 @@ class SyncScanService(private val project: Project) {
         val shadowedTargetMap = targets.associateWith { copyTempFrom(it) }
         val parameters = with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
         val stdErr = StringBuilder()
-        return MypyExecutor(project).execute(configuration, parameters).transform { line ->
-            if (line.isError) {
-                stdErr.append(line.text)
-                return@transform
-            }
-            MypyOutputParser.parse(line.text).onSuccess { emit(it) }.onFailure {
-                when (it) {
-                    is MypyParseException -> {
-                        thisLogger().warn(
-                            MypyBundle.message("mypy.executable.parsing-result-failed", configuration), it
-                        )
-                    }
+        return MypyExecutor(project).execute(configuration, parameters).filter { it.text.isNotBlank() }
+            .transform { line ->
+                if (line.isError) {
+                    stdErr.append(line.text)
+                    return@transform
+                }
+                MypyOutputParser.parse(line.text).onSuccess { emit(it) }.onFailure {
+                    when (it) {
+                        is MypyParseException -> {
+                            thisLogger().warn(
+                                MypyBundle.message("mypy.executable.parsing-result-failed", configuration), it
+                            )
+                        }
 
-                    else -> {
-                        thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
+                        else -> {
+                            thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
+                        }
                     }
                 }
-            }
-        }.onCompletion {
+            }.onCompletion {
             // cleanup
             shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
             if (it is CancellationException) {
                 throw it
             }
             if (it is ToolExecutionTerminatedException) {
-                // exit code 1 should be fine https://github.com/python/mypy/issues/6003
-                if (it.exitCode > 1) {
-                    showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                        DialogManager.showToolExecutionErrorDialog(
-                            configuration, stdErr.toString(), it.exitCode
-                        )
-                    }
+                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
+                    DialogManager.showToolExecutionErrorDialog(
+                        configuration, stdErr.toString(), it.exitCode
+                    )
                 }
             } else if (it != null) {
                 // Unexpected exception
