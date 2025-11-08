@@ -9,7 +9,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transform
-import works.szabope.plugins.common.processErrorAndGet
 import works.szabope.plugins.common.run.ToolExecutionTerminatedException
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
@@ -28,9 +27,7 @@ class AsyncScanService(private val project: Project) {
         val unparsableLinesOfStdout = StringBuilder()
         val parameters = with(project) { buildMypyParamList(configuration, targets) }
         val stdErr = StringBuilder()
-        return MypyExecutor(project).runCatching { execute(configuration, parameters) }.processErrorAndGet {
-            return emptyList()
-        }.transform { line ->
+        return MypyExecutor(project).execute(configuration, parameters).transform { line ->
             if (line.isError) {
                 stdErr.append(line.text)
                 return@transform
