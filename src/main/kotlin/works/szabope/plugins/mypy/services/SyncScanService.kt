@@ -6,11 +6,11 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.transform
-import works.szabope.plugins.common.processErrorAndGet
+import works.szabope.plugins.common.run.ToolExecutionTerminatedException
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
@@ -27,25 +27,13 @@ class SyncScanService(private val project: Project) {
     fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): Flow<MypyMessage> {
         val shadowedTargetMap = targets.associateWith { copyTempFrom(it) }
         val parameters = with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
-        val output = MypyExecutor(project).execute(configuration, parameters)
-            .also { shadowedTargetMap.values.onEach { it.deleteIfExists() } }.processErrorAndGet {
-                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")) {
-                    DialogManager.showFailedToExecuteErrorDialog(
-                        it.message ?: MypyBundle.message("mypy.please_report_this_issue")
-                    )
-                }
-                return emptyFlow()
+        val stdErr = StringBuilder()
+        return MypyExecutor(project).execute(configuration, parameters).transform { line ->
+            if (line.isError) {
+                stdErr.append(line.text)
+                return@transform
             }
-        // exit code 1 should be fine https://github.com/python/mypy/issues/6003
-        if (output.exitCode > 1) {
-            showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                DialogManager.showToolExecutionErrorDialog(
-                    configuration, output.stderr, output.exitCode
-                )
-            }
-        }
-        return output.stdoutLines.asFlow().transform { line -> // transform
-            MypyOutputParser.parse(line).onSuccess { emit(it) }.onFailure {
+            MypyOutputParser.parse(line.text).onSuccess { emit(it) }.onFailure {
                 when (it) {
                     is MypyParseException -> {
                         thisLogger().warn(
@@ -56,6 +44,29 @@ class SyncScanService(private val project: Project) {
                     else -> {
                         thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
                     }
+                }
+            }
+        }.onCompletion {
+            // cleanup
+            shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
+            if (it is CancellationException) {
+                throw it
+            }
+            if (it is ToolExecutionTerminatedException) {
+                // exit code 1 should be fine https://github.com/python/mypy/issues/6003
+                if (it.exitCode > 1) {
+                    showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
+                        DialogManager.showToolExecutionErrorDialog(
+                            configuration, stdErr.toString(), it.exitCode
+                        )
+                    }
+                }
+            } else if (it != null) {
+                // Unexpected exception
+                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")) {
+                    DialogManager.showFailedToExecuteErrorDialog(
+                        it.message ?: MypyBundle.message("mypy.please_report_this_issue")
+                    )
                 }
             }
         }

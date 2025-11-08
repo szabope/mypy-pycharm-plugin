@@ -61,7 +61,7 @@ open class ScanAction : DumbAwareAction() {
     }
 
     private fun isReadyToScan(project: Project, targets: Collection<VirtualFile>): Boolean {
-        return targets.isNotEmpty() && !ScanJobRegistry.INSTANCE.isActive() && MypySettings.getInstance(project)
+        return targets.isNotEmpty() && ScanJobRegistry.INSTANCE.isAvailable() && MypySettings.getInstance(project)
             .getData().let { SettingsValidator(project).isComplete(it) } && isEligibleTargets(targets)
     }
 

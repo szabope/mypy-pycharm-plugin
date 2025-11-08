@@ -5,11 +5,12 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transform
 import works.szabope.plugins.common.processErrorAndGet
+import works.szabope.plugins.common.run.ToolExecutionTerminatedException
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
@@ -26,27 +27,15 @@ class AsyncScanService(private val project: Project) {
         // If you have a better idea, please let me know.
         val unparsableLinesOfStdout = StringBuilder()
         val parameters = with(project) { buildMypyParamList(configuration, targets) }
-        val output = MypyExecutor(project).execute(configuration, parameters).processErrorAndGet {
-            showClickableBalloonError(
-                project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")
-            ) {
-                DialogManager.showFailedToExecuteErrorDialog(
-                    it.message ?: MypyBundle.message("mypy.please_report_this_issue")
-                )
-            }
+        val stdErr = StringBuilder()
+        return MypyExecutor(project).runCatching { execute(configuration, parameters) }.processErrorAndGet {
             return emptyList()
-        }
-
-        // exit code 1 should be fine https://github.com/python/mypy/issues/6003
-        if (output.exitCode > 1) {
-            showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                DialogManager.showToolExecutionErrorDialog(
-                    configuration, output.stderr, output.exitCode
-                )
+        }.transform { line ->
+            if (line.isError) {
+                stdErr.append(line.text)
+                return@transform
             }
-        }
-        return output.stdoutLines.asFlow().transform { line ->
-            MypyOutputParser.parse(line).onSuccess { emit(it) }.onFailure {
+            MypyOutputParser.parse(line.text).onSuccess { emit(it) }.onFailure {
                 when (it) {
                     is MypyParseException -> {
                         unparsableLinesOfStdout.appendLine(it.sourceJson)
@@ -58,6 +47,28 @@ class AsyncScanService(private val project: Project) {
                 }
             }
         }.onCompletion {
+            if (it is CancellationException) {
+                throw it
+            }
+            if (it is ToolExecutionTerminatedException) {
+                // exit code 1 should be fine https://github.com/python/mypy/issues/6003
+                if (it.exitCode > 1) {
+                    showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
+                        DialogManager.showToolExecutionErrorDialog(
+                            configuration, stdErr.toString(), it.exitCode
+                        )
+                    }
+                }
+            } else if (it != null) {
+                // Unexpected exception
+                showClickableBalloonError(
+                    project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")
+                ) {
+                    DialogManager.showFailedToExecuteErrorDialog(
+                        it.message ?: MypyBundle.message("mypy.please_report_this_issue")
+                    )
+                }
+            }
             if (unparsableLinesOfStdout.isNotEmpty()) {
                 showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.parse_error")) {
                     DialogManager.showToolOutputParseErrorDialog(
