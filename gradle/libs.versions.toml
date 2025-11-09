@@ -3,7 +3,7 @@
 junit = "4.13.2"
 kotlinProcess = "1.5.1"
 mockk = "1.14.4"
-myPluginCommon = "1.0.4"
+myPluginCommon = "1.0.5"
 
 # plugins
 changelog = "2.2.1"

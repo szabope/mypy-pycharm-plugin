@@ -5,12 +5,14 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.progress.currentThreadCoroutineScope
 import com.intellij.openapi.project.DumbAwareAction
 import kotlinx.coroutines.guava.future
+import works.szabope.plugins.mypy.toolWindow.MypyTreeService
 
 class StopScanAction : DumbAwareAction() {
 
     override fun actionPerformed(event: AnActionEvent) {
         currentThreadCoroutineScope().future {
             ScanJobRegistry.INSTANCE.cancel()
+            event.project?.let { MypyTreeService.getInstance(it) }?.lock()
         }.get()
     }
 
