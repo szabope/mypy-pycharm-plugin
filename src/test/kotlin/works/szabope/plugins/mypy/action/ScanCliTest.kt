@@ -79,8 +79,9 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         }
         val dialogShown = CompletableFuture<TestDialogWrapper>()
         dialogManager.onDialog(MypyParseErrorDialog::class.java) {
+            it.close(DialogWrapper.OK_EXIT_CODE)
             dialogShown.complete(it)
-            DialogWrapper.OK_EXIT_CODE
+            it.getExitCode()
         }
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
@@ -116,8 +117,9 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         }
         val dialogShown = CompletableFuture<TestDialogWrapper>()
         dialogManager.onDialog(MypyExecutionErrorDialog::class.java) {
+            it.close(DialogWrapper.OK_EXIT_CODE)
             dialogShown.complete(it)
-            DialogWrapper.OK_EXIT_CODE
+            it.getExitCode()
         }
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
@@ -146,8 +148,9 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         }
         val dialogShown = CompletableFuture<TestDialogWrapper>()
         dialogManager.onDialog(FailedToExecuteErrorDialog::class.java) {
+            it.close(DialogWrapper.OK_EXIT_CODE)
             dialogShown.complete(it)
-            DialogWrapper.OK_EXIT_CODE
+            it.getExitCode()
         }
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
