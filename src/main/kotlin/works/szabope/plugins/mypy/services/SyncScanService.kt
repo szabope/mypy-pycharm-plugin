@@ -6,15 +6,9 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.transform
-import works.szabope.plugins.common.run.ToolExecutionTerminatedException
+import kotlinx.coroutines.flow.*
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
-import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.services.parser.MypyMessage
 import works.szabope.plugins.mypy.services.parser.MypyOutputParser
 import works.szabope.plugins.mypy.services.parser.MypyParseException
@@ -49,26 +43,9 @@ class SyncScanService(private val project: Project) {
                     }
                 }
             }.onCompletion {
-            // cleanup
-            shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
-            if (it is CancellationException) {
-                throw it
-            }
-            if (it is ToolExecutionTerminatedException) {
-                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                    DialogManager.showToolExecutionErrorDialog(
-                        configuration, stdErr.toString(), it.exitCode
-                    )
-                }
-            } else if (it != null) {
-                // Unexpected exception
-                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")) {
-                    DialogManager.showFailedToExecuteErrorDialog(
-                        it.message ?: MypyBundle.message("mypy.please_report_this_issue")
-                    )
-                }
-            }
-        }
+                // cleanup
+                shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
+            }.catch(handleScanException(project, configuration, stdErr))
     }
 
     private fun copyTempFrom(file: VirtualFile): Path {

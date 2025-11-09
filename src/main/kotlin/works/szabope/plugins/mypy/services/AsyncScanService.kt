@@ -5,12 +5,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.flow.transform
-import works.szabope.plugins.common.run.ToolExecutionTerminatedException
+import kotlinx.coroutines.flow.*
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
@@ -28,50 +23,35 @@ class AsyncScanService(private val project: Project) {
         val unparsableLinesOfStdout = StringBuilder()
         val parameters = with(project) { buildMypyParamList(configuration, targets) }
         val stdErr = StringBuilder()
-        return MypyExecutor(project).execute(configuration, parameters).filter { it.text.isNotBlank() }.transform { line ->
-            if (line.isError) {
-                stdErr.append(line.text)
-                return@transform
-            }
-            MypyOutputParser.parse(line.text).onSuccess { emit(it) }.onFailure {
-                when (it) {
-                    is MypyParseException -> {
-                        unparsableLinesOfStdout.appendLine("${it.sourceJson} failed with ${it.message}")
-                    }
+        return MypyExecutor(project).execute(configuration, parameters).filter { it.text.isNotBlank() }
+            .transform { line ->
+                if (line.isError) {
+                    stdErr.append(line.text)
+                    return@transform
+                }
+                MypyOutputParser.parse(line.text).onSuccess { emit(it) }.onFailure {
+                    when (it) {
+                        is MypyParseException -> {
+                            unparsableLinesOfStdout.appendLine("${it.sourceJson} failed with ${it.message}")
+                        }
 
-                    else -> {
-                        thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
+                        else -> {
+                            thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
+                        }
                     }
                 }
-            }
-        }.onCompletion {
-            if (it is CancellationException) {
-                throw it
-            }
-            if (it is ToolExecutionTerminatedException) {
-                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                    DialogManager.showToolExecutionErrorDialog(
-                        configuration, stdErr.toString(), it.exitCode
-                    )
+            }.onCompletion {
+                if (unparsableLinesOfStdout.isNotEmpty()) {
+                    showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.parse_error")) {
+                        DialogManager.showToolOutputParseErrorDialog(
+                            configuration,
+                            targets.joinToString("\n"),
+                            unparsableLinesOfStdout.toString(),
+                            "" //TODO: this looks ugly -> make it less ugly
+                        )
+                    }
                 }
-            } else if (it != null) {
-                // Unexpected exception
-                showClickableBalloonError(
-                    project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")
-                ) {
-                    DialogManager.showFailedToExecuteErrorDialog(
-                        it.message ?: MypyBundle.message("mypy.please_report_this_issue")
-                    )
-                }
-            }
-            if (unparsableLinesOfStdout.isNotEmpty()) {
-                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.parse_error")) {
-                    DialogManager.showToolOutputParseErrorDialog(
-                        configuration, targets.joinToString("\n"), unparsableLinesOfStdout.toString(), "" //TODO: this looks ugly -> make it less ugly
-                    )
-                }
-            }
-        }.toList(ArrayList())
+            }.catch(handleScanException(project, configuration, stdErr)).toList(ArrayList())
     }
 
     companion object {
