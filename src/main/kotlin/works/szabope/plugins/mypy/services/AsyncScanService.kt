@@ -47,7 +47,7 @@ class AsyncScanService(private val project: Project) {
                             configuration,
                             targets.joinToString("\n"),
                             unparsableLinesOfStdout.toString(),
-                            "" //TODO: this looks ugly -> make it less ugly
+                            ""
                         )
                     }
                 }

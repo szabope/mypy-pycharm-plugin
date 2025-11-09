@@ -6,6 +6,7 @@ import com.intellij.openapi.util.NlsContexts.DialogTitle
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.JBUI
+import com.jetbrains.rd.generator.nova.GenerationSpec.Companion.nullIfEmpty
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
 import java.awt.Dimension
@@ -38,8 +39,7 @@ class MypyParseErrorDialog(
 ) : MypyErrorDialog(
     MypyBundle.message("mypy.dialog.parse_error.title"), MypyErrorDescription(
         MypyBundle.message("mypy.dialog.parse_error.details", configuration, targets, json),
-        MypyBundle.message("mypy.dialog.parse_error.message", error)
-    )
+        error.nullIfEmpty()?.let { MypyBundle.message("mypy.dialog.parse_error.message", it) })
 )
 
 class MypyGeneralErrorDialog(throwable: Throwable) : MypyErrorDialog(
