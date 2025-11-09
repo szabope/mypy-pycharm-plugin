@@ -2,17 +2,22 @@ package works.szabope.plugins.mypy.action
 
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.progress.currentThreadCoroutineScope
 import com.intellij.openapi.project.DumbAwareAction
-import works.szabope.plugins.mypy.services.AsyncScanService
+import kotlinx.coroutines.guava.future
+import works.szabope.plugins.mypy.toolWindow.MypyTreeService
 
 class StopScanAction : DumbAwareAction() {
 
     override fun actionPerformed(event: AnActionEvent) {
-        AsyncScanService.getInstance(event.project ?: return).cancelScan()
+        currentThreadCoroutineScope().future {
+            ScanJobRegistry.INSTANCE.cancel()
+            event.project?.let { MypyTreeService.getInstance(it) }?.lock()
+        }.get()
     }
 
     override fun update(event: AnActionEvent) {
-        event.presentation.isEnabled = AsyncScanService.getInstance(event.project ?: return).scanInProgress
+        event.presentation.isEnabled = ScanJobRegistry.INSTANCE.isActive()
     }
 
     override fun getActionUpdateThread(): ActionUpdateThread {

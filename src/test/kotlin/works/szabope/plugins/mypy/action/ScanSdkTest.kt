@@ -12,7 +12,6 @@ import junit.framework.AssertionFailedError
 import kotlinx.coroutines.runBlocking
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
 import works.szabope.plugins.mypy.MypyBundle
-import works.szabope.plugins.mypy.action.ScanActionUtil.isReadyToScan
 import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.testutil.*
@@ -51,7 +50,7 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
         }
         val target = TempFileSystem.getInstance().findFileByPath("/src")!!
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
-        PlatformTestUtil.waitWhileBusy { !isReadyToScan(project) }
+        PlatformTestUtil.waitWhileBusy { ScanJobRegistry.INSTANCE.isActive() }
         assertionError?.let { throw it }
         runBlocking {
             waitUntilAssertSucceeds {

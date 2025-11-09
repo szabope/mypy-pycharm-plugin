@@ -5,7 +5,10 @@ import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.startOffset
+import com.jetbrains.python.psi.PyFormattedStringElement
+import com.jetbrains.python.psi.PyStringLiteralExpression
 import com.jetbrains.python.psi.PyUtil.StringNodeInfo
 import com.jetbrains.python.psi.impl.PyPsiUtils
 import works.szabope.plugins.mypy.MypyBundle
@@ -36,8 +39,10 @@ class MypyIgnoreIntention(private val line: Int) : PsiElementBaseIntentionAction
     /** mypy does not support `#type: ignore` on multiline triple quoted elements */
     private fun isTripleQuotedMultilineString(element: PsiElement): Boolean {
         try {
-            val stringNode = element.context?.let { StringNodeInfo(it) }
-            return stringNode != null && stringNode.isTripleQuoted && stringNode.content.contains('\n')
+            val elements = PsiTreeUtil.collectParents(element, PyFormattedStringElement::class.java, true) {
+                it is PyStringLiteralExpression
+            }
+            return elements.any { StringNodeInfo(it).isTripleQuoted && it.text.contains('\n') }
         } catch (_: IllegalArgumentException) {
             return false
         }

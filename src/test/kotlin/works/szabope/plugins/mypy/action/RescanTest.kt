@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.testFramework.TestDataPath
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
-import works.szabope.plugins.mypy.services.AsyncScanService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.testutil.dataContext
 import works.szabope.plugins.mypy.testutil.scan
@@ -25,7 +24,7 @@ class RescanTest : AbstractToolWindowTestCase() {
         }
         val file = myFixture.configureByText("a.py", "doesn't matter").virtualFile
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(file)) })
-        PlatformTestUtil.waitWhileBusy { AsyncScanService.getInstance(project).scanInProgress }
+        PlatformTestUtil.waitWhileBusy { ScanJobRegistry.INSTANCE.isActive() }
     }
 
     /**
@@ -35,7 +34,7 @@ class RescanTest : AbstractToolWindowTestCase() {
     fun `test rescan running for the same file scan did`() {
         MypySettings.getInstance(project).executablePath = Paths.get(testDataPath).resolve("mypy2").absolutePathString()
         PlatformTestUtil.invokeNamedAction(RescanAction.ID)
-        PlatformTestUtil.waitWhileBusy { !ScanActionUtil.isReadyToScan(project) }
+        PlatformTestUtil.waitWhileBusy { ScanJobRegistry.INSTANCE.isActive() }
         treeUtil.assertStructure("+Found 1 issue(s) in 1 file(s)\n")
         treeUtil.expandAll()
         treeUtil.assertStructure(

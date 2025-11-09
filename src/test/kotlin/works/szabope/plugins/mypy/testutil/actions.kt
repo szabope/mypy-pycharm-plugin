@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 package works.szabope.plugins.mypy.testutil
 
 import com.intellij.openapi.actionSystem.*
@@ -10,14 +8,9 @@ import works.szabope.plugins.mypy.action.InstallMypyAction
 import works.szabope.plugins.mypy.action.ScanAction
 import works.szabope.plugins.mypy.action.StopScanAction
 
-/**
- * Invoke named action with custom context
- * @see com.intellij.testFramework.PlatformTestUtil.invokeNamedAction
- */
 fun scan(context: DataContext) {
     val action = ActionManager.getInstance().getAction(ScanAction.ID)
     val event = AnActionEvent.createEvent(context, null, "", ActionUiKind.NONE, null)
-    PerformWithDocumentsCommitted.commitDocumentsIfNeeded(action, event)
     updateAction(action, event)
     Assert.assertTrue(event.presentation.isEnabled)
     performAction(action, event)
@@ -34,7 +27,6 @@ fun stopScan(context: DataContext) {
 fun installMypy(context: DataContext) {
     val action = ActionManager.getInstance().getAction(InstallMypyAction.ID)
     val event = AnActionEvent.createEvent(context, null, ActionPlaces.NOTIFICATION, ActionUiKind.NONE, null)
-    PerformWithDocumentsCommitted.commitDocumentsIfNeeded(action, event)
     updateAction(action, event)
     Assert.assertTrue(event.presentation.isEnabled)
     performAction(action, event)

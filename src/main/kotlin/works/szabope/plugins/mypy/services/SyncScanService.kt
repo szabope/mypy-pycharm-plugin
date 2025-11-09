@@ -6,14 +6,9 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.transform
-import works.szabope.plugins.common.processErrorAndGet
+import kotlinx.coroutines.flow.*
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
-import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.services.parser.MypyMessage
 import works.szabope.plugins.mypy.services.parser.MypyOutputParser
 import works.szabope.plugins.mypy.services.parser.MypyParseException
@@ -27,38 +22,30 @@ class SyncScanService(private val project: Project) {
     fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): Flow<MypyMessage> {
         val shadowedTargetMap = targets.associateWith { copyTempFrom(it) }
         val parameters = with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
-        val output = MypyExecutor(project).execute(configuration, parameters)
-            .also { shadowedTargetMap.values.onEach { it.deleteIfExists() } }.processErrorAndGet {
-                showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.failed_to_execute")) {
-                    DialogManager.showFailedToExecuteErrorDialog(
-                        it.message ?: MypyBundle.message("mypy.please_report_this_issue")
-                    )
+        val stdErr = StringBuilder()
+        return MypyExecutor(project).execute(configuration, parameters).filter { it.text.isNotBlank() }
+            .transform { line ->
+                if (line.isError) {
+                    stdErr.append(line.text)
+                    return@transform
                 }
-                return emptyFlow()
-            }
-        // exit code 1 should be fine https://github.com/python/mypy/issues/6003
-        if (output.exitCode > 1) {
-            showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                DialogManager.showToolExecutionErrorDialog(
-                    configuration, output.stderr, output.exitCode
-                )
-            }
-        }
-        return output.stdoutLines.asFlow().transform { line -> // transform
-            MypyOutputParser.parse(line).onSuccess { emit(it) }.onFailure {
-                when (it) {
-                    is MypyParseException -> {
-                        thisLogger().warn(
-                            MypyBundle.message("mypy.executable.parsing-result-failed", configuration), it
-                        )
-                    }
+                MypyOutputParser.parse(line.text).onSuccess { emit(it) }.onFailure {
+                    when (it) {
+                        is MypyParseException -> {
+                            thisLogger().warn(
+                                MypyBundle.message("mypy.executable.parsing-result-failed", configuration), it
+                            )
+                        }
 
-                    else -> {
-                        thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
+                        else -> {
+                            thisLogger().error(MypyBundle.message("mypy.please_report_this_issue"), it)
+                        }
                     }
                 }
-            }
-        }
+            }.onCompletion {
+                // cleanup
+                shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
+            }.catch(handleScanException(project, configuration, stdErr))
     }
 
     private fun copyTempFrom(file: VirtualFile): Path {
