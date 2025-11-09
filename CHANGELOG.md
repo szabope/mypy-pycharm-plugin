@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-11-09
+
+- Changelog update - `v2.0.0` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/113
+- 2.0.1 by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/114
+  * cleanup AsyncScanService
+  * simplify scan actions and their tests
+  * fix mypy cannot be killed
+  * simplify avoiding posix
+  * fix no intention for triple-quoted multiline strings
+  * remove some ugliness from dialog
+  * fix stopping scan leaves tree in what seems to be in-progress state
+
 ## [2.0.0] - 2025-11-05
 
 - Changelog update - `v1.0.26` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/110
@@ -186,7 +198,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.26...v2.0.0
 [1.0.26]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.25...v1.0.26
 [1.0.25]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.24...v1.0.25
