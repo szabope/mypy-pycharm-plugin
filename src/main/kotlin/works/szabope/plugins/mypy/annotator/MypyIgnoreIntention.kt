@@ -12,13 +12,20 @@ import com.jetbrains.python.psi.PyStringLiteralExpression
 import com.jetbrains.python.psi.PyUtil.StringNodeInfo
 import com.jetbrains.python.psi.impl.PyPsiUtils
 import works.szabope.plugins.mypy.MypyBundle
+import works.szabope.plugins.mypy.services.parser.MypyMessage
 
 /**
- * Intention action to append `# type: ignore` comment to suppress Mypy annotations.
+ * Intention action to append `# type: ignore[...]` comment to suppress Mypy annotations.
  */
-class MypyIgnoreIntention(private val line: Int) : PsiElementBaseIntentionAction(), IntentionAction {
+class MypyIgnoreIntention(private val issue: MypyMessage) : PsiElementBaseIntentionAction(), IntentionAction {
+
+    companion object {
+        @JvmStatic
+        val COMMENT_REGEX = "^#\\s+type:\\s+ignore(\\[(?<codes>[a-zA-Z\\s,-]+)])?".toRegex()
+    }
+
     override fun getText(): String {
-        return MypyBundle.message("mypy.intention.ignore.text")
+        return MypyBundle.message("mypy.intention.ignore.text", issue.code)
     }
 
     override fun getFamilyName(): String {
@@ -31,9 +38,23 @@ class MypyIgnoreIntention(private val line: Int) : PsiElementBaseIntentionAction
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
         val existingComment = PyPsiUtils.findSameLineComment(element)
-        val lineEndOffset = existingComment?.startOffset ?: element.containingFile.fileDocument.getLineEndOffset(line)
+        val existingMypyIgnoreComment = existingComment?.text?.let { COMMENT_REGEX.find(it) }
+        val existingCodes = existingMypyIgnoreComment?.groups["codes"]?.value
+        val comment = if (existingCodes != null) {
+            existingMypyIgnoreComment.value.replace(existingCodes, "$existingCodes,${issue.code}")
+        } else { // (existingMypyIgnoreComment != null) { IMPOSSIBLE, we cannot end up here with `#  type: ignore`
+            "# type: ignore[${issue.code}]"
+        }
+        existingMypyIgnoreComment?.run {
+            element.containingFile.fileDocument.deleteString(
+                existingComment.textRange.startOffset,
+                existingComment.textRange.endOffset
+            )
+        }
+        val codeLineEndOffset =
+            existingComment?.startOffset ?: element.containingFile.fileDocument.getLineEndOffset(issue.line)
         val spaces = " ".repeat(existingComment?.let { 0 } ?: 2)
-        element.containingFile.fileDocument.insertString(lineEndOffset, "$spaces# type: ignore ")
+        element.containingFile.fileDocument.insertString(codeLineEndOffset, "$spaces$comment ")
     }
 
     /** mypy does not support `#type: ignore` on multiline triple quoted elements */

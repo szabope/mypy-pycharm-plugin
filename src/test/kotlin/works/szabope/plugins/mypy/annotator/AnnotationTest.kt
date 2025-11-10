@@ -36,11 +36,11 @@ class AnnotationTest : BasePlatformTestCase() {
                                 |   return 'fun'
                                 |""".trimMargin()
         )
-        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text"))
+        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text", "valid-type"))
         assertNotNull(intention)
         myFixture.launchAction(intention)
         myFixture.checkResult(
-            """|def lets_have_fun() -> [int]:  # type: ignore 
+            """|def lets_have_fun() -> [int]:  # type: ignore[valid-type] 
                |   return 'fun'
                |""".trimMargin()
         )
@@ -53,11 +53,28 @@ class AnnotationTest : BasePlatformTestCase() {
                                 |   return 'fun'
                                 |""".trimMargin()
         )
-        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text"))
+        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text", "valid-type"))
         assertNotNull(intention)
         myFixture.launchAction(intention)
         myFixture.checkResult(
-            """|def lets_have_fun() -> [int]:  # type: ignore # comment
+            """|def lets_have_fun() -> [int]:  # type: ignore[valid-type] # comment
+               |   return 'fun'
+               |""".trimMargin()
+        )
+        PsiTestUtil.checkFileStructure(myFixture.file)
+    }
+
+    fun `test existing ignore with codes gets extended`() {
+        myFixture.configureByText(
+            "b.py", """|def<caret> lets_have_fun() -> [int]:  # type: ignore[some-code,another-code, and-a-third-one]
+                                |   return 'fun'
+                                |""".trimMargin()
+        )
+        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text", "valid-type"))
+        assertNotNull(intention)
+        myFixture.launchAction(intention)
+        myFixture.checkResult(
+            """|def lets_have_fun() -> [int]:  # type: ignore[some-code,another-code, and-a-third-one,valid-type] 
                |   return 'fun'
                |""".trimMargin()
         )
@@ -72,7 +89,7 @@ class AnnotationTest : BasePlatformTestCase() {
                                 |   intention should not be available""${'"'}""".trimMargin()
         )
         assertNotEmpty(myFixture.doHighlighting())
-        assertEmpty(myFixture.filterAvailableIntentions(MypyBundle.message("mypy.intention.ignore.text")))
+        assertEmpty(myFixture.filterAvailableIntentions(MypyBundle.message("mypy.intention.ignore.text", "name-defined")))
     }
 
     fun `test single line triple-quoted string annotated with intention available`() {
@@ -81,7 +98,7 @@ class AnnotationTest : BasePlatformTestCase() {
                                 |   return <caret>f""${'"'}this one here {x}""${'"'}""".trimMargin()
         )
         assertNotEmpty(myFixture.doHighlighting())
-        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text"))
+        val intention = myFixture.findSingleIntention(MypyBundle.message("mypy.intention.ignore.text", "name-defined"))
         assertNotNull(intention)
     }
 

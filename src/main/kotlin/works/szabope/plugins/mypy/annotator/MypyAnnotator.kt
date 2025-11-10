@@ -47,7 +47,7 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMe
                 it to requireNotNull(file.findElementFor(it)) { "Mypy result mismatch for $it" }
             }.collect { (issue, psiElement) ->
                 holder.newAnnotation(severity, issue.message).range(psiElement.textRange)
-                    .withFix(MypyIgnoreIntention(issue.line)).create()
+                    .withFix(MypyIgnoreIntention(issue)).create()
             }
         }
     }
