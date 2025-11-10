@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-11-10
+
+- Add code to type ignore by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/116
+  * make ignore intention use code reported by mypy to add ignore comment
+
 ## [2.0.0] - 2025-11-05
 
 - Changelog update - `v1.0.26` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/110
@@ -186,7 +191,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.26...v2.0.0
 [1.0.26]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.25...v1.0.26
 [1.0.25]: https://github.com/szabope/mypy-pycharm-plugin/compare/v1.0.24...v1.0.25
