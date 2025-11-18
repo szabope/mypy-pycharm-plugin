@@ -15,13 +15,21 @@ import works.szabope.plugins.mypy.services.parser.MypyParseException
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
+import kotlin.time.measureTime
+import kotlin.time.measureTimedValue
 
 @Service(Service.Level.PROJECT)
 class SyncScanService(private val project: Project) {
 
     fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): Flow<MypyMessage> {
-        val shadowedTargetMap = targets.associateWith { copyTempFrom(it) }
-        val parameters = with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
+        val shadowedTargetMap = targets.associateWith {
+            measureTimedValue {
+                copyTempFrom(it)
+            }.also { m -> thisLogger().debug($$"SyncScanService#scan$createShadowFile took $${m.duration}") }.value
+        }
+        val parameters = measureTimedValue {
+            with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
+        }.also { m -> thisLogger().debug($$"SyncScanService#scan$buildParamList took $${m.duration}") }.value
         val stdErr = StringBuilder()
         return MypyExecutor(project).execute(configuration, parameters).filter { it.text.isNotBlank() }
             .transform { line ->
@@ -43,8 +51,10 @@ class SyncScanService(private val project: Project) {
                     }
                 }
             }.onCompletion {
-                // cleanup
-                shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
+                measureTime {
+                    // cleanup
+                    shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
+                }.let { thisLogger().debug($$"SyncScanService#scan$cleanUp took $$it") }
             }.catch(handleScanException(project, configuration, stdErr))
     }
 
