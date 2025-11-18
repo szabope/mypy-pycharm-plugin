@@ -5,6 +5,7 @@ import com.intellij.codeInsight.daemon.HighlightDisplayKey
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -19,6 +20,7 @@ import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.SettingsValidator
 import works.szabope.plugins.mypy.services.SyncScanService
 import works.szabope.plugins.mypy.services.parser.MypyMessage
+import kotlin.time.measureTimedValue
 
 //TODO: extract to common
 class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMessage>>() {
@@ -30,11 +32,16 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMe
     }
 
     override fun doAnnotate(info: AnnotatorInfo): Flow<MypyMessage> {
-        if (!SettingsValidator(info.project).isComplete(MypySettings.getInstance(info.project).getData())) {
+        val isComplete = measureTimedValue {
+            SettingsValidator(info.project).isComplete(MypySettings.getInstance(info.project).getData())
+        }.also { thisLogger().debug($$"MypyAnnotator#doAnnotate$isComplete took $${it.duration}") }.value
+        if (!isComplete) {
             return flowOf()
         }
-        return SyncScanService.getInstance(info.project)
-            .scan(listOf(info.file), MypySettings.getInstance(info.project).getData())
+        return measureTimedValue {
+            SyncScanService.getInstance(info.project)
+                .scan(listOf(info.file), MypySettings.getInstance(info.project).getData())
+        }.also { thisLogger().debug($$"MypyAnnotator#doAnnotate$scan took $${it.duration}") }.value
     }
 
     override fun apply(file: PsiFile, annotationResult: Flow<MypyMessage>, holder: AnnotationHolder) {
@@ -57,8 +64,12 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMe
     }
 
     private fun PsiFile.findElementFor(issue: MypyMessage): PsiElement? {
-        val tabSize = CodeStyle.getFacade(this).tabSize
-        val offset = DocumentUtil.calculateOffset(fileDocument, issue.line, issue.column, tabSize)
-        return findElementAt(offset)
+        val (result, duration) = measureTimedValue {
+            val tabSize = CodeStyle.getFacade(this).tabSize
+            val offset = DocumentUtil.calculateOffset(fileDocument, issue.line, issue.column, tabSize)
+            findElementAt(offset)
+        }
+        thisLogger().debug($$"MypyAnnotator$PsiFile#findElementFor took $$duration")
+        return result
     }
 }
