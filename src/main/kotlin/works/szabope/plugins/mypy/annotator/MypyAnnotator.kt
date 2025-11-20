@@ -12,6 +12,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.testFramework.LightVirtualFile
 import com.intellij.util.DocumentUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -26,7 +27,9 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMe
 
     class AnnotatorInfo(val file: VirtualFile, val project: Project)
 
-    override fun collectInformation(file: PsiFile): AnnotatorInfo {
+    override fun collectInformation(file: PsiFile): AnnotatorInfo? {
+        // do not run for in-memory files, shadowing would fail
+        if (file.virtualFile is LightVirtualFile) return null
         return AnnotatorInfo(file.virtualFile, file.project)
     }
 
