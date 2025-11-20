@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.mypy.services.SettingsValidator
 import works.szabope.plugins.mypy.services.SyncScanService
 import works.szabope.plugins.mypy.services.parser.MypyMessage
 import kotlin.time.measureTimedValue
@@ -32,15 +31,14 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMe
     }
 
     override fun doAnnotate(info: AnnotatorInfo): Flow<MypyMessage> {
-        val isComplete = measureTimedValue {
-            SettingsValidator(info.project).isComplete(MypySettings.getInstance(info.project).getData())
+        val configuration = measureTimedValue {
+            MypySettings.getInstance(info.project).getValidConfiguration()
         }.also { thisLogger().debug($$"MypyAnnotator#doAnnotate$isComplete took $${it.duration}") }.value
-        if (!isComplete) {
+        if (configuration.isFailure) {
             return flowOf()
         }
         return measureTimedValue {
-            SyncScanService.getInstance(info.project)
-                .scan(listOf(info.file), MypySettings.getInstance(info.project).getData())
+            SyncScanService.getInstance(info.project).scan(listOf(info.file), configuration.getOrThrow())
         }.also { thisLogger().debug($$"MypyAnnotator#doAnnotate$scan took $${it.duration}") }.value
     }
 

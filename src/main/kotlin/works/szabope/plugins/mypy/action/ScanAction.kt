@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import works.szabope.plugins.mypy.services.AsyncScanService
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.mypy.services.SettingsValidator
 import works.szabope.plugins.mypy.services.parser.MypyMessageConverter
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 import works.szabope.plugins.mypy.toolWindow.MypyTreeService
@@ -34,7 +33,7 @@ open class ScanAction : DumbAwareAction() {
         treeService.reinitialize(targets)
         WriteIntentReadAction.run { FileDocumentManager.getInstance().saveAllDocuments() }
         val job = currentThreadCoroutineScope().launch(Dispatchers.IO) {
-            val configuration = MypySettings.getInstance(project).getData()
+            val configuration = MypySettings.getInstance(project).getValidConfiguration().getOrNull() ?: return@launch
             AsyncScanService.getInstance(project).scan(targets, configuration).forEach {
                 val mypyMessage = MypyMessageConverter.convert(it)
                 withContext(Dispatchers.EDT) {
@@ -62,7 +61,7 @@ open class ScanAction : DumbAwareAction() {
 
     private fun isReadyToScan(project: Project, targets: Collection<VirtualFile>): Boolean {
         return targets.isNotEmpty() && ScanJobRegistry.INSTANCE.isAvailable() && MypySettings.getInstance(project)
-            .getData().let { SettingsValidator(project).isComplete(it) } && isEligibleTargets(targets)
+            .getValidConfiguration().isSuccess && isEligibleTargets(targets)
     }
 
     private fun isEligibleTargets(targets: Collection<VirtualFile>) = targets.map { isEligible(it) }.all { it }

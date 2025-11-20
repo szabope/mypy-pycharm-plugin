@@ -5,12 +5,13 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.python.sdk.pythonSdk
 import org.jetbrains.annotations.TestOnly
 import works.szabope.plugins.common.services.BasicSettingsData
+import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.common.services.Settings
 
 @Service(Service.Level.PROJECT)
 @State(name = "MypySettings", storages = [Storage("MypyPlugin.xml")], category = SettingsCategory.PLUGINS)
-class MypySettings(internal val project: Project) :
-    SimplePersistentStateComponent<MypySettings.MypyState>(MypyState()), Settings {
+class MypySettings(internal val project: Project) : SimplePersistentStateComponent<MypySettings.MypyState>(MypyState()),
+    Settings {
 
     private var initialized = false
 
@@ -64,7 +65,7 @@ class MypySettings(internal val project: Project) :
             state.excludeNonProjectFiles = value
         }
 
-    override var projectDirectory
+    override var workingDirectory
         get() = state.projectDirectory
         set(value) {
             state.projectDirectory = value
@@ -92,15 +93,34 @@ class MypySettings(internal val project: Project) :
         initialized = true
     }
 
-    override fun getData() = MypyExecutorConfiguration(
-        executablePath,
-        useProjectSdk,
-        configFilePath,
-        arguments,
-        projectDirectory,
-        excludeNonProjectFiles,
-        scanBeforeCheckIn
-    )
+    override fun getValidConfiguration(): Result<ImmutableSettingsData> {
+        val workingDirectory = workingDirectory
+        if (workingDirectory.isNullOrBlank()) {
+            return Result.failure(MypySettingsInvalid("Working directory is required"))
+        }
+        if (!isMypySet()) {
+            return Result.failure(MypySettingsInvalid("Mypy tool is not set"))
+        }
+
+        return MypyExecutorConfiguration(
+            executablePath,
+            useProjectSdk,
+            configFilePath,
+            arguments,
+            workingDirectory,
+            excludeNonProjectFiles,
+            scanBeforeCheckIn
+        ).let { Result.success(it) }
+    }
+
+    private fun isMypySet(): Boolean {
+        return if (useProjectSdk) {
+            project.pythonSdk != null && MypyPluginPackageManagementService.getInstance(project)
+                .checkInstalledRequirement().isSuccess
+        } else {
+            executablePath.isNotBlank()
+        }
+    }
 
     @TestOnly
     fun reset() {

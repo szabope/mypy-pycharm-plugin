@@ -34,7 +34,7 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
         MypyBundle.message("mypy.configuration.path_to_executable.version_validation_title"),
         MypyBundle.message("mypy.configuration.use_project_sdk"),
         MypyBundle.message("mypy.configuration.config_file.comment"),
-        MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
+        MypyBundle.message("mypy.configuration.config_file.help")
     )
 ) {
     override val settings get() = MypySettings.getInstance(project)

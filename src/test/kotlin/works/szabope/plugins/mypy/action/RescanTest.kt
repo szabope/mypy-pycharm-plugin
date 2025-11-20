@@ -20,7 +20,7 @@ class RescanTest : AbstractToolWindowTestCase() {
         with(MypySettings.getInstance(project)) {
             useProjectSdk = false
             executablePath = Paths.get(testDataPath).resolve("mypy").absolutePathString()
-            projectDirectory = Paths.get(testDataPath).absolutePathString()
+            workingDirectory = Paths.get(testDataPath).absolutePathString()
         }
         val file = myFixture.configureByText("a.py", "doesn't matter").virtualFile
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(file)) })

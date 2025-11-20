@@ -21,7 +21,7 @@ class StopScanTest : AbstractToolWindowTestCase() {
         with(MypySettings.getInstance(project)) {
             useProjectSdk = false
             executablePath = Paths.get(testDataPath).resolve("mypy").absolutePathString()
-            projectDirectory = Paths.get(testDataPath).absolutePathString()
+            workingDirectory = Paths.get(testDataPath).absolutePathString()
         }
     }
 

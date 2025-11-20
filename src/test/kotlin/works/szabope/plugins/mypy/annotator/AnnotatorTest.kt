@@ -2,7 +2,6 @@ package works.szabope.plugins.mypy.annotator
 
 import com.intellij.testFramework.TestDataPath
 import works.szabope.plugins.mypy.AbstractMypyTestCase
-import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.MypySettings
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
@@ -28,14 +27,14 @@ class AnnotatorTest : AbstractMypyTestCase() {
             useProjectSdk = false
         }
         myFixture.configureByText("a.py", DOESNT_MATTER)
-        assertEmpty(myFixture.filterAvailableIntentions(MypyBundle.message("mypy.intention.ignore.text")))
+        assertEmpty(myFixture.filterAvailableIntentions("Suppress mypy "))
     }
 
     fun `test MypyAnnotator does not fail if mypy executable path has a space in it`() {
         with(MypySettings.getInstance(project)) {
             executablePath = Paths.get(testDataPath).resolve("white space/mypy").absolutePathString()
             configFilePath = Paths.get(testDataPath).resolve("white space/mypy.ini").absolutePathString()
-            projectDirectory = Paths.get(testDataPath).absolutePathString()
+            workingDirectory = Paths.get(testDataPath).absolutePathString()
             arguments = ""
             useProjectSdk = false
         }

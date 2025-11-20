@@ -7,7 +7,7 @@ data class MypyExecutorConfiguration(
     override val useProjectSdk: Boolean,
     override val configFilePath: String,
     override val arguments: String,
-    override val projectDirectory: String? = null,
+    override val workingDirectory: String,
     override val excludeNonProjectFiles: Boolean,
     override val scanBeforeCheckIn: Boolean
 ) : ImmutableSettingsData

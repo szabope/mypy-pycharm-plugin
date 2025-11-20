@@ -71,7 +71,7 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
     private fun setUpSettings() {
         with(MypySettings.getInstance(project)) {
             executablePath = ""
-            projectDirectory = Paths.get(testDataPath).absolutePathString()
+            workingDirectory = Paths.get(testDataPath).absolutePathString()
             useProjectSdk = true
             configFilePath = ""
             scanBeforeCheckIn = false
