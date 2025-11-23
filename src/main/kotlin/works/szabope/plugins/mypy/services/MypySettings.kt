@@ -2,6 +2,7 @@ package works.szabope.plugins.mypy.services
 
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.jetbrains.python.sdk.pythonSdk
 import org.jetbrains.annotations.TestOnly
 import works.szabope.plugins.common.services.BasicSettingsData
@@ -89,6 +90,9 @@ class MypySettings(internal val project: Project) : SimplePersistentStateCompone
         }
         if (state.arguments == null && oldSettings.arguments != null) {
             arguments = oldSettings.arguments!!
+        }
+        if (state.projectDirectory == null) {
+            workingDirectory = project.guessProjectDir()?.canonicalPath
         }
         initialized = true
     }
