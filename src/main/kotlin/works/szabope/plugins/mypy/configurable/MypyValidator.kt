@@ -61,10 +61,7 @@ class MypyValidator(private val project: Project) {
         }.getOrNull()
     }
 
-    fun validateSdk(): String? {
-        if (MypyPluginPackageManagementService.getInstance(project).isWSL()) {
-            return MypyBundle.message("mypy.configuration.wsl_not_supported")
-        }
+    fun validateProjectSdk(): String? {
         MypyPluginPackageManagementService.getInstance(project).checkInstalledRequirement().onFailure {
             when (it) {
                 is PluginPackageManagementException.PackageNotInstalledException -> return MypyBundle.message(
