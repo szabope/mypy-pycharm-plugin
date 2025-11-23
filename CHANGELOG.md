@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2.1.2] - 2025-11-23
+
+- fix misleading description within configuration panel
+- do not run annotator for virtual files (e.g. python console)
+- move wsl validation to common
+- initialize working directory on startup if empty
+
 ## [2.1.1] - 2025-11-18
 
 - Changelog update - `v2.1.0` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/117
@@ -208,7 +215,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.0.0...v2.0.1
