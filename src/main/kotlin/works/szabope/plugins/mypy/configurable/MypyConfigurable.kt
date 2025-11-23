@@ -3,7 +3,6 @@ package works.szabope.plugins.mypy.configurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.SystemInfo
-import com.intellij.ui.components.JBRadioButton
 import com.intellij.ui.layout.ValidationInfoBuilder
 import works.szabope.plugins.common.configurable.ConfigurableConfiguration
 import works.szabope.plugins.common.configurable.GeneralConfigurable
@@ -34,7 +33,7 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
         MypyBundle.message("mypy.configuration.path_to_executable.version_validation_title"),
         MypyBundle.message("mypy.configuration.use_project_sdk"),
         MypyBundle.message("mypy.configuration.config_file.comment"),
-        MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
+        MypyBundle.message("mypy.configuration.config_file.help")
     )
 ) {
     override val settings get() = MypySettings.getInstance(project)
@@ -47,9 +46,7 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
         }
     }
 
-    override fun validateSdk(
-        builder: ValidationInfoBuilder, button: JBRadioButton
-    ) = MypyValidator(project).validateSdk()?.let { builder.error(it) }
+    override fun validateLocalSdk() = MypyValidator(project).validateProjectSdk()
 
     override fun validateConfigFilePath(
         builder: ValidationInfoBuilder, field: TextFieldWithBrowseButton

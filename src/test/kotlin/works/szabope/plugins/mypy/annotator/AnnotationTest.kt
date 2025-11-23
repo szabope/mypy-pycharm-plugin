@@ -24,7 +24,7 @@ class AnnotationTest : BasePlatformTestCase() {
         myFixture.enableInspections(MypyInspection())
         with(MypySettings.getInstance(myFixture.project)) {
             executablePath = Paths.get(myFixture.testDataPath).resolve("mypy").absolutePathString()
-            projectDirectory = Paths.get(testDataPath).absolutePathString()
+            workingDirectory = Paths.get(testDataPath).absolutePathString()
             arguments = ""
             useProjectSdk = false
         }
@@ -89,7 +89,7 @@ class AnnotationTest : BasePlatformTestCase() {
                                 |   intention should not be available""${'"'}""".trimMargin()
         )
         assertNotEmpty(myFixture.doHighlighting())
-        assertEmpty(myFixture.filterAvailableIntentions(MypyBundle.message("mypy.intention.ignore.text", "name-defined")))
+        assertEmpty(myFixture.filterAvailableIntentions("Suppress mypy "))
     }
 
     fun `test single line triple-quoted string annotated with intention available`() {

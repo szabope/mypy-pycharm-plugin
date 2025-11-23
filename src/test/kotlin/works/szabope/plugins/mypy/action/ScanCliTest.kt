@@ -132,7 +132,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         myFixture.copyDirectoryToProject("/", "/")
         with(MypySettings.getInstance(project)) {
             executablePath = "/does/not/exist"
-            projectDirectory = Paths.get(testDataPath).absolutePathString()
+            workingDirectory = Paths.get(testDataPath).absolutePathString()
             useProjectSdk = false
             configFilePath = ""
             scanBeforeCheckIn = false
@@ -162,7 +162,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
     private fun setUpSettings(executable: String) {
         with(MypySettings.getInstance(project)) {
             executablePath = Paths.get(testDataPath).resolve(executable).absolutePathString()
-            projectDirectory = Paths.get(testDataPath).absolutePathString()
+            workingDirectory = Paths.get(testDataPath).absolutePathString()
             useProjectSdk = false
             configFilePath = ""
             scanBeforeCheckIn = false
