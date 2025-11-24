@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [2.1.3] - 2025-11-24
+
+- fix comment on configurable by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/129
+
 ## [2.1.2] - 2025-11-23
 
 - fix misleading description within configuration panel
@@ -215,7 +219,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.2...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.3...HEAD
+[2.1.3]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.0.1...v2.1.0
