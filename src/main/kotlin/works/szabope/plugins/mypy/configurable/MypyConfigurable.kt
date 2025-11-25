@@ -38,7 +38,6 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
 ) {
     override val settings get() = MypySettings.getInstance(project)
     override val packageManager get() = MypyPluginPackageManagementService.getInstance(project)
-    override val defaultArguments = MypyArgs.MYPY_RECOMMENDED_COMMAND_ARGS
 
     override fun validateExecutable(path: String?) = with(MypyValidator(project)) {
         path?.trimToNull()?.let { path ->
