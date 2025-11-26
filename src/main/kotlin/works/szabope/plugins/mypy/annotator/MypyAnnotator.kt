@@ -5,7 +5,6 @@ import com.intellij.codeInsight.daemon.HighlightDisplayKey
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.profile.codeInspection.InspectionProjectProfileManager
@@ -16,7 +15,6 @@ import com.intellij.util.DocumentUtil
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.SyncScanService
 import works.szabope.plugins.mypy.services.parser.MypyMessage
-import kotlin.time.measureTimedValue
 
 //TODO: extract to common
 class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, List<MypyMessage>>() {
@@ -55,12 +53,8 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, List<MypyMe
     }
 
     private fun PsiFile.findElementFor(issue: MypyMessage): PsiElement? {
-        val (result, duration) = measureTimedValue {
-            val tabSize = CodeStyle.getFacade(this).tabSize
-            val offset = DocumentUtil.calculateOffset(fileDocument, issue.line, issue.column, tabSize)
-            findElementAt(offset)
-        }
-        thisLogger().debug($$"MypyAnnotator$PsiFile#findElementFor took $$duration")
-        return result
+        val tabSize = CodeStyle.getFacade(this).tabSize
+        val offset = DocumentUtil.calculateOffset(fileDocument, issue.line, issue.column, tabSize)
+        return findElementAt(offset)
     }
 }
