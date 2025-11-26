@@ -2,7 +2,6 @@ package works.szabope.plugins.mypy.annotator
 
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
-import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
@@ -14,7 +13,6 @@ import com.jetbrains.python.psi.PyUtil.StringNodeInfo
 import com.jetbrains.python.psi.impl.PyPsiUtils
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.parser.MypyMessage
-import kotlin.time.measureTimedValue
 
 /**
  * Intention action to append `# type: ignore[...]` comment to suppress Mypy annotations.
@@ -35,9 +33,7 @@ class MypyIgnoreIntention(private val issue: MypyMessage) : PsiElementBaseIntent
     }
 
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement): Boolean {
-        return measureTimedValue {
-            !isTripleQuotedMultilineString(element)
-        }.also { thisLogger().debug("MypyIgnoreIntention#isAvailable took ${it.duration}") }.value
+        return !isTripleQuotedMultilineString(element)
     }
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {

@@ -6,7 +6,10 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.future.asCompletableFuture
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.parser.MypyMessage
@@ -15,23 +18,17 @@ import works.szabope.plugins.mypy.services.parser.MypyParseException
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
-import kotlin.time.measureTime
-import kotlin.time.measureTimedValue
 
 @Service(Service.Level.PROJECT)
-class SyncScanService(private val project: Project) {
+class SyncScanService(private val project: Project, private val cs: CoroutineScope) {
 
-    fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): Flow<MypyMessage> {
+    fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): List<MypyMessage> {
         val shadowedTargetMap = targets.associateWith {
-            measureTimedValue {
-                copyTempFrom(it)
-            }.also { m -> thisLogger().debug($$"SyncScanService#scan$createShadowFile took $${m.duration}") }.value
+            copyTempFrom(it)
         }
-        val parameters = measureTimedValue {
-            with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
-        }.also { m -> thisLogger().debug($$"SyncScanService#scan$buildParamList took $${m.duration}") }.value
+        val parameters = with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
         val stdErr = StringBuilder()
-        return MypyExecutor(project).execute(configuration, parameters).filter { it.text.isNotBlank() }
+        val flow = MypyExecutor(project).execute(configuration, parameters).filter { it.text.isNotBlank() }
             .transform { line ->
                 if (line.isError) {
                     stdErr.append(line.text)
@@ -51,11 +48,12 @@ class SyncScanService(private val project: Project) {
                     }
                 }
             }.onCompletion {
-                measureTime {
-                    // cleanup
-                    shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
-                }.let { thisLogger().debug($$"SyncScanService#scan$cleanUp took $$it") }
+                // cleanup
+                shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
             }.catch(handleScanException(project, configuration, stdErr))
+        return cs.async {
+            flow.toList()
+        }.asCompletableFuture().get()
     }
 
     private fun copyTempFrom(file: VirtualFile): Path {

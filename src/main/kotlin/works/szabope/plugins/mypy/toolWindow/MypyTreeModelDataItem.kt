@@ -12,5 +12,5 @@ data class MypyTreeModelDataItem(
     override val severity: SeverityConfig,
     val hint: String?,
 ) : TreeModelDataItem {
-    override fun toRepresentation() = "$message [$code] ($line:$column) $hint"
+    override fun toRepresentation() = "$message [$code] ($line:$column) ${hint?.replace("\n", " ")}"
 }

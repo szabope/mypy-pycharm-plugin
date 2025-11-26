@@ -1,7 +1,6 @@
 package works.szabope.plugins.mypy.services.parser
 
 import kotlinx.serialization.Serializable
-import works.szabope.plugins.common.services.ToolResultItem
 
 // https://github.com/Kotlin/kotlinx.serialization/issues/2808
 @Suppress("PROVIDED_RUNTIME_TOO_LOW", "INLINE_CLASSES_NOT_SUPPORTED")
@@ -14,4 +13,4 @@ data class MypyMessage(
     val hint: String?,
     val code: String,
     var severity: String
-) : ToolResultItem
+)
