@@ -6,7 +6,6 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.diagnostic.thisLogger
-import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.profile.codeInspection.InspectionProjectProfileManager
@@ -14,16 +13,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.util.DocumentUtil
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.SyncScanService
 import works.szabope.plugins.mypy.services.parser.MypyMessage
 import kotlin.time.measureTimedValue
 
 //TODO: extract to common
-class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMessage>>() {
+class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, List<MypyMessage>>() {
 
     class AnnotatorInfo(val file: VirtualFile, val project: Project)
 
@@ -33,30 +29,24 @@ class MypyAnnotator : ExternalAnnotator<MypyAnnotator.AnnotatorInfo, Flow<MypyMe
         return AnnotatorInfo(file.virtualFile, file.project)
     }
 
-    override fun doAnnotate(info: AnnotatorInfo): Flow<MypyMessage> {
-        val configuration = measureTimedValue {
-            MypySettings.getInstance(info.project).getValidConfiguration()
-        }.also { thisLogger().debug($$"MypyAnnotator#doAnnotate$isComplete took $${it.duration}") }.value
+    override fun doAnnotate(info: AnnotatorInfo): List<MypyMessage> {
+        val configuration = MypySettings.getInstance(info.project).getValidConfiguration()
         if (configuration.isFailure) {
-            return flowOf()
+            return emptyList()
         }
-        return measureTimedValue {
-            SyncScanService.getInstance(info.project).scan(listOf(info.file), configuration.getOrThrow())
-        }.also { thisLogger().debug($$"MypyAnnotator#doAnnotate$scan took $${it.duration}") }.value
+        return SyncScanService.getInstance(info.project).scan(listOf(info.file), configuration.getOrThrow())
     }
 
-    override fun apply(file: PsiFile, annotationResult: Flow<MypyMessage>, holder: AnnotationHolder) {
+    override fun apply(file: PsiFile, annotationResult: List<MypyMessage>, holder: AnnotationHolder) {
         val profile = InspectionProjectProfileManager.getInstance(file.project).currentProfile
         val severity = HighlightDisplayKey.findById(MypyInspectionId)?.let {
             profile.getErrorLevel(it, file).severity
         } ?: HighlightSeverity.ERROR
-        runBlockingCancellable {
-            annotationResult.map {
-                it to requireNotNull(file.findElementFor(it)) { "Mypy result mismatch for $it" }
-            }.collect { (issue, psiElement) ->
-                holder.newAnnotation(severity, issue.message).range(psiElement.textRange)
-                    .withFix(MypyIgnoreIntention(issue)).create()
-            }
+        annotationResult.map {
+            it to requireNotNull(file.findElementFor(it)) { "Mypy result mismatch for $it" }
+        }.forEach { (issue, psiElement) ->
+            holder.newAnnotation(severity, issue.message).range(psiElement.textRange)
+                .withFix(MypyIgnoreIntention(issue)).create()
         }
     }
 
