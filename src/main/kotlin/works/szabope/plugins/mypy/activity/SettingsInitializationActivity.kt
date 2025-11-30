@@ -11,6 +11,9 @@ import works.szabope.plugins.mypy.services.OldMypySettings
 internal class SettingsInitializationActivity : ProjectActivity {
 
     override suspend fun execute(project: Project) {
+        if (project.isDefault) {
+            return
+        }
         if (!ApplicationManager.getApplication().isUnitTestMode) {
             MypyPluginPackageManagementService.getInstance(project).reloadPackages()
         }
