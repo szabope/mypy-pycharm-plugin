@@ -7,9 +7,8 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.future.asCompletableFuture
+import kotlinx.coroutines.future.future
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.parser.MypyMessage
@@ -51,9 +50,9 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
                 // cleanup
                 shadowedTargetMap.values.onEach { shadowFile -> shadowFile.deleteIfExists() }
             }.catch(handleScanException(project, configuration, stdErr))
-        return cs.async {
+        return cs.future {
             flow.toList()
-        }.asCompletableFuture().get()
+        }.get()
     }
 
     private fun copyTempFrom(file: VirtualFile): Path {
