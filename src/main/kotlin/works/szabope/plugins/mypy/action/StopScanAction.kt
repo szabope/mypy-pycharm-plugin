@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.progress.currentThreadCoroutineScope
 import com.intellij.openapi.project.DumbAwareAction
-import kotlinx.coroutines.guava.future
+import kotlinx.coroutines.future.future
 import works.szabope.plugins.mypy.toolWindow.MypyTreeService
 
 class StopScanAction : DumbAwareAction() {
