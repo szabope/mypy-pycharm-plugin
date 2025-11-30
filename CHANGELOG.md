@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2.1.4] - 2025-11-26
+
+- Changelog update - `v2.1.3` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/130
+- Attempt to fix periodic UI freezing by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/133
+- Remove default arguments
+- Fix format for multi-line hints, resolves Issue #81
+
 ## [2.1.3] - 2025-11-24
 
 - fix comment on configurable by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/129
@@ -219,7 +226,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.3...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.4...HEAD
+[2.1.4]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.0...v2.1.1
