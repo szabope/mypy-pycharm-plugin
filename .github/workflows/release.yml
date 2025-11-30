@@ -4,6 +4,8 @@
 
 name: Release
 on:
+  # Enable manual trigger
+  workflow_dispatch:
   release:
     types: [prereleased, released]
 
