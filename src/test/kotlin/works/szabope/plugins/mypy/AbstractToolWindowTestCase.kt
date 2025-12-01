@@ -1,6 +1,7 @@
 package works.szabope.plugins.mypy
 
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.testFramework.replaceService
 import com.intellij.toolWindow.ToolWindowHeadlessManagerImpl
 import com.intellij.ui.tree.TreeTestUtil
@@ -27,6 +28,7 @@ abstract class AbstractToolWindowTestCase : AbstractMypyTestCase() {
         with(MypyTreeService.getInstance(project)) {
             mypySeverityConfigs.keys.forEach { assertTrue(isSeverityLevelDisplayed(it)) }
         }
+        PlatformTestUtil.waitForAllBackgroundActivityToCalmDown()
     }
 
     override fun tearDown() {
