@@ -6,12 +6,9 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.openapi.wm.ToolWindowType
 import com.intellij.ui.content.ContentFactory
-import org.jetbrains.annotations.VisibleForTesting
 import works.szabope.plugins.mypy.MypyBundle
 
-
-@VisibleForTesting
-internal open class MypyToolWindowFactory : ToolWindowFactory, DumbAware {
+class MypyToolWindowFactory : ToolWindowFactory, DumbAware {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val panel = MypyToolWindowPanel(project)

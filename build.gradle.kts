@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.kotlin) // Kotlin support
     alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
-    alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
     alias(libs.plugins.serialization) // Gradle Kotlin Serialization Plugin
 }
@@ -70,7 +69,6 @@ dependencies {
         zipSigner()
         testFramework(TestFrameworkType.Platform)
     }
-    implementation(libs.kotlinProcess)
     implementation(libs.myPluginCommon)
 }
 

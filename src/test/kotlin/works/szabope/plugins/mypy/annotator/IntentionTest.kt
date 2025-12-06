@@ -9,7 +9,7 @@ import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
 
 @TestDataPath($$"$CONTENT_ROOT/testData/annotation")
-class AnnotationTest : BasePlatformTestCase() {
+class IntentionTest : BasePlatformTestCase() {
 
     companion object {
         val DOESNT_MATTER = """|def<caret> lets_have_fun() -> [int]:

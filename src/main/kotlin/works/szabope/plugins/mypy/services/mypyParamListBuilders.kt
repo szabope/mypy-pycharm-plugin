@@ -24,9 +24,7 @@ fun buildMypyParamList(configuration: ImmutableSettingsData, shadowMap: Map<Virt
 
 context(project: Project)
 fun buildMypyParamList(
-    configuration: ImmutableSettingsData,
-    targets: Collection<VirtualFile>,
-    extraArgs: Collection<String> = emptyList()
+    configuration: ImmutableSettingsData, targets: Collection<VirtualFile>, extraArgs: Collection<String> = emptyList()
 ) = with(configuration) {
     val params = MypyArgs.MYPY_MANDATORY_COMMAND_ARGS.split(" ").toMutableList()
     configFilePath.nullize(true)?.let { params.add("--config-file"); params.add(it) }
