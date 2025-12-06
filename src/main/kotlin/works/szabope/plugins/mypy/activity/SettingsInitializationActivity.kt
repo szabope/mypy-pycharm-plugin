@@ -8,7 +8,7 @@ import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.OldMypySettings
 
-internal class SettingsInitializationActivity : ProjectActivity {
+class SettingsInitializationActivity : ProjectActivity {
 
     override suspend fun execute(project: Project) {
         if (project.isDefault) {

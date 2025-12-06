@@ -1,5 +1,3 @@
-@file:Suppress("removal", "UnstableApiUsage")
-
 package works.szabope.plugins.mypy.services
 
 import com.intellij.openapi.components.Service
