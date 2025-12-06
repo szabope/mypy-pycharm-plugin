@@ -20,7 +20,7 @@ object MypyOutputParser {
      * @throws SerializationException mypy _sometimes_ prints its own errors to stdout, mixing them into normal output,
      * in which case even `-O json` is ignored.
      */
-    @Throws(SerializationException::class)
+    @Throws(MypyParseException::class)
     fun parse(json: String): Result<MypyMessage> {
         val result = try {
             withUnknownKeys.decodeFromString(MypyMessage.serializer(), json)

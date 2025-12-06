@@ -7,6 +7,7 @@ import com.intellij.ui.layout.ValidationInfoBuilder
 import works.szabope.plugins.common.configurable.ConfigurableConfiguration
 import works.szabope.plugins.common.configurable.GeneralConfigurable
 import works.szabope.plugins.common.trimToNull
+import works.szabope.plugins.common.validator.FileValidator
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.action.InstallMypyAction
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
@@ -48,7 +49,7 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
 
     override fun validateConfigFilePath(
         builder: ValidationInfoBuilder, field: TextFieldWithBrowseButton
-    ) = MypyConfigFileValidator().validateConfigFilePath(field.text.trimToNull())?.let { builder.error(it) }
+    ) = FileValidator().validateConfigFilePath(field.text.trimToNull())?.let { builder.error(it) }
 
     companion object {
         const val ID = "Settings.Mypy"
