@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [2.1.6] - 2025-12-06
+
+- Changelog update - `v2.1.5` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/140
+- Support 2025.3 by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/143
+
 ## [2.1.5] - 2025-12-01
 
 - Support 2025.3 by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/139
@@ -230,7 +235,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.5...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.6...HEAD
+[2.1.6]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.5...v2.1.6
 [2.1.5]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.4...v2.1.5
 [2.1.4]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.2...v2.1.3
