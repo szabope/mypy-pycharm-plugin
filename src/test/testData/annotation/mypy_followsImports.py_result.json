@@ -1,0 +1,2 @@
+{"file": "/src/followsImports.py", "line": 1, "column": 1, "message": "Name \"x\" is not defined", "hint": null, "code": "name-defined", "severity": "error"}
+{"file": "/src/dummy.py", "line": 1, "column": 1, "message": "Name \"x\" is not defined", "hint": null, "code": "name-defined", "severity": "error"}
