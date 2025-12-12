@@ -13,7 +13,7 @@ class MypyAnnotator : ToolAnnotator<MypyMessage>() {
     override fun getSettingsInstance(project: Project) = MypySettings.getInstance(project)
 
     override fun scan(info: AnnotatorInfo, configuration: ImmutableSettingsData) =
-        SyncScanService.getInstance(info.project).scan(listOf(info.file), configuration)
+        SyncScanService.getInstance(info.project).scan(listOf(info.file), configuration)[info.file] ?: emptyList()
 
     override fun createIntention(message: MypyMessage) = MypyIgnoreIntention(message)
 }

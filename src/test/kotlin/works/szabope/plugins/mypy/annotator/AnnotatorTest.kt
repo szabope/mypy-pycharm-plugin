@@ -40,7 +40,7 @@ class AnnotatorTest : AbstractToolWindowTestCase() {
             arguments = ""
             useProjectSdk = false
         }
-        myFixture.configureByText("a.py", DOESNT_MATTER)
+        myFixture.configureByFile("a.py")
         @Suppress("UnstableApiUsage") val mypyAnnotations =
             myFixture.doHighlighting().filter { it.toolId == MypyAnnotator::class.java }
         assertEquals(1, mypyAnnotations.size)

@@ -6,11 +6,10 @@ import works.szabope.plugins.common.run.ToolExecutionTerminatedException
 import works.szabope.plugins.common.services.ImmutableSettingsData
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
-import works.szabope.plugins.mypy.services.parser.MypyMessage
 
-fun handleScanException(
+inline fun <reified T> handleScanException(
     project: Project, configuration: ImmutableSettingsData, stdErr: StringBuilder
-): suspend FlowCollector<MypyMessage>.(Throwable) -> Unit = {
+): suspend FlowCollector<T>.(Throwable) -> Unit = {
     if (it is ToolExecutionTerminatedException) {
         showClickableBalloonError(project, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
             DialogManager.showToolExecutionErrorDialog(

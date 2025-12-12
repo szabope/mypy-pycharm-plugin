@@ -1,1 +1,1 @@
-{"file": "/home/debian/PycharmProjects/subprocess-workflow/src/c.py", "line": 2, "column": 11, "message": "Name \"x\" is not defined", "hint": null, "code": "name-defined", "severity": "error"}
+{"file": "/src/c.py", "line": 2, "column": 11, "message": "Name \"x\" is not defined", "hint": null, "code": "name-defined", "severity": "error"}
