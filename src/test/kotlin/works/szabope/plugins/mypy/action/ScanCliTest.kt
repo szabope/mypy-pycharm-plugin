@@ -105,9 +105,24 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         assertionError?.let { throw it }
     }
 
-    fun `test mypy returning with an exit code 2 results in dialog`() {
+    // syntax error results in exit 2
+    fun `test mypy returning with an exit code 2 is also fine`() {
         myFixture.copyDirectoryToProject("/", "/")
         setUpSettings("mypy_exit_with_2")
+        var assertionError: Error? = null
+        toolWindowManager.onBalloon {
+            assertionError = AssertionFailedError("Should not happen")
+        }
+        val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
+            .first().url.virtualFile!!
+        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
+        PlatformTestUtil.waitWhileBusy { ScanJobRegistry.INSTANCE.isActive() }
+        assertionError?.let { throw it }
+    }
+
+    fun `test mypy returning with an exit code other than 0, 1, and 2 results in dialog`() {
+        myFixture.copyDirectoryToProject("/", "/")
+        setUpSettings("mypy_exit_with_3")
         toolWindowManager.onBalloon {
             it.listener?.hyperlinkUpdate(
                 HyperlinkEvent(
