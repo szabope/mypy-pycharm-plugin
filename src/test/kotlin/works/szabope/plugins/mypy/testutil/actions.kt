@@ -3,10 +3,18 @@ package works.szabope.plugins.mypy.testutil
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.actionSystem.ex.ActionUtil.performAction
 import com.intellij.openapi.actionSystem.ex.ActionUtil.updateAction
+import com.intellij.testFramework.PlatformTestUtil
 import org.junit.Assert
 import works.szabope.plugins.mypy.action.InstallMypyAction
 import works.szabope.plugins.mypy.action.ScanAction
 import works.szabope.plugins.mypy.action.StopScanAction
+
+fun waitForIt(actionId: String, context: DataContext) {
+    val action = ActionManager.getInstance().getAction(actionId)
+    val event = AnActionEvent.createEvent(context, null, "", ActionUiKind.NONE, null)
+    updateAction(action, event)
+    PlatformTestUtil.waitWhileBusy { !event.presentation.isEnabled }
+}
 
 fun scan(context: DataContext) {
     val action = ActionManager.getInstance().getAction(ScanAction.ID)

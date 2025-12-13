@@ -49,7 +49,9 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
             }
         }
         val target = TempFileSystem.getInstance().findFileByPath("/src")!!
-        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
+        val context = dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) }
+        waitForIt(ScanAction.ID, context)
+        scan(context)
         PlatformTestUtil.waitWhileBusy { ScanJobRegistry.INSTANCE.isActive() }
         assertionError?.let { throw it }
         runBlocking {
