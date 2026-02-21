@@ -25,16 +25,6 @@ kotlin {
 // Configure project's dependencies
 repositories {
     mavenCentral()
-
-    maven {
-        url = uri("https://maven.pkg.github.com/szabope/pycharm-plugin-base")
-        credentials {
-            username =
-                providers.gradleProperty("gpr.user").orNull ?: providers.environmentVariable("GPR_USERNAME").orNull
-            password = providers.gradleProperty("gpr.key").orNull ?: providers.environmentVariable("GPR_TOKEN").orNull
-        }
-    }
-
     // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
         defaultRepositories()
