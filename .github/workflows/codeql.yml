@@ -70,7 +70,7 @@ jobs:
               - .idea/**
               - out/**
               - generated/**
-              - **/generated/**
+              - "**/generated/**"
 
       # IntelliJ Plugin Build
       - name: Build IntelliJ Plugin
