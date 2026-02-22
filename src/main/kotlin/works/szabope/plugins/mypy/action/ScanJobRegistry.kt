@@ -2,6 +2,7 @@ package works.szabope.plugins.mypy.action
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import org.jetbrains.annotations.TestOnly
 
 class ScanJobRegistry {
     private var job: Job? = null
@@ -19,6 +20,11 @@ class ScanJobRegistry {
 
     suspend fun cancel() {
         job?.cancelAndJoin()
+    }
+
+    @TestOnly
+    fun reset() {
+        job = null
     }
 
     companion object {
