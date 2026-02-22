@@ -12,8 +12,10 @@ import works.szabope.plugins.mypy.action.StopScanAction
 fun waitForIt(actionId: String, context: DataContext) {
     val action = ActionManager.getInstance().getAction(actionId)
     val event = AnActionEvent.createEvent(context, null, "", ActionUiKind.NONE, null)
-    updateAction(action, event)
-    PlatformTestUtil.waitWhileBusy { !event.presentation.isEnabled }
+    PlatformTestUtil.waitWhileBusy {
+        updateAction(action, event)
+        !event.presentation.isEnabled
+    }
 }
 
 fun scan(context: DataContext) {
