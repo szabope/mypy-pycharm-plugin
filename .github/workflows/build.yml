@@ -31,6 +31,8 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
 
       # Free GitHub Actions Environment Disk Space
@@ -85,6 +87,8 @@ jobs:
     name: Test
     needs: [ build ]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
 
       # Free GitHub Actions Environment Disk Space
@@ -138,6 +142,8 @@ jobs:
     name: Verify plugin
     needs: [ build ]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
 
       # Free GitHub Actions Environment Disk Space
