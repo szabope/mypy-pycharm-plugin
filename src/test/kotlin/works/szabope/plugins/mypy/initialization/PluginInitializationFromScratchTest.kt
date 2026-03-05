@@ -9,7 +9,7 @@ class PluginInitializationFromScratchTest : AbstractToolWindowTestCase() {
     fun `test plugin initialized from scratch (no python sdk) results in notification`() {
         val actions = getMypyConfigurationNotCompleteNotification(project).actions
         assertEquals(
-            MypyBundle.message("mypy.intention.complete_configuration.text"),
+            MypyBundle.message("action.works.szabope.plugins.mypy.action.OpenSettingsAction.text"),
             actions.single().templatePresentation.text
         )
     }
