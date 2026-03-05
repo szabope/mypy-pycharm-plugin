@@ -52,7 +52,7 @@ class ScanSdkTest : AbstractToolWindowTestCase() {
         val context = dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) }
         waitForIt(ScanAction.ID, context)
         scan(context)
-        PlatformTestUtil.waitWhileBusy { ScanJobRegistry.INSTANCE.isActive() }
+        PlatformTestUtil.waitWhileBusy { MypyScanJobRegistryService.getInstance(project).isActive() }
         assertionError?.let { throw it }
         runBlocking {
             waitUntilAssertSucceeds {

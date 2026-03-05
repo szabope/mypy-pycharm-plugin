@@ -31,8 +31,8 @@ class StopScanTest : AbstractToolWindowTestCase() {
     fun `test that we can stop an external process that runs an infinite loop`() {
         val file = myFixture.configureByText("a.py", "doesn't matter").virtualFile
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(file)) })
-        PlatformTestUtil.waitWhileBusy { !ScanJobRegistry.INSTANCE.isActive() } // make sure that scan has been started
+        PlatformTestUtil.waitWhileBusy { !MypyScanJobRegistryService.getInstance(project).isActive() } // make sure that scan has been started
         stopScan(dataContext(project) {})
-        PlatformTestUtil.waitWhileBusy { !ScanJobRegistry.INSTANCE.isAvailable() }
+        PlatformTestUtil.waitWhileBusy { !MypyScanJobRegistryService.getInstance(project).isAvailable() }
     }
 }

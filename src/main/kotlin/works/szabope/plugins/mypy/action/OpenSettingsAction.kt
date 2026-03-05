@@ -1,26 +1,11 @@
 package works.szabope.plugins.mypy.action
 
-import com.intellij.notification.Notification
-import com.intellij.openapi.actionSystem.ActionUpdateThread
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.options.ShowSettingsUtil
-import com.intellij.openapi.wm.ToolWindowManager
-import works.szabope.plugins.mypy.MypyBundle
+import com.intellij.openapi.options.BoundSearchableConfigurable
+import works.szabope.plugins.common.action.AbstractOpenSettingsAction
 import works.szabope.plugins.mypy.configurable.MypyConfigurable
 
-class OpenSettingsAction : AnAction(MypyBundle.message("mypy.intention.complete_configuration.text")) {
-    override fun actionPerformed(e: AnActionEvent) {
-        val project = e.project ?: return
-        ToolWindowManager.getInstance(project).invokeLater {
-            e.getData(Notification.KEY)?.expire()
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, MypyConfigurable::class.java)
-        }
-    }
-
-    override fun getActionUpdateThread(): ActionUpdateThread {
-        return ActionUpdateThread.BGT
-    }
+class OpenSettingsAction : AbstractOpenSettingsAction() {
+    override fun getConfigurableClass(): Class<out BoundSearchableConfigurable> = MypyConfigurable::class.java
 
     companion object {
         const val ID = "works.szabope.plugins.mypy.action.OpenSettingsAction"

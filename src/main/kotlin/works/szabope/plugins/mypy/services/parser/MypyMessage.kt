@@ -8,10 +8,10 @@ import works.szabope.plugins.common.annotator.ToolMessage
 @Serializable
 data class MypyMessage(
     val file: String,
-    override var line: Int,
+    override val line: Int,
     override val column: Int,
     override val message: String,
     val hint: String?,
     val code: String,
-    var severity: String
+    val severity: String
 ) : ToolMessage
