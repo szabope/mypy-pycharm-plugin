@@ -11,13 +11,13 @@ class StopScanAction : DumbAwareAction() {
 
     override fun actionPerformed(event: AnActionEvent) {
         currentThreadCoroutineScope().future {
-            ScanJobRegistry.INSTANCE.cancel()
+            event.project?.let { MypyScanJobRegistryService.getInstance(it).cancel() }
             event.project?.let { MypyTreeService.getInstance(it) }?.lock()
         }.get()
     }
 
     override fun update(event: AnActionEvent) {
-        event.presentation.isEnabled = ScanJobRegistry.INSTANCE.isActive()
+        event.presentation.isEnabled = event.project?.let { MypyScanJobRegistryService.getInstance(it).isActive() } ?: false
     }
 
     override fun getActionUpdateThread(): ActionUpdateThread {

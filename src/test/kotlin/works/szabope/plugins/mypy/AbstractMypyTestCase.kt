@@ -12,7 +12,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import works.szabope.plugins.mypy.action.ScanJobRegistry
+import com.intellij.testFramework.replaceService
+import works.szabope.plugins.mypy.action.MypyScanJobRegistryService
 import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
 import works.szabope.plugins.common.test.sdk.PythonMockSdk
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
@@ -40,7 +41,7 @@ abstract class AbstractMypyTestCase : BasePlatformTestCase() {
         }
         super.setUp()
         MypySettings.getInstance(project).reset()
-        ScanJobRegistry.INSTANCE.reset()
+        project.replaceService(MypyScanJobRegistryService::class.java, MypyScanJobRegistryService(), testRootDisposable)
     }
 
     override fun tearDown() {

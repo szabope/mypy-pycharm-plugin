@@ -7,7 +7,9 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import com.intellij.testFramework.replaceService
 import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
+import works.szabope.plugins.mypy.action.MypyScanJobRegistryService
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.testutil.MypyPluginPackageManagementServiceStub
 
@@ -28,6 +30,7 @@ abstract class AbstractMypyHeavyPlatformTestCase : HeavyPlatformTestCase() {
             mypyPackageManagementServiceStub
         }
         super.setUp()
+        project.replaceService(MypyScanJobRegistryService::class.java, MypyScanJobRegistryService(), testRootDisposable)
     }
 
     override fun tearDown() {

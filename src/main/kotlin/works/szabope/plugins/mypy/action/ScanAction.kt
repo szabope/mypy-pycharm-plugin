@@ -42,7 +42,7 @@ open class ScanAction : DumbAwareAction() {
             }
             treeService.lock()
         }
-        ScanJobRegistry.INSTANCE.set(job)
+        MypyScanJobRegistryService.getInstance(project).set(job)
         ToolWindowManager.getInstance(project).getToolWindow(MypyToolWindowPanel.ID)?.show()
     }
 
@@ -60,7 +60,7 @@ open class ScanAction : DumbAwareAction() {
     }
 
     private fun isReadyToScan(project: Project, targets: Collection<VirtualFile>): Boolean {
-        return targets.isNotEmpty() && ScanJobRegistry.INSTANCE.isAvailable() && MypySettings.getInstance(project)
+        return targets.isNotEmpty() && MypyScanJobRegistryService.getInstance(project).isAvailable() && MypySettings.getInstance(project)
             .getValidConfiguration().isSuccess && isEligibleTargets(targets)
     }
 
