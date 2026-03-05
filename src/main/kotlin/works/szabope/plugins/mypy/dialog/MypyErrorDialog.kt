@@ -1,6 +1,5 @@
 package works.szabope.plugins.mypy.dialog
 
-import com.jetbrains.rd.generator.nova.GenerationSpec.Companion.nullIfEmpty
 import works.szabope.plugins.common.dialog.PluginErrorDescription
 import works.szabope.plugins.common.dialog.PluginErrorDialog
 import works.szabope.plugins.common.services.ImmutableSettingsData
@@ -30,13 +29,13 @@ class MypyParseErrorDialog(
 ) : PluginErrorDialog(
     MypyBundle.message("mypy.dialog.parse_error.title"), PluginErrorDescription(
         MypyBundle.message("mypy.dialog.parse_error.details", configuration, targets, json),
-        error.nullIfEmpty()?.let { MypyBundle.message("mypy.dialog.parse_error.message", it) })
+        error.ifEmpty { null }?.let { MypyBundle.message("mypy.dialog.parse_error.message", it) })
 )
 
 class MypyGeneralErrorDialog(throwable: Throwable) : PluginErrorDialog(
     MypyBundle.message("mypy.dialog.general_error.title"), PluginErrorDescription(
         MypyBundle.message(
-            "mypy.dialog.general_error.details", throwable.message!!, throwable.stackTraceToString()
+            "mypy.dialog.general_error.details", throwable.message ?: throwable.toString(), throwable.stackTraceToString()
         ), MypyBundle.message("mypy.please_report_this_issue")
     )
 )

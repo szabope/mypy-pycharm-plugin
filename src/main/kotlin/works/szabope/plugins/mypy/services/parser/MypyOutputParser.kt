@@ -37,12 +37,7 @@ object MypyOutputParser {
      */
     private fun adjustForPlatform(message: MypyMessage): MypyMessage {
         return message.copy(
-            file = message.file,
             line = message.line - 1,
-            column = message.column,
-            message = message.message,
-            hint = message.hint,
-            code = message.code,
             severity = message.severity.uppercase()
         )
     }
