@@ -27,7 +27,7 @@ class MypyInitializationWithLocalPythonSdkTest : AbstractMypyHeavyPlatformTestCa
         runWriteActionAndWait {
             ProjectJdkTable.getInstance().addJdk(mockSdk)
         }
-        myProject = PlatformTestUtil.loadAndOpenProject(Path.of(PROJECT_PATH), getTestRootDisposable())
+        myProject = PlatformTestUtil.loadAndOpenProject(Path.of(PROJECT_PATH).toAbsolutePath(), getTestRootDisposable())
     }
 
     fun `test plugin initialized for project with python sdk results in notification`() {
