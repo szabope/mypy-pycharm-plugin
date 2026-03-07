@@ -10,17 +10,17 @@ class MypyInitializationFromOldConfigurationTest : AbstractMypyHeavyPlatformTest
 
     override fun setUpProject() {
         VfsRootAccess.allowRootAccess(testRootDisposable, "/usr/bin")
-        myProject = PlatformTestUtil.loadAndOpenProject(Path.of(PROJECT_PATH), getTestRootDisposable())
+        myProject = PlatformTestUtil.loadAndOpenProject(Path.of(PROJECT_PATH).toAbsolutePath(), getTestRootDisposable())
     }
 
     fun `test plugin initialized from old configuration`() {
         with(MypySettings.getInstance(project)) {
             PlatformTestUtil.waitWhileBusy { !isInitialized() }
             assertFalse(useProjectSdk)
-            assertEquals("$PROJECT_PATH/.venv/bin/mypy", executablePath)
+            assertEquals("${project.basePath}/.venv/bin/mypy", executablePath)
             assertEquals("--show-column-numbers", arguments)
             assertFalse(scanBeforeCheckIn)
-            assertEquals("$PROJECT_PATH/mypy.conf", configFilePath)
+            assertEquals("${project.basePath}/mypy.conf", configFilePath)
         }
     }
 
