@@ -1,8 +1,10 @@
 package works.szabope.plugins.mypy
 
+import com.intellij.openapi.progress.withCurrentThreadCoroutineScopeBlocking
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
 import com.intellij.testFramework.HeavyPlatformTestCase
+import com.intellij.util.ThrowableRunnable
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
@@ -31,6 +33,10 @@ abstract class AbstractMypyHeavyPlatformTestCase : HeavyPlatformTestCase() {
         }
         super.setUp()
         project.replaceService(MypyScanJobRegistryService::class.java, MypyScanJobRegistryService(), testRootDisposable)
+    }
+
+    override fun runTestRunnable(testRunnable: ThrowableRunnable<Throwable>) {
+        withCurrentThreadCoroutineScopeBlocking { super.runTestRunnable(testRunnable) }
     }
 
     override fun tearDown() {

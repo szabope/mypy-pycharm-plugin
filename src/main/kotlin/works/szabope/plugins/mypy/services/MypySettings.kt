@@ -89,12 +89,12 @@ class MypySettings(internal val project: Project) : SimplePersistentStateCompone
         initialized = true
     }
 
-    override fun getValidConfiguration(): Result<ImmutableSettingsData> {
+    override suspend fun getValidConfiguration(): Result<ImmutableSettingsData> {
         val workingDirectory = workingDirectory
         if (workingDirectory.isNullOrBlank()) {
             return Result.failure(MypySettingsInvalid("Working directory is required"))
         }
-        if (!isMypySet()) {
+        if (!isToolSet()) {
             return Result.failure(MypySettingsInvalid("Mypy tool is not set"))
         }
 
@@ -109,7 +109,7 @@ class MypySettings(internal val project: Project) : SimplePersistentStateCompone
         ).let { Result.success(it) }
     }
 
-    private fun isMypySet(): Boolean {
+    private suspend fun isToolSet(): Boolean {
         return if (useProjectSdk) {
             project.pythonSdk != null && MypyPluginPackageManagementService.getInstance(project)
                 .checkInstalledRequirement().isSuccess

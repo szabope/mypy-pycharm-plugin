@@ -45,7 +45,7 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
         }
     }
 
-    override fun validateLocalSdk() = MypyValidator(project).validateProjectSdk()
+    override suspend fun validateLocalSdk() = MypyValidator(project).validateProjectSdk()
 
     override fun validateConfigFilePath(
         builder: ValidationInfoBuilder, field: TextFieldWithBrowseButton

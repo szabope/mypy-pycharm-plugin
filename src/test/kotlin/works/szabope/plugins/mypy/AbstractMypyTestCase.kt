@@ -1,6 +1,8 @@
 package works.szabope.plugins.mypy
 
 import com.intellij.openapi.application.runWriteActionAndWait
+import com.intellij.openapi.progress.withCurrentThreadCoroutineScopeBlocking
+import com.intellij.util.ThrowableRunnable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.projectRoots.Sdk
@@ -42,6 +44,10 @@ abstract class AbstractMypyTestCase : BasePlatformTestCase() {
         super.setUp()
         MypySettings.getInstance(project).reset()
         project.replaceService(MypyScanJobRegistryService::class.java, MypyScanJobRegistryService(), testRootDisposable)
+    }
+
+    override fun runTestRunnable(testRunnable: ThrowableRunnable<Throwable>) {
+        withCurrentThreadCoroutineScopeBlocking { super.runTestRunnable(testRunnable) }
     }
 
     override fun tearDown() {

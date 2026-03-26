@@ -70,7 +70,6 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
 
     private fun findFile(path: Path): VirtualFile? {
         return if (ApplicationManager.getApplication().isUnitTestMode) {
-            @Suppress("UnstableApiUsage")
             TempFileSystem.getInstance().findFileByNioFile(path)
         } else {
             VfsUtil.findFile(path, false)

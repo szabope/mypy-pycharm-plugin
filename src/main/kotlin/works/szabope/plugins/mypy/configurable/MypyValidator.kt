@@ -40,28 +40,7 @@ class MypyValidator(private val project: Project) {
         return null
     }
 
-    private fun getVersionForExecutable(pathToExecutable: String): String? {
-        val targetEnvRequest = LocalTargetEnvironmentRequest()
-        val targetEnvironment = LocalTargetEnvironment(LocalTargetEnvironmentRequest())
-
-        val commandLineBuilder = TargetedCommandLineBuilder(targetEnvRequest)
-        commandLineBuilder.setExePath(pathToExecutable)
-        commandLineBuilder.addParameters("-V")
-
-        val targetCMD = commandLineBuilder.build()
-
-        val process = targetEnvironment.createProcess(targetCMD)
-
-        return runCatching {
-            val processHandler = CapturingProcessHandler(
-                process, targetCMD.charset, targetCMD.getCommandPresentation(targetEnvironment)
-            )
-            val processOutput = processHandler.runProcess(5000, true).stdout
-            "(\\d+.\\d+.\\d+)".toRegex().find(processOutput)?.groups?.last()?.value
-        }.getOrNull()
-    }
-
-    fun validateProjectSdk(): String? {
+    suspend fun validateProjectSdk(): String? {
         MypyPluginPackageManagementService.getInstance(project).checkInstalledRequirement().onFailure {
             when (it) {
                 is PluginPackageManagementException.PackageNotInstalledException -> return MypyBundle.message(
@@ -74,5 +53,26 @@ class MypyValidator(private val project: Project) {
             }
         }
         return null
+    }
+
+    private fun getVersionForExecutable(pathToExecutable: String): String? {
+        val targetEnvRequest = LocalTargetEnvironmentRequest()
+        val targetEnvironment = LocalTargetEnvironment(LocalTargetEnvironmentRequest())
+
+        @Suppress("UnstableApiUsage") val commandLineBuilder = TargetedCommandLineBuilder(targetEnvRequest)
+        commandLineBuilder.setExePath(pathToExecutable)
+        commandLineBuilder.addParameters("-V")
+
+        val targetCMD = commandLineBuilder.build()
+
+        val process = targetEnvironment.createProcess(targetCMD)
+
+        return runCatching {
+            @Suppress("UnstableApiUsage") val processHandler = CapturingProcessHandler(
+                process, targetCMD.charset, targetCMD.getCommandPresentation(targetEnvironment)
+            )
+            val processOutput = processHandler.runProcess(5000, true).stdout
+            "(\\d+.\\d+.\\d+)".toRegex().find(processOutput)?.groups?.last()?.value
+        }.getOrNull()
     }
 }
