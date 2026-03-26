@@ -56,12 +56,13 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
         PlatformTestUtil.waitWhileBusy { MypyScanJobRegistryService.getInstance(project).isActive() }
         assertionError?.let { throw it }
-        treeUtil.assertStructure("+Found 1 issue(s) in 1 file(s)\n")
+        treeUtil.assertStructure("+Found 2 issue(s) in 1 file(s)\n")
         treeUtil.expandAll()
         treeUtil.assertStructure(
-            """|-Found 1 issue(s) in 1 file(s)
+            """|-Found 2 issue(s) in 1 file(s)
                    | -src/a.py
                    |  Bracketed expression "[...]" is not valid as a type [valid-type] (0:-1) Did you mean "List[...]"?
+                   |  Bracketed expression "[...]" is not valid as a type [valid-type] (1:10) 
                    |""".trimMargin()
         )
         unmark(exclusionContext)

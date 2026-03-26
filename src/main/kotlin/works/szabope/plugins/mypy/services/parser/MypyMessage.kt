@@ -11,7 +11,7 @@ data class MypyMessage(
     override val line: Int,
     override val column: Int,
     override val message: String,
-    val hint: String?,
+    val hint: String? = null, // without initialization, it is still treated as required; alternatively we could set explicitNulls on parser
     val code: String,
     val severity: String
 ) : ToolMessage
