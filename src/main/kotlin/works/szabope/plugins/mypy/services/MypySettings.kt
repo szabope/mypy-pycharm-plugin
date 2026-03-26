@@ -2,21 +2,12 @@ package works.szabope.plugins.mypy.services
 
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.guessProjectDir
-import com.jetbrains.python.sdk.pythonSdk
-import org.jetbrains.annotations.TestOnly
 import works.szabope.plugins.common.blankToSingleSpace
-import works.szabope.plugins.common.services.BasicSettingsData
-import works.szabope.plugins.common.services.ToolExecutorConfiguration
-import works.szabope.plugins.common.services.Settings
-import works.szabope.plugins.common.services.ToolSettingsInvalidException
+import works.szabope.plugins.common.services.AbstractToolSettings
 
 @Service(Service.Level.PROJECT)
 @State(name = "MypySettings", storages = [Storage("MypyPlugin.xml")], category = SettingsCategory.PLUGINS)
-class MypySettings(internal val project: Project) : SimplePersistentStateComponent<MypySettings.MypyState>(MypyState()),
-    Settings {
-
-    private var initialized = false
+class MypySettings(private val project: Project) : AbstractToolSettings<MypySettings.MypyState>(project, MypyState()) {
 
     class MypyState : BaseState() {
         var mypyExecutable by string()
@@ -31,9 +22,7 @@ class MypySettings(internal val project: Project) : SimplePersistentStateCompone
 
     override var useProjectSdk
         get() = state.useProjectSdk
-        set(value) {
-            state.useProjectSdk = value
-        }
+        set(value) { state.useProjectSdk = value }
 
     override var executablePath
         get() = state.mypyExecutable?.trim() ?: ""
@@ -49,82 +38,26 @@ class MypySettings(internal val project: Project) : SimplePersistentStateCompone
 
     override var isAutoScrollToSource
         get() = state.autoScrollToSource
-        set(value) {
-            state.autoScrollToSource = value
-        }
+        set(value) { state.autoScrollToSource = value }
 
     override var excludeNonProjectFiles
         get() = state.excludeNonProjectFiles
-        set(value) {
-            state.excludeNonProjectFiles = value
-        }
+        set(value) { state.excludeNonProjectFiles = value }
 
     override var workingDirectory
         get() = state.projectDirectory
-        set(value) {
-            state.projectDirectory = value
-        }
+        set(value) { state.projectDirectory = value }
 
     override var scanBeforeCheckIn
         get() = state.scanBeforeCheckIn
-        set(value) {
-            state.scanBeforeCheckIn = value
-        }
+        set(value) { state.scanBeforeCheckIn = value }
 
-    override suspend fun initSettings(oldSettings: BasicSettingsData) {
-        if (state.mypyExecutable == null) {
-            oldSettings.executablePath?.let { executablePath = it }
-        }
-        if (executablePath.isNotBlank() && project.pythonSdk == null) {
-            useProjectSdk = false
-        }
-        if (state.configFilePath == null) {
-            oldSettings.configFilePath?.let { configFilePath = it }
-        }
-        if (state.arguments == null) {
-            oldSettings.arguments?.let { arguments = it }
-        }
-        if (state.projectDirectory == null) {
-            workingDirectory = project.guessProjectDir()?.canonicalPath
-        }
-        initialized = true
-    }
-
-    override suspend fun getValidConfiguration(): Result<ToolExecutorConfiguration> {
-        val workingDirectory = workingDirectory
-        if (workingDirectory.isNullOrBlank()) {
-            return Result.failure(ToolSettingsInvalidException("Working directory is required"))
-        }
-        if (!isToolSet()) {
-            return Result.failure(ToolSettingsInvalidException("Mypy tool is not set"))
-        }
-
-        return ToolExecutorConfiguration(
-            executablePath,
-            useProjectSdk,
-            configFilePath,
-            arguments,
-            workingDirectory,
-            excludeNonProjectFiles,
-            scanBeforeCheckIn
-        ).let { Result.success(it) }
-    }
-
-    private suspend fun isToolSet(): Boolean {
-        return if (useProjectSdk) {
-            project.pythonSdk != null && MypyPluginPackageManagementService.getInstance(project)
-                .checkInstalledRequirement().isSuccess
-        } else {
-            executablePath.isNotBlank()
-        }
-    }
-
-    @TestOnly
-    fun reset() {
-        loadState(MypyState())
-    }
-
-    fun isInitialized() = initialized
+    override fun getPackageManagementService() = MypyPluginPackageManagementService.getInstance(project)
+    override fun toolNotSetMessage() = "Mypy tool is not set"
+    override fun isExecutableStateNull() = state.mypyExecutable == null
+    override fun isConfigFileStateNull() = state.configFilePath == null
+    override fun isArgumentsStateNull() = state.arguments == null
+    override fun initialState() = MypyState()
 
     companion object {
         @JvmStatic
