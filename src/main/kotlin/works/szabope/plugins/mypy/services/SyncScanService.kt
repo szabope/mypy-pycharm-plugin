@@ -1,6 +1,5 @@
 package works.szabope.plugins.mypy.services
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -8,7 +7,6 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.ex.temp.TempFileSystem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.future
@@ -31,6 +29,7 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
         val shadowedTargetMap = targets.associateWith {
             copyTempFrom(it)
         }
+        val targetsByPath = targets.associateBy { it.canonicalPath ?: it.path }
         val parameters = with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
         val stdErr = StringBuilder()
         val flow: Flow<Pair<VirtualFile, MypyMessage>> =
@@ -40,8 +39,9 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
                     return@transform
                 }
                 MypyOutputParser.parse(line.text).onSuccess { message ->
-                    findFile(Path(message.file))?.let { virtualFile ->
-                        emit(virtualFile to message)
+                    val virtualFile = targetsByPath[message.file] ?: VfsUtil.findFile(Path(message.file), false)
+                    virtualFile?.let {
+                        emit(it to message)
                     } ?: thisLogger().warn("Can't find VirtualFile at ${message.file}")
                 }.onFailure {
                     when (it) {
@@ -66,14 +66,6 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
                 acc
             }.mapValues { (_, v) -> v.toList() }
         }.get()
-    }
-
-    private fun findFile(path: Path): VirtualFile? {
-        return if (ApplicationManager.getApplication().isUnitTestMode) {
-            TempFileSystem.getInstance().findFileByNioFile(path)
-        } else {
-            VfsUtil.findFile(path, false)
-        }
     }
 
     private fun copyTempFrom(file: VirtualFile): Path {
