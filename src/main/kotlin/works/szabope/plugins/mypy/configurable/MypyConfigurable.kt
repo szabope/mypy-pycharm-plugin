@@ -41,7 +41,7 @@ class MypyConfigurable(private val project: Project) : GeneralConfigurable(
 
     override fun validateExecutable(path: String?) = with(MypyValidator(project)) {
         path?.trimToNull()?.let { path ->
-            validateExecutablePath(path) ?: validateMypyVersion(path)
+            validateExecutablePath(path) ?: validateVersion(path)
         }
     }
 
