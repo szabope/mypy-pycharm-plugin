@@ -2,7 +2,7 @@ package works.szabope.plugins.mypy.dialog
 
 import works.szabope.plugins.common.dialog.PluginErrorDescription
 import works.szabope.plugins.common.dialog.PluginErrorDialog
-import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.mypy.MypyBundle
 
 class MypyPackageInstallationErrorDialog(message: String) : PluginErrorDialog(
@@ -17,7 +17,7 @@ class FailedToExecuteErrorDialog(message: String) : PluginErrorDialog(
 )
 
 class MypyExecutionErrorDialog(
-    configuration: ImmutableSettingsData, result: String, resultCode: Int?
+    configuration: ToolExecutorConfiguration, result: String, resultCode: Int?
 ) : PluginErrorDialog(
     MypyBundle.message("mypy.dialog.execution_error.title"), PluginErrorDescription(
         MypyBundle.message("mypy.dialog.execution_error.content", configuration, result),
@@ -25,7 +25,7 @@ class MypyExecutionErrorDialog(
 )
 
 class MypyParseErrorDialog(
-    configuration: ImmutableSettingsData, targets: String, json: String, error: String
+    configuration: ToolExecutorConfiguration, targets: String, json: String, error: String
 ) : PluginErrorDialog(
     MypyBundle.message("mypy.dialog.parse_error.title"), PluginErrorDescription(
         MypyBundle.message("mypy.dialog.parse_error.details", configuration, targets, json),

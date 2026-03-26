@@ -6,7 +6,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.flow.*
-import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.common.services.showClickableBalloonError
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
@@ -18,7 +18,7 @@ import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 @Service(Service.Level.PROJECT)
 class AsyncScanService(private val project: Project) {
 
-    suspend fun scan(targets: Collection<VirtualFile>, configuration: ImmutableSettingsData): List<MypyMessage> {
+    suspend fun scan(targets: Collection<VirtualFile>, configuration: ToolExecutorConfiguration): List<MypyMessage> {
         // Why? See MypyParseException
         // So let's collect parse failures and report them.
         // If you have a better idea, please let me know.

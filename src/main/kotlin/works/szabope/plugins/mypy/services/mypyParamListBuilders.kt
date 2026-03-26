@@ -9,13 +9,13 @@ import com.intellij.platform.workspace.jps.entities.contentRoot
 import com.intellij.util.execution.ParametersListUtil
 import com.intellij.util.text.nullize
 import works.szabope.plugins.common.run.Exclusions
-import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.mypy.MypyArgs
 import java.nio.file.Path
 import kotlin.io.path.pathString
 
 context(project: Project)
-fun buildMypyParamList(configuration: ImmutableSettingsData, shadowMap: Map<VirtualFile, Path>): List<String> {
+fun buildMypyParamList(configuration: ToolExecutorConfiguration, shadowMap: Map<VirtualFile, Path>): List<String> {
     val shadowParameters = shadowMap.flatMap { (shadowedOriginal, shadowCastingOne) ->
         listOf("--shadow-file", shadowedOriginal.path, shadowCastingOne.pathString)
     }
@@ -24,7 +24,7 @@ fun buildMypyParamList(configuration: ImmutableSettingsData, shadowMap: Map<Virt
 
 context(project: Project)
 fun buildMypyParamList(
-    configuration: ImmutableSettingsData, targets: Collection<VirtualFile>, extraArgs: Collection<String> = emptyList()
+    configuration: ToolExecutorConfiguration, targets: Collection<VirtualFile>, extraArgs: Collection<String> = emptyList()
 ) = with(configuration) {
     val params = MypyArgs.MYPY_MANDATORY_COMMAND_ARGS.split(" ").toMutableList()
     configFilePath.nullize(true)?.let { params.add("--config-file"); params.add(it) }

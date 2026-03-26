@@ -4,7 +4,7 @@ package works.szabope.plugins.mypy.dialog
 import works.szabope.plugins.common.dialog.AbstractDialogManager
 import works.szabope.plugins.common.dialog.IDialogManager
 import works.szabope.plugins.common.dialog.IDialogManager.IShowDialog
-import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.common.services.PluginPackageManagementException
 
 class DialogManager : AbstractDialogManager() {
@@ -13,7 +13,7 @@ class DialogManager : AbstractDialogManager() {
         MypyPackageInstallationErrorDialog(exception.message).asPluginDialog()
 
     override fun createToolExecutionErrorDialog(
-        configuration: ImmutableSettingsData,
+        configuration: ToolExecutorConfiguration,
         result: String,
         resultCode: Int
     ) = MypyExecutionErrorDialog(configuration, result, resultCode).asPluginDialog()
@@ -22,7 +22,7 @@ class DialogManager : AbstractDialogManager() {
         FailedToExecuteErrorDialog(message).asPluginDialog()
 
     override fun createToolOutputParseErrorDialog(
-        configuration: ImmutableSettingsData,
+        configuration: ToolExecutorConfiguration,
         targets: String,
         json: String,
         error: String

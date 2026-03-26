@@ -10,7 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.future
-import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.services.parser.MypyMessage
 import works.szabope.plugins.mypy.services.parser.MypyOutputParser
@@ -24,7 +24,7 @@ import kotlin.io.path.writeText
 class SyncScanService(private val project: Project, private val cs: CoroutineScope) {
 
     fun scan(
-        targets: Collection<VirtualFile>, configuration: ImmutableSettingsData
+        targets: Collection<VirtualFile>, configuration: ToolExecutorConfiguration
     ): Map<VirtualFile, List<MypyMessage>> {
         val shadowedTargetMap = targets.associateWith {
             copyTempFrom(it)

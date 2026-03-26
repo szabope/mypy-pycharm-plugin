@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import works.szabope.plugins.common.action.AbstractScanAction
 import works.szabope.plugins.common.action.AbstractScanJobRegistry
-import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.common.services.Settings
 import works.szabope.plugins.common.toolWindow.ITreeService
 import works.szabope.plugins.mypy.services.AsyncScanService
@@ -26,7 +26,7 @@ open class ScanAction : AbstractScanAction() {
     override suspend fun scanAndAdd(
         project: Project,
         targets: Collection<VirtualFile>,
-        configuration: ImmutableSettingsData,
+        configuration: ToolExecutorConfiguration,
         treeService: ITreeService
     ) {
         AsyncScanService.getInstance(project).scan(targets, configuration).forEach {

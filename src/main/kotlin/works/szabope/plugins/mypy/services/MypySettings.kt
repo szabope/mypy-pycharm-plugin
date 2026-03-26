@@ -7,7 +7,7 @@ import com.jetbrains.python.sdk.pythonSdk
 import org.jetbrains.annotations.TestOnly
 import works.szabope.plugins.common.blankToSingleSpace
 import works.szabope.plugins.common.services.BasicSettingsData
-import works.szabope.plugins.common.services.ImmutableSettingsData
+import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.common.services.Settings
 import works.szabope.plugins.common.services.ToolSettingsInvalidException
 
@@ -90,7 +90,7 @@ class MypySettings(internal val project: Project) : SimplePersistentStateCompone
         initialized = true
     }
 
-    override suspend fun getValidConfiguration(): Result<ImmutableSettingsData> {
+    override suspend fun getValidConfiguration(): Result<ToolExecutorConfiguration> {
         val workingDirectory = workingDirectory
         if (workingDirectory.isNullOrBlank()) {
             return Result.failure(ToolSettingsInvalidException("Working directory is required"))
@@ -99,7 +99,7 @@ class MypySettings(internal val project: Project) : SimplePersistentStateCompone
             return Result.failure(ToolSettingsInvalidException("Mypy tool is not set"))
         }
 
-        return MypyExecutorConfiguration(
+        return ToolExecutorConfiguration(
             executablePath,
             useProjectSdk,
             configFilePath,
