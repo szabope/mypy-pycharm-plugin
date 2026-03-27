@@ -1,7 +1,6 @@
 // inspired by idea/243.19420.21 git4idea.test.TestDialogManager
 package works.szabope.plugins.mypy.testutil
 
-import works.szabope.plugins.common.dialog.PluginDialog
 import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.common.services.PluginPackageManagementException
 import works.szabope.plugins.common.test.dialog.AbstractTestDialogManager
@@ -16,9 +15,6 @@ class TestDialogManager : AbstractTestDialogManager() {
 
     override fun createToolExecutionErrorDialog(configuration: ToolExecutorConfiguration, result: String, resultCode: Int) =
         TestDialogWrapper(MypyExecutionErrorDialog::class.java, configuration, result, resultCode)
-
-    override fun createFailedToExecuteErrorDialog(message: String): PluginDialog =
-        TestDialogWrapper(FailedToExecuteErrorDialog::class.java, message)
 
     override fun createToolOutputParseErrorDialog(
         configuration: ToolExecutorConfiguration, targets: String, json: String, error: String

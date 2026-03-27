@@ -18,9 +18,6 @@ class DialogManager : AbstractDialogManager() {
         resultCode: Int
     ) = MypyExecutionErrorDialog(configuration, result, resultCode).asPluginDialog()
 
-    override fun createFailedToExecuteErrorDialog(message: String) =
-        FailedToExecuteErrorDialog(message).asPluginDialog()
-
     override fun createToolOutputParseErrorDialog(
         configuration: ToolExecutorConfiguration,
         targets: String,
@@ -38,8 +35,6 @@ class DialogManager : AbstractDialogManager() {
             dialogManager.createPyPackageInstallationErrorDialog(exception)
         override fun createToolExecutionErrorDialog(configuration: ToolExecutorConfiguration, result: String, resultCode: Int) =
             dialogManager.createToolExecutionErrorDialog(configuration, result, resultCode)
-        override fun createFailedToExecuteErrorDialog(message: String) =
-            dialogManager.createFailedToExecuteErrorDialog(message)
         override fun createToolOutputParseErrorDialog(configuration: ToolExecutorConfiguration, targets: String, json: String, error: String) =
             dialogManager.createToolOutputParseErrorDialog(configuration, targets, json, error)
         override fun createGeneralErrorDialog(failure: Throwable) =

@@ -10,12 +10,6 @@ class MypyPackageInstallationErrorDialog(message: String) : PluginErrorDialog(
     PluginErrorDescription(message, MypyBundle.message("mypy.dialog.installation_error.message"))
 )
 
-class FailedToExecuteErrorDialog(message: String) : PluginErrorDialog(
-    MypyBundle.message("mypy.dialog.failed_to_execute.title"), PluginErrorDescription(
-        message, MypyBundle.message("mypy.dialog.failed_to_execute.message")
-    )
-)
-
 class MypyExecutionErrorDialog(
     configuration: ToolExecutorConfiguration, result: String, resultCode: Int?
 ) : PluginErrorDialog(
