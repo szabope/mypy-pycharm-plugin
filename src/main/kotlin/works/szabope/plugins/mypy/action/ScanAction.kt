@@ -7,10 +7,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import works.szabope.plugins.common.action.AbstractScanAction
 import works.szabope.plugins.common.action.AbstractScanJobRegistry
+import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
+import works.szabope.plugins.common.services.IncompleteConfigurationNotifier
 import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.common.services.Settings
 import works.szabope.plugins.common.toolWindow.ITreeService
 import works.szabope.plugins.mypy.services.AsyncScanService
+import works.szabope.plugins.mypy.services.MypyIncompleteConfigurationNotifier
+import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.services.parser.MypyMessageConverter
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
@@ -22,6 +26,8 @@ open class ScanAction : AbstractScanAction() {
     override fun getSettings(project: Project): Settings = MypySettings.getInstance(project)
     override fun getScanJobRegistry(project: Project): AbstractScanJobRegistry = MypyScanJobRegistryService.getInstance(project)
     override fun getToolWindowId(): String = MypyToolWindowPanel.ID
+    override fun getIncompleteConfigurationNotifier(project: Project): IncompleteConfigurationNotifier = MypyIncompleteConfigurationNotifier.getInstance(project)
+    override fun getPackageManagementService(project: Project): AbstractPluginPackageManagementService = MypyPluginPackageManagementService.getInstance(project)
 
     override suspend fun scanAndAdd(
         project: Project,

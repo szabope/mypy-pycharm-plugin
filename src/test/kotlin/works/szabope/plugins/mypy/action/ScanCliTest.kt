@@ -1,5 +1,6 @@
 package works.szabope.plugins.mypy.action
 
+import com.intellij.notification.ActionCenter
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem
@@ -14,8 +15,8 @@ import junit.framework.AssertionFailedError
 import org.jetbrains.concurrency.asPromise
 import works.szabope.plugins.common.test.dialog.TestDialogWrapper
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
+import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
-import works.szabope.plugins.mypy.dialog.FailedToExecuteErrorDialog
 import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
 import works.szabope.plugins.mypy.dialog.MypyParseErrorDialog
 import works.szabope.plugins.mypy.services.MypySettings
@@ -144,7 +145,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         assertTrue(dialogShown.isDone && with(dialogShown.get()) { isShown() && getExitCode() == DialogWrapper.OK_EXIT_CODE })
     }
 
-    fun `test executable path does not exist results in dialog`() {
+    fun `test executable path does not exist results in incomplete configuration notification`() {
         myFixture.copyDirectoryToProject("/", "/")
         with(MypySettings.getInstance(project)) {
             executablePath = "/does/not/exist"
@@ -155,24 +156,18 @@ class ScanCliTest : AbstractToolWindowTestCase() {
             arguments = ""
             excludeNonProjectFiles = true
         }
-        toolWindowManager.onBalloon {
-            it.listener?.hyperlinkUpdate(
-                HyperlinkEvent(
-                    "dumb", HyperlinkEvent.EventType.ACTIVATED, URI("http://localhost").toURL()
-                )
-            )
-        }
-        val dialogShown = CompletableFuture<TestDialogWrapper>()
-        dialogManager.onDialog(FailedToExecuteErrorDialog::class.java) {
-            it.close(DialogWrapper.OK_EXIT_CODE)
-            dialogShown.complete(it)
-            it.getExitCode()
-        }
+        val notificationsBefore = ActionCenter.getNotifications(project).count { isIncompleteConfigNotification(it) }
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
-        PlatformTestUtil.assertPromiseSucceeds(dialogShown.asPromise())
-        assertTrue(dialogShown.isDone && with(dialogShown.get()) { isShown() && getExitCode() == DialogWrapper.OK_EXIT_CODE })
+        PlatformTestUtil.waitWhileBusy { MypyScanJobRegistryService.getInstance(project).isActive() }
+        assertTrue(ActionCenter.getNotifications(project).count { isIncompleteConfigNotification(it) } > notificationsBefore)
+    }
+
+    private fun isIncompleteConfigNotification(notification: com.intellij.notification.Notification): Boolean {
+        return MypyBundle.message("notification.group.mypy.group") == notification.groupId &&
+                MypyBundle.message("mypy.notification.incomplete_configuration") == notification.content &&
+                !notification.isExpired
     }
 
     private fun setUpSettings(executable: String) {

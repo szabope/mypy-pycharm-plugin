@@ -53,7 +53,7 @@ class AsyncScanService(private val project: Project) {
                         )
                     }
                 }
-            }.catch(handleScanException(project, configuration, stdErr)).toList(ArrayList())
+            }.catch(handleScanException(project, configuration, stdErr, MypyIncompleteConfigurationNotifier.getInstance(project))).toList(ArrayList())
     }
 
     companion object {
