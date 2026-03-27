@@ -10,7 +10,7 @@ import works.szabope.plugins.mypy.services.parser.MypyMessage
 class MypyAnnotator : ToolAnnotator<MypyMessage>() {
     override val inspectionId = MypyInspectionId
 
-    override fun getSettingsInstance(project: Project) = MypySettings.getInstance(project)
+    override fun getSettings(project: Project) = MypySettings.getInstance(project)
 
     override fun scan(info: AnnotatorInfo, configuration: ToolExecutorConfiguration) =
         SyncScanService.getInstance(info.project).scan(listOf(info.file), configuration)[info.file] ?: emptyList()
