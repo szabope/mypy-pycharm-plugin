@@ -1,81 +1,29 @@
 package works.szabope.plugins.mypy
 
-import com.intellij.openapi.application.runWriteActionAndWait
-import com.intellij.openapi.progress.withCurrentThreadCoroutineScopeBlocking
-import com.intellij.util.ThrowableRunnable
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.projectRoots.ProjectJdkTable
-import com.intellij.openapi.projectRoots.Sdk
-import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
-import com.intellij.testFramework.LightProjectDescriptor
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.jetbrains.python.sdk.pythonSdk
-import io.mockk.clearAllMocks
+import com.intellij.testFramework.replaceService
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.unmockkAll
-import com.intellij.testFramework.replaceService
-import works.szabope.plugins.mypy.action.MypyScanJobRegistryService
 import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
-import works.szabope.plugins.common.test.sdk.PythonMockSdk
+import works.szabope.plugins.common.test.AbstractPluginTestCase
+import works.szabope.plugins.mypy.action.MypyScanJobRegistryService
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.testutil.MypyPluginPackageManagementServiceStub
 
-abstract class AbstractMypyTestCase : BasePlatformTestCase() {
+abstract class AbstractMypyTestCase : AbstractPluginTestCase() {
 
-    // local variables are not supported in mockk answer, yet
-    private lateinit var mypyPackageManagementServiceStub: AbstractPluginPackageManagementService
-
-    override fun setUp() {
-        // FIXME: this is a duct tape for
-        //  com.intellij.python.community.services.systemPython.searchPythonsPhysicallyNoCache
-        //  accessing /usr/bin/python3(\.\d+)? which is not allowed from tests
-        VfsRootAccess.allowRootAccess(testRootDisposable, "/usr/bin")
+    override fun setupPackageManagementServiceMock(stubProvider: (Project) -> AbstractPluginPackageManagementService) {
         mockkObject(MypyPluginPackageManagementService.Companion)
         every { MypyPluginPackageManagementService.getInstance(any(Project::class)) } answers {
-            if (!::mypyPackageManagementServiceStub.isInitialized) {
-                mypyPackageManagementServiceStub = MypyPluginPackageManagementServiceStub(
-                    firstArg<Project>()
-                )
-            }
-            mypyPackageManagementServiceStub
+            stubProvider(firstArg())
         }
-        super.setUp()
+    }
+
+    override fun createPackageManagementServiceStub(project: Project) = MypyPluginPackageManagementServiceStub(project)
+
+    override fun onSetUp() {
         MypySettings.getInstance(project).reset()
         project.replaceService(MypyScanJobRegistryService::class.java, MypyScanJobRegistryService(), testRootDisposable)
-    }
-
-    override fun runTestRunnable(testRunnable: ThrowableRunnable<Throwable>) {
-        withCurrentThreadCoroutineScopeBlocking { super.runTestRunnable(testRunnable) }
-    }
-
-    override fun tearDown() {
-        clearAllMocks()
-        unmockkAll()
-        super.tearDown()
-    }
-
-    /**
-     * https://youtrack.jetbrains.com/issue/IJPL-197007
-     */
-    override fun getProjectDescriptor(): LightProjectDescriptor? = LightProjectDescriptor()
-
-    fun withMockSdk(path: String, action: (Sdk) -> Unit) {
-        val mockSdk = PythonMockSdk.create(path)
-        runWriteActionAndWait {
-            ProjectJdkTable.getInstance().addJdk(mockSdk)
-        }
-        project.pythonSdk = mockSdk
-        module.pythonSdk = mockSdk
-        try {
-            action(mockSdk)
-        } finally {
-            project.pythonSdk = null
-            module.pythonSdk = null
-            runWriteActionAndWait {
-                ProjectJdkTable.getInstance().removeJdk(mockSdk)
-            }
-        }
     }
 }

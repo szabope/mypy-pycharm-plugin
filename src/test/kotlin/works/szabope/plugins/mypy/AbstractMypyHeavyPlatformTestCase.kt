@@ -1,47 +1,27 @@
 package works.szabope.plugins.mypy
 
-import com.intellij.openapi.progress.withCurrentThreadCoroutineScopeBlocking
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
-import com.intellij.testFramework.HeavyPlatformTestCase
-import com.intellij.util.ThrowableRunnable
-import io.mockk.clearAllMocks
+import com.intellij.testFramework.replaceService
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.unmockkAll
-import com.intellij.testFramework.replaceService
 import works.szabope.plugins.common.services.AbstractPluginPackageManagementService
+import works.szabope.plugins.common.test.AbstractPluginHeavyPlatformTestCase
 import works.szabope.plugins.mypy.action.MypyScanJobRegistryService
 import works.szabope.plugins.mypy.services.MypyPluginPackageManagementService
 import works.szabope.plugins.mypy.testutil.MypyPluginPackageManagementServiceStub
 
-abstract class AbstractMypyHeavyPlatformTestCase : HeavyPlatformTestCase() {
+abstract class AbstractMypyHeavyPlatformTestCase : AbstractPluginHeavyPlatformTestCase() {
 
-    // local variables are not supported in mockk answer, yet
-    private lateinit var mypyPackageManagementServiceStub: AbstractPluginPackageManagementService
-
-    override fun setUp() {
-        VfsRootAccess.allowRootAccess(testRootDisposable, "/usr/bin")
+    override fun setupPackageManagementServiceMock(stubProvider: (Project) -> AbstractPluginPackageManagementService) {
         mockkObject(MypyPluginPackageManagementService.Companion)
         every { MypyPluginPackageManagementService.getInstance(any(Project::class)) } answers {
-            if (!::mypyPackageManagementServiceStub.isInitialized) {
-                mypyPackageManagementServiceStub = MypyPluginPackageManagementServiceStub(
-                    firstArg<Project>()
-                )
-            }
-            mypyPackageManagementServiceStub
+            stubProvider(firstArg())
         }
-        super.setUp()
+    }
+
+    override fun createPackageManagementServiceStub(project: Project) = MypyPluginPackageManagementServiceStub(project)
+
+    override fun onSetUp() {
         project.replaceService(MypyScanJobRegistryService::class.java, MypyScanJobRegistryService(), testRootDisposable)
-    }
-
-    override fun runTestRunnable(testRunnable: ThrowableRunnable<Throwable>) {
-        withCurrentThreadCoroutineScopeBlocking { super.runTestRunnable(testRunnable) }
-    }
-
-    override fun tearDown() {
-        clearAllMocks()
-        unmockkAll()
-        super.tearDown()
     }
 }

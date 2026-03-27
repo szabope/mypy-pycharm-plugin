@@ -1,23 +1,11 @@
 package works.szabope.plugins.mypy.testutil
 
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.wm.ToolWindowBalloonShowOptions
-import com.intellij.toolWindow.ToolWindowHeadlessManagerImpl
-import org.junit.Assert.assertNull
+import works.szabope.plugins.common.test.toolWindow.AbstractTestToolWindowHeadlessManagerImpl
 import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 
-class TestToolWindowHeadlessManagerImpl(project: Project) : ToolWindowHeadlessManagerImpl(project) {
-    private val myHandlers = hashMapOf<String, (ToolWindowBalloonShowOptions) -> Unit>()
+class TestToolWindowHeadlessManagerImpl(project: Project) :
+    AbstractTestToolWindowHeadlessManagerImpl(project) {
 
-    override fun notifyByBalloon(options: ToolWindowBalloonShowOptions) {
-        myHandlers[options.toolWindowId]?.invoke(options)
-    }
-
-    fun onBalloon(handler: (ToolWindowBalloonShowOptions) -> Unit) {
-        assertNull(myHandlers.put(MypyToolWindowPanel.ID, handler))
-    }
-
-    fun cleanup() {
-        myHandlers.clear()
-    }
+    override val toolWindowId = MypyToolWindowPanel.ID
 }

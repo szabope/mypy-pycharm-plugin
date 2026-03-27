@@ -6,7 +6,7 @@ import com.intellij.testFramework.TestDataPath
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.mypy.testutil.dataContext
-import works.szabope.plugins.mypy.testutil.invokeNamedActionWithScope
+import works.szabope.plugins.common.test.action.invokeNamedActionWithScope
 import works.szabope.plugins.mypy.testutil.scan
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
