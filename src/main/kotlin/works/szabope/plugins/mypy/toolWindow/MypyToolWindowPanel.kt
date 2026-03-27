@@ -19,7 +19,7 @@ class MypyToolWindowPanel(project: Project, @VisibleForTesting val tree: Tree = 
     }
 
     companion object {
-        private const val MAIN_ACTION_GROUP: String = "works.szabope.plugins.mypy.MypyPluginActions"
+        private const val MAIN_ACTION_GROUP = "works.szabope.plugins.mypy.MypyPluginActions"
         const val ID = "Mypy "
         const val SCROLL_TO_SOURCE_ID = "works.szabope.plugins.mypy.action.ScrollToSourceAction"
     }

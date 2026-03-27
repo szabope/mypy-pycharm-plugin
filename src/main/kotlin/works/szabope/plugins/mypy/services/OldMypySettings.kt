@@ -23,14 +23,10 @@ class OldMypySettings : SimplePersistentStateComponent<OldMypySettings.OldMypySe
         var mypyArguments by string()
     }
 
-    override val executablePath: String?
-        get() = state.customMypyPath
-    override val configFilePath: String?
-        get() = state.mypyConfigFilePath
-    override val arguments: String?
-        get() = state.mypyArguments
-    override val scanBeforeCheckIn: Boolean
-        get() = false
+    override val executablePath get() = state.customMypyPath
+    override val configFilePath get() = state.mypyConfigFilePath
+    override val arguments get() = state.mypyArguments
+    override val scanBeforeCheckIn get() = false
 
     companion object {
         @JvmStatic

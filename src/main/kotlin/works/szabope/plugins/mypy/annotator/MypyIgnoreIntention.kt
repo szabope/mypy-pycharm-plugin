@@ -24,17 +24,12 @@ class MypyIgnoreIntention(private val issue: MypyMessage) : PsiElementBaseIntent
         val COMMENT_REGEX = "^#\\s+type:\\s+ignore(\\[(?<codes>[a-zA-Z\\s,-]+)])?".toRegex()
     }
 
-    override fun getText(): String {
-        return MypyBundle.message("mypy.intention.ignore.text", issue.code)
-    }
+    override fun getText(): String = MypyBundle.message("mypy.intention.ignore.text", issue.code)
 
-    override fun getFamilyName(): String {
-        return MypyBundle.message("mypy.intention.ignore.family_name")
-    }
+    override fun getFamilyName(): String = MypyBundle.message("mypy.intention.ignore.family_name")
 
-    override fun isAvailable(project: Project, editor: Editor?, element: PsiElement): Boolean {
-        return !isTripleQuotedMultilineString(element)
-    }
+    override fun isAvailable(project: Project, editor: Editor?, element: PsiElement): Boolean =
+        !isTripleQuotedMultilineString(element)
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
         val existingComment = PyPsiUtils.findSameLineComment(element)

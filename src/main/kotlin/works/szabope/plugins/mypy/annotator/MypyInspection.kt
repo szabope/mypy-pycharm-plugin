@@ -7,7 +7,5 @@ const val MypyInspectionId = "MypyInspection"
 
 internal class MypyInspection : PyInspection(), ExternalAnnotatorBatchInspection {
 
-    override fun getShortName(): String {
-        return MypyInspectionId
-    }
+    override fun getShortName(): String = MypyInspectionId
 }

@@ -11,9 +11,7 @@ import works.szabope.plugins.common.services.AbstractPluginPackageManagementServ
 @Service(Service.Level.PROJECT)
 class MypyPluginPackageManagementService(override val project: Project) : AbstractPluginPackageManagementService() {
 
-    override fun getRequirement(): PyRequirement {
-        return pyRequirement("mypy", PyRequirementRelation.GTE, MINIMUM_VERSION)
-    }
+    override fun getRequirement(): PyRequirement = pyRequirement("mypy", PyRequirementRelation.GTE, MINIMUM_VERSION)
 
     companion object {
         const val MINIMUM_VERSION = "1.11"
