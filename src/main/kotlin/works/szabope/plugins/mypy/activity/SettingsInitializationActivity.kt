@@ -19,6 +19,6 @@ class SettingsInitializationActivity : AbstractSettingsInitializationActivity() 
 
     override suspend fun getOldSettings(project: Project): BasicSettingsData = OldMypySettings.getInstance(project)
 
-    override fun notifyIncomplete(project: Project, canInstall: Boolean) =
-        MypyIncompleteConfigurationNotifier.getInstance(project).showWarningBubble(canInstall)
+    override fun getIncompleteConfigurationNotifier(project: Project) =
+        MypyIncompleteConfigurationNotifier.getInstance(project)
 }
