@@ -8,7 +8,7 @@ import works.szabope.plugins.mypy.MypyBundle
 
 @Service(Service.Level.PROJECT)
 @State(name = "MypySettings", storages = [Storage("MypyPlugin.xml")], category = SettingsCategory.PLUGINS)
-class MypySettings(private val project: Project) : AbstractToolSettings<MypySettings.MypyState>(project, MypyState()) {
+class MypySettings(project: Project) : AbstractToolSettings<MypySettings.MypyState>(project, MypyState()) {
 
     class MypyState : BaseState() {
         var mypyExecutable by string()
