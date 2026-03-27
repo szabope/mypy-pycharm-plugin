@@ -4,6 +4,7 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import works.szabope.plugins.common.blankToSingleSpace
 import works.szabope.plugins.common.services.AbstractToolSettings
+import works.szabope.plugins.mypy.MypyBundle
 
 @Service(Service.Level.PROJECT)
 @State(name = "MypySettings", storages = [Storage("MypyPlugin.xml")], category = SettingsCategory.PLUGINS)
@@ -53,7 +54,7 @@ class MypySettings(private val project: Project) : AbstractToolSettings<MypySett
         set(value) { state.scanBeforeCheckIn = value }
 
     override fun getPackageManagementService() = MypyPluginPackageManagementService.getInstance(project)
-    override fun toolNotSetMessage() = "Mypy tool is not set"
+    override fun toolNotSetMessage() = MypyBundle.message("mypy.configuration.tool_not_set")
     override fun isExecutableStateNull() = state.mypyExecutable == null
     override fun isConfigFileStateNull() = state.configFilePath == null
     override fun isArgumentsStateNull() = state.arguments == null
