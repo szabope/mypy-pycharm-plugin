@@ -59,9 +59,7 @@ abstract class AbstractMypyTestCase : BasePlatformTestCase() {
     /**
      * https://youtrack.jetbrains.com/issue/IJPL-197007
      */
-    override fun getProjectDescriptor(): LightProjectDescriptor? {
-        return LightProjectDescriptor()
-    }
+    override fun getProjectDescriptor(): LightProjectDescriptor? = LightProjectDescriptor()
 
     fun withMockSdk(path: String, action: (Sdk) -> Unit) {
         val mockSdk = PythonMockSdk.create(path)

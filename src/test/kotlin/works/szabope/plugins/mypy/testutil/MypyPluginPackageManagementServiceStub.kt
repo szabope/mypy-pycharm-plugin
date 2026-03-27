@@ -7,7 +7,5 @@ import com.jetbrains.python.packaging.requirement.PyRequirementRelation
 import works.szabope.plugins.common.test.services.AbstractPluginPackageManagementServiceStub
 
 class MypyPluginPackageManagementServiceStub(project: Project) : AbstractPluginPackageManagementServiceStub(project) {
-    override fun getRequirement(): PyRequirement {
-        return pyRequirement("mypy", PyRequirementRelation.GTE, "1.11")
-    }
+    override fun getRequirement(): PyRequirement = pyRequirement("mypy", PyRequirementRelation.GTE, "1.11")
 }

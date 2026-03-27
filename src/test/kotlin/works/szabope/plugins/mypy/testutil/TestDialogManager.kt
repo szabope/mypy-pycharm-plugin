@@ -9,9 +9,7 @@ import works.szabope.plugins.mypy.dialog.*
 
 class TestDialogManager : AbstractTestDialogManager() {
     override fun createPyPackageInstallationErrorDialog(exception: PluginPackageManagementException.InstallationFailedException) =
-        TestDialogWrapper(
-            MypyPackageInstallationErrorDialog::class.java, exception
-        )
+        TestDialogWrapper(MypyPackageInstallationErrorDialog::class.java, exception)
 
     override fun createToolExecutionErrorDialog(configuration: ToolExecutorConfiguration, result: String, resultCode: Int) =
         TestDialogWrapper(MypyExecutionErrorDialog::class.java, configuration, result, resultCode)

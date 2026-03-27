@@ -16,7 +16,6 @@ fun dataContext(
     val panelContext = IdeUiService.getInstance().createUiDataContext(panel)
     val testContext = SimpleDataContext.builder().setParent(panelContext).add(CommonDataKeys.PROJECT, project).build()
     val builder = SimpleDataContext.builder().setParent(testContext)
-    builder.apply { }
     customizer(builder)
     return builder.build()
 }

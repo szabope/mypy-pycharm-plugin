@@ -40,6 +40,11 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         super.setUp()
     }
 
+    override fun tearDown() {
+        dialogManager.cleanup()
+        super.tearDown()
+    }
+
     @Suppress("removal")
     fun testManualScan() {
         myFixture.copyDirectoryToProject("/", "/")
