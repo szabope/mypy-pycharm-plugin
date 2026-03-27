@@ -22,10 +22,11 @@ import works.szabope.plugins.mypy.toolWindow.MypyTreeService
 
 open class ScanAction : AbstractScanAction() {
 
+    override val toolWindowId = MypyToolWindowPanel.ID
+
     override fun getTreeService(project: Project): ITreeService = MypyTreeService.getInstance(project)
     override fun getSettings(project: Project): Settings = MypySettings.getInstance(project)
     override fun getScanJobRegistry(project: Project): AbstractScanJobRegistry = MypyScanJobRegistryService.getInstance(project)
-    override fun getToolWindowId(): String = MypyToolWindowPanel.ID
     override fun getIncompleteConfigurationNotifier(project: Project): IncompleteConfigurationNotifier = MypyIncompleteConfigurationNotifier.getInstance(project)
     override fun getPackageManagementService(project: Project): AbstractPluginPackageManagementService = MypyPluginPackageManagementService.getInstance(project)
 

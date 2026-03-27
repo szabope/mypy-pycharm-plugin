@@ -41,8 +41,10 @@ class MypyIgnoreIntention(private val issue: MypyMessage) : PsiElementBaseIntent
         val existingMypyIgnoreComment = existingComment?.text?.let { COMMENT_REGEX.find(it) }
         val existingCodes = existingMypyIgnoreComment?.groups["codes"]?.value
         val comment = if (existingCodes != null) {
+            // append to existing code list: `# type: ignore[existing,code]`
             existingMypyIgnoreComment.value.replace(existingCodes, "$existingCodes,${issue.code}")
-        } else { // (existingMypyIgnoreComment != null) { IMPOSSIBLE, we cannot end up here with `#  type: ignore`
+        } else {
+            // no ignore comment, or bare `# type: ignore` without brackets — write fresh
             "# type: ignore[${issue.code}]"
         }
         existingMypyIgnoreComment?.run {
