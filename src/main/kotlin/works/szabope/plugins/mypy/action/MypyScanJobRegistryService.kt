@@ -8,6 +8,7 @@ import works.szabope.plugins.common.action.AbstractScanJobRegistry
 @Service(Service.Level.PROJECT)
 class MypyScanJobRegistryService : AbstractScanJobRegistry() {
     companion object {
+        @JvmStatic
         fun getInstance(project: Project): MypyScanJobRegistryService = project.service()
     }
 }
