@@ -8,13 +8,11 @@ import works.szabope.plugins.common.toolWindow.AbstractToolWindowPanel
 import works.szabope.plugins.common.toolWindow.ITreeService
 import works.szabope.plugins.mypy.services.MypySettings
 
-class MypyToolWindowPanel(private val project: Project, @VisibleForTesting val tree: Tree = Tree()) :
+class MypyToolWindowPanel(project: Project, @VisibleForTesting val tree: Tree = Tree()) :
     AbstractToolWindowPanel(project, tree) {
 
-    override val treeService: ITreeService
-        get() = MypyTreeService.getInstance(project)
-    override val settings: Settings
-        get() = MypySettings.getInstance(project)
+    override val treeService: ITreeService = MypyTreeService.getInstance(project)
+    override val settings: Settings = MypySettings.getInstance(project)
 
     init {
         super.init(ID, MAIN_ACTION_GROUP, SCROLL_TO_SOURCE_ID)

@@ -35,7 +35,7 @@ fun buildMypyParamList(
             .forEach { params.add("--exclude"); params.add(it) }
     }
     params.addAll(extraArgs)
-    targets.map { requireNotNull(it.canonicalPath) }.let { params.addAll(it) }
+    params.addAll(targets.map { requireNotNull(it.canonicalPath) })
     params
 }
 
