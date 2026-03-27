@@ -27,7 +27,7 @@ context(project: Project)
 fun buildMypyParamList(
     configuration: ToolExecutorConfiguration, targets: Collection<VirtualFile>, extraArgs: Collection<String> = emptyList()
 ) = with(configuration) {
-    val params = MypyArgs.MYPY_MANDATORY_COMMAND_ARGS.split(" ").toMutableList()
+    val params = MypyArgs.MANDATORY_ARGS.toMutableList()
     configFilePath.nullize(true)?.let { params.add("--config-file"); params.add(it) }
     arguments.nullize(true)?.let { params.addAll(ParametersListUtil.parse(it)) }
     if (excludeNonProjectFiles) {
