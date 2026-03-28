@@ -2,7 +2,6 @@ package works.szabope.plugins.mypy.dialog
 
 import works.szabope.plugins.common.dialog.PluginErrorDescription
 import works.szabope.plugins.common.dialog.PluginErrorDialog
-import works.szabope.plugins.common.services.ToolExecutorConfiguration
 import works.szabope.plugins.mypy.MypyBundle
 
 class MypyPackageInstallationErrorDialog(message: String) : PluginErrorDialog(
@@ -11,18 +10,18 @@ class MypyPackageInstallationErrorDialog(message: String) : PluginErrorDialog(
 )
 
 class MypyExecutionErrorDialog(
-    configuration: ToolExecutorConfiguration, result: String, resultCode: Int?
+    commandLine: String, result: String, resultCode: Int?
 ) : PluginErrorDialog(
     MypyBundle.message("mypy.dialog.execution_error.title"), PluginErrorDescription(
-        MypyBundle.message("mypy.dialog.execution_error.content", configuration, result),
+        MypyBundle.message("mypy.dialog.execution_error.content", commandLine, result),
         resultCode?.let { MypyBundle.message("mypy.dialog.execution_error.status_code", it) })
 )
 
 class MypyParseErrorDialog(
-    configuration: ToolExecutorConfiguration, targets: String, json: String, error: String
+    commandLine: String, targets: String, json: String, error: String
 ) : PluginErrorDialog(
     MypyBundle.message("mypy.dialog.parse_error.title"), PluginErrorDescription(
-        MypyBundle.message("mypy.dialog.parse_error.details", configuration, targets, json),
+        MypyBundle.message("mypy.dialog.parse_error.details", commandLine, targets, json),
         error.ifEmpty { null }?.let { MypyBundle.message("mypy.dialog.parse_error.message", it) })
 )
 

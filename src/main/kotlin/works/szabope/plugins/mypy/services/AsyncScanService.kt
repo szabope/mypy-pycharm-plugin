@@ -51,10 +51,10 @@ class AsyncScanService(private val project: Project) {
                 }
                 if (output.isNotEmpty()) {
                     showClickableBalloonError(project, MypyToolWindowPanel.ID, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
-                        DialogManager.showToolExecutionErrorDialog(configuration, output, executor.exitCode)
+                        DialogManager.showToolExecutionErrorDialog(executor.commandLine ?: "", output, executor.exitCode)
                     }
                 }
-            }.catch(handleScanException(project, configuration, stdErr, MypyIncompleteConfigurationNotifier.getInstance(project))).toList(ArrayList())
+            }.catch(handleScanException(project, { executor.commandLine }, stdErr, MypyIncompleteConfigurationNotifier.getInstance(project))).toList(ArrayList())
     }
 
     companion object {

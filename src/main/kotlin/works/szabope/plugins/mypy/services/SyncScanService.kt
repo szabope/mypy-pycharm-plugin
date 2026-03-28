@@ -32,8 +32,9 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
         val targetsByPath = targets.associateBy { it.canonicalPath ?: it.path }
         val parameters = with(project) { buildMypyParamList(configuration, shadowedTargetMap) }
         val stdErr = StringBuilder()
+        val executor = MypyExecutor(project)
         val flow: Flow<Pair<VirtualFile, MypyMessage>> =
-            MypyExecutor(project).execute(configuration, parameters).filter { it.text.isNotBlank() }.transform { line ->
+            executor.execute(configuration, parameters).filter { it.text.isNotBlank() }.transform { line ->
                 if (line.isError) {
                     stdErr.append(line.text)
                     return@transform
@@ -47,7 +48,7 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
                     when (it) {
                         is MypyParseException -> {
                             thisLogger().warn(
-                                MypyBundle.message("mypy.executable.parsing-result-failed", configuration), it
+                                MypyBundle.message("mypy.executable.parsing-result-failed", executor.commandLine ?: ""), it
                             )
                         }
 
@@ -62,7 +63,7 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
                 if (stdErr.isNotEmpty()) {
                     thisLogger().warn("mypy wrote to stderr: $stdErr")
                 }
-            }.catch(handleScanException(project, configuration, stdErr, MypyIncompleteConfigurationNotifier.getInstance(project), silent = true))
+            }.catch(handleScanException(project, { executor.commandLine }, stdErr, MypyIncompleteConfigurationNotifier.getInstance(project), silent = true))
         return cs.future {
             flow.fold(mutableMapOf<VirtualFile, MutableList<MypyMessage>>()) { acc, (k, v) ->
                 acc.getOrPut(k) { mutableListOf() }.add(v)
