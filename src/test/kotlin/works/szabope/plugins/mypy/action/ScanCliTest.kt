@@ -18,7 +18,6 @@ import works.szabope.plugins.mypy.AbstractToolWindowTestCase
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
-import works.szabope.plugins.mypy.dialog.MypyParseErrorDialog
 import works.szabope.plugins.mypy.services.MypySettings
 import works.szabope.plugins.common.test.action.markExcluded
 import works.szabope.plugins.common.test.action.unmark
@@ -76,7 +75,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         unmark(exclusionContext)
     }
 
-    fun `test mypy returning non-json result with exit code 0 results in Dialog of The Parse Error`() {
+    fun `test mypy returning non-json result with exit code 0 results in Dialog`() {
         myFixture.copyDirectoryToProject("/", "/")
         setUpSettings("mypy_non_json_output")
         toolWindowManager.onBalloon {
@@ -87,7 +86,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
             )
         }
         val dialogShown = CompletableFuture<TestDialogWrapper>()
-        dialogManager.onDialog(MypyParseErrorDialog::class.java) {
+        dialogManager.onDialog(MypyExecutionErrorDialog::class.java) {
             it.close(DialogWrapper.OK_EXIT_CODE)
             dialogShown.complete(it)
             it.getExitCode()
@@ -112,6 +111,29 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
         PlatformTestUtil.waitWhileBusy { MypyScanJobRegistryService.getInstance(project).isActive() }
         assertionError?.let { throw it }
+    }
+
+    fun `test mypy returning with an exit code 2 and stderr results in dialog`() {
+        myFixture.copyDirectoryToProject("/", "/")
+        setUpSettings("mypy_exit_with_2_and_stderr")
+        toolWindowManager.onBalloon {
+            it.listener?.hyperlinkUpdate(
+                HyperlinkEvent(
+                    "dumb", HyperlinkEvent.EventType.ACTIVATED, URI("http://localhost").toURL()
+                )
+            )
+        }
+        val dialogShown = CompletableFuture<TestDialogWrapper>()
+        dialogManager.onDialog(MypyExecutionErrorDialog::class.java) {
+            it.close(DialogWrapper.OK_EXIT_CODE)
+            dialogShown.complete(it)
+            it.getExitCode()
+        }
+        val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
+            .first().url.virtualFile!!
+        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
+        PlatformTestUtil.assertPromiseSucceeds(dialogShown.asPromise())
+        assertTrue(dialogShown.isDone && with(dialogShown.get()) { isShown() && getExitCode() == DialogWrapper.OK_EXIT_CODE })
     }
 
     // syntax error results in exit 2

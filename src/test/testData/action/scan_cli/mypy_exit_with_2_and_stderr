@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ "$1" = "-V" ]; then
+  echo "mypy 1.11.2 (compiled: yes)"
+else
+  echo 'mypy: "lib-stub/collections.pyi" shadows library module "collections"' >&2
+  echo 'note: A user-defined top-level module with name "collections" is not supported' >&2
+  exit 2
+fi

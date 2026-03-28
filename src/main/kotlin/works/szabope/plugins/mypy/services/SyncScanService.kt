@@ -59,6 +59,9 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
             }.onCompletion {
                 // cleanup
                 shadowedTargetMap.values.forEach { shadowFile -> shadowFile.deleteIfExists() }
+                if (stdErr.isNotEmpty()) {
+                    thisLogger().warn("mypy wrote to stderr: $stdErr")
+                }
             }.catch(handleScanException(project, configuration, stdErr, MypyIncompleteConfigurationNotifier.getInstance(project)))
         return cs.future {
             flow.fold(mutableMapOf<VirtualFile, MutableList<MypyMessage>>()) { acc, (k, v) ->

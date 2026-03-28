@@ -15,7 +15,7 @@ class DialogManager : AbstractDialogManager() {
     override fun createToolExecutionErrorDialog(
         configuration: ToolExecutorConfiguration,
         result: String,
-        resultCode: Int
+        resultCode: Int?
     ) = MypyExecutionErrorDialog(configuration, result, resultCode).asPluginDialog()
 
     override fun createToolOutputParseErrorDialog(
@@ -33,7 +33,7 @@ class DialogManager : AbstractDialogManager() {
         override fun showDialog(dialog: PluginDialog) = dialogManager.showDialog(dialog)
         override fun createPyPackageInstallationErrorDialog(exception: PluginPackageManagementException.InstallationFailedException) =
             dialogManager.createPyPackageInstallationErrorDialog(exception)
-        override fun createToolExecutionErrorDialog(configuration: ToolExecutorConfiguration, result: String, resultCode: Int) =
+        override fun createToolExecutionErrorDialog(configuration: ToolExecutorConfiguration, result: String, resultCode: Int?) =
             dialogManager.createToolExecutionErrorDialog(configuration, result, resultCode)
         override fun createToolOutputParseErrorDialog(configuration: ToolExecutorConfiguration, targets: String, json: String, error: String) =
             dialogManager.createToolOutputParseErrorDialog(configuration, targets, json, error)
