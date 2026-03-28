@@ -13,15 +13,17 @@ import io.mockk.every
 import io.mockk.mockkObject
 import junit.framework.AssertionFailedError
 import org.jetbrains.concurrency.asPromise
+import works.szabope.plugins.common.test.action.markExcluded
+import works.szabope.plugins.common.test.action.unmark
 import works.szabope.plugins.common.test.dialog.TestDialogWrapper
 import works.szabope.plugins.mypy.AbstractToolWindowTestCase
 import works.szabope.plugins.mypy.MypyBundle
 import works.szabope.plugins.mypy.dialog.DialogManager
 import works.szabope.plugins.mypy.dialog.MypyExecutionErrorDialog
 import works.szabope.plugins.mypy.services.MypySettings
-import works.szabope.plugins.common.test.action.markExcluded
-import works.szabope.plugins.common.test.action.unmark
-import works.szabope.plugins.mypy.testutil.*
+import works.szabope.plugins.mypy.testutil.TestDialogManager
+import works.szabope.plugins.mypy.testutil.dataContext
+import works.szabope.plugins.mypy.testutil.scan
 import java.net.URI
 import java.nio.file.Paths
 import java.util.concurrent.CompletableFuture
@@ -174,7 +176,7 @@ class ScanCliTest : AbstractToolWindowTestCase() {
         assertTrue(dialogShown.isDone && with(dialogShown.get()) { isShown() && getExitCode() == DialogWrapper.OK_EXIT_CODE })
     }
 
-    fun `test executable path does not exist results in incomplete configuration notification`() {
+    fun `test incomplete configuration notification is not shown if already visible`() {
         myFixture.copyDirectoryToProject("/", "/")
         with(MypySettings.getInstance(project)) {
             executablePath = "/does/not/exist"
@@ -185,12 +187,19 @@ class ScanCliTest : AbstractToolWindowTestCase() {
             arguments = ""
             excludeNonProjectFiles = true
         }
-        val notificationsBefore = ActionCenter.getNotifications(project).count { isIncompleteConfigNotification(it) }
         val target = WorkspaceModel.getInstance(project).currentSnapshot.entities(ContentRootEntity::class.java)
             .first().url.virtualFile!!
-        scan(dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) })
+        val dataContext = dataContext(project) { add(CommonDataKeys.VIRTUAL_FILE_ARRAY, arrayOf(target)) }
+        scan(dataContext)
         PlatformTestUtil.waitWhileBusy { MypyScanJobRegistryService.getInstance(project).isActive() }
-        assertTrue(ActionCenter.getNotifications(project).count { isIncompleteConfigNotification(it) } > notificationsBefore)
+        val notificationsAfterFirst =
+            ActionCenter.getNotifications(project).count { isIncompleteConfigNotification(it) }
+        scan(dataContext)
+        PlatformTestUtil.waitWhileBusy { MypyScanJobRegistryService.getInstance(project).isActive() }
+        assertEquals(1, notificationsAfterFirst)
+        assertEquals(
+            notificationsAfterFirst,
+            ActionCenter.getNotifications(project).count { isIncompleteConfigNotification(it) })
     }
 
     private fun isIncompleteConfigNotification(notification: com.intellij.notification.Notification): Boolean {
