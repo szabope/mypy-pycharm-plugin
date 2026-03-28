@@ -12,10 +12,10 @@ import works.szabope.plugins.mypy.toolWindow.MypyToolWindowPanel
 
 inline fun <reified T> handleScanException(
     project: Project, configuration: ToolExecutorConfiguration, stdErr: StringBuilder,
-    notifier: IncompleteConfigurationNotifier
+    notifier: IncompleteConfigurationNotifier, silent: Boolean = false
 ): suspend FlowCollector<T>.(Throwable) -> Unit = {
     if (it is ToolExecutionTerminatedException) {
-        showClickableBalloonError(project, MypyToolWindowPanel.ID, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
+        if (!silent) showClickableBalloonError(project, MypyToolWindowPanel.ID, MypyBundle.message("mypy.toolwindow.balloon.external_error")) {
             DialogManager.showToolExecutionErrorDialog(
                 configuration, stdErr.toString(), it.exitCode
             )

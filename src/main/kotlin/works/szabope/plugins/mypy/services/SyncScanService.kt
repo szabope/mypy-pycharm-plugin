@@ -62,7 +62,7 @@ class SyncScanService(private val project: Project, private val cs: CoroutineSco
                 if (stdErr.isNotEmpty()) {
                     thisLogger().warn("mypy wrote to stderr: $stdErr")
                 }
-            }.catch(handleScanException(project, configuration, stdErr, MypyIncompleteConfigurationNotifier.getInstance(project)))
+            }.catch(handleScanException(project, configuration, stdErr, MypyIncompleteConfigurationNotifier.getInstance(project), silent = true))
         return cs.future {
             flow.fold(mutableMapOf<VirtualFile, MutableList<MypyMessage>>()) { acc, (k, v) ->
                 acc.getOrPut(k) { mutableListOf() }.add(v)

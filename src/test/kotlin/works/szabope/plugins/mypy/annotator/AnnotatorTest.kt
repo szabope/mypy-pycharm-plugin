@@ -64,4 +64,36 @@ class AnnotatorTest : AbstractToolWindowTestCase() {
         assertEquals(0, mypyAnnotations.size)
         assertionError?.let { throw it }
     }
+
+    fun `test MypyAnnotator does not show ToolWindow error when mypy returns non-json result`() {
+        with(MypySettings.getInstance(project)) {
+            executablePath = Paths.get(testDataPath).resolve("mypy_non_json_output").absolutePathString()
+            workingDirectory = Paths.get(testDataPath).absolutePathString()
+            arguments = ""
+            useProjectSdk = false
+        }
+        var assertionError: Error? = null
+        toolWindowManager.onBalloon {
+            assertionError = AssertionFailedError("Should not happen: $it")
+        }
+        myFixture.configureByFile("dummy.py")
+        myFixture.doHighlighting()
+        assertionError?.let { throw it }
+    }
+
+    fun `test MypyAnnotator does not show ToolWindow error when mypy exits with unexpected exit code`() {
+        with(MypySettings.getInstance(project)) {
+            executablePath = Paths.get(testDataPath).resolve("mypy_exit_with_3").absolutePathString()
+            workingDirectory = Paths.get(testDataPath).absolutePathString()
+            arguments = ""
+            useProjectSdk = false
+        }
+        var assertionError: Error? = null
+        toolWindowManager.onBalloon {
+            assertionError = AssertionFailedError("Should not happen: $it")
+        }
+        myFixture.configureByFile("dummy.py")
+        myFixture.doHighlighting()
+        assertionError?.let { throw it }
+    }
 }
