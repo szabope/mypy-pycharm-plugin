@@ -3,6 +3,7 @@
 package works.szabope.plugins.mypy.initialization
 
 import com.intellij.openapi.application.runWriteActionAndWait
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.projectRoots.SdkAdditionalData
 import com.intellij.testFramework.PlatformTestUtil
@@ -22,8 +23,7 @@ class MypyInitializationWithRemotePythonSdkTest : AbstractMypyHeavyPlatformTestC
     private interface RemoteSdkAdditionalData : SdkAdditionalData, PyRemoteSdkAdditionalDataMarker
 
     override fun tearDown() {
-        val mockSdk = project.pythonSdk!!
-        project.pythonSdk = null
+        val mockSdk = module.pythonSdk!!
         module?.pythonSdk = null
         runWriteActionAndWait {
             ProjectJdkTable.getInstance().removeJdk(mockSdk)
@@ -33,9 +33,7 @@ class MypyInitializationWithRemotePythonSdkTest : AbstractMypyHeavyPlatformTestC
 
     override fun setUpProject() {
         val mockSdk = PythonMockSdk.create(
-            "Remote Python 3.13.1 Docker (python:latest) (3)",
-            "$PROJECT_PATH/MockSdk",
-            LanguageLevel.PYTHON313
+            "Remote Python 3.13.1 Docker (python:latest) (3)", "$PROJECT_PATH/MockSdk", LanguageLevel.PYTHON313
         )
         // let's lie about locality, see com.jetbrains.python.sdk.PythonSdkUtil#isRemote(Sdk)
         val mockAdditionalData = mockk<RemoteSdkAdditionalData>()
@@ -45,6 +43,9 @@ class MypyInitializationWithRemotePythonSdkTest : AbstractMypyHeavyPlatformTestC
             ProjectJdkTable.getInstance().addJdk(mockSdk)
         }
         myProject = PlatformTestUtil.loadAndOpenProject(Path.of(PROJECT_PATH).toAbsolutePath(), getTestRootDisposable())
+        runWriteActionAndWait {
+            myModule = ModuleManager.getInstance(myProject).modules.first()
+        }
     }
 
     fun `test plugin initialized for project with python sdk results in notification`() {
