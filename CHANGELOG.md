@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [2.2.3] - 2026-04-06
+
+- Changelog update - `v2.2.2` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/167
+- determine SDK based on module instead of project by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/169
+
 ## [2.2.2] - 2026-03-29
 
 - Changelog update - `v2.2.1` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/165
@@ -265,7 +270,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.2...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.3...HEAD
+[2.2.3]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.1.8...v2.2.0
