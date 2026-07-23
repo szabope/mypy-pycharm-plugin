@@ -6,8 +6,8 @@ myPluginCommon = "latest"
 
 # plugins
 changelog = "2.5.0"
-intelliJPlatform = "2.10.5"
-kotlin = "2.2.21"
+intelliJPlatform = "2.18.1"
+kotlin = "2.4.10"
 kover = "0.9.3"
 serialization = "2.2.0"
 
