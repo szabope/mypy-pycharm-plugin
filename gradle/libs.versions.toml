@@ -8,7 +8,6 @@ myPluginCommon = "latest"
 changelog = "2.5.0"
 intelliJPlatform = "2.18.1"
 kotlin = "2.4.10"
-kover = "0.9.3"
 serialization = "2.2.0"
 
 [libraries]
@@ -20,5 +19,4 @@ myPluginCommon = { group = "works.szabope.plugins", name = "common", version.ref
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization" }
