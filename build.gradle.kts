@@ -17,9 +17,6 @@ version = providers.gradleProperty("pluginVersion").get()
 // Set the JVM language level used to build the project.
 kotlin {
     jvmToolchain(25)
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
-    }
 }
 
 // Configure project's dependencies
@@ -148,5 +145,12 @@ tasks {
 
     publishPlugin {
         dependsOn(patchChangelog)
+    }
+
+    test {
+        exclude("**/*\$Companion.class")
+        exclude("**/Abstract*.class")
+        include("**/*Test.class")
+        include("**/*TestCase.class")
     }
 }

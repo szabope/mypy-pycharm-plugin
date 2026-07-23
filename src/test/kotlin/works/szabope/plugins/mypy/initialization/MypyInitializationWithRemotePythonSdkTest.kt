@@ -5,13 +5,12 @@ package works.szabope.plugins.mypy.initialization
 import com.intellij.openapi.application.runWriteActionAndWait
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.projectRoots.ProjectJdkTable
-import com.intellij.openapi.projectRoots.SdkAdditionalData
 import com.intellij.testFramework.PlatformTestUtil
 import com.jetbrains.python.psi.LanguageLevel
 import com.jetbrains.python.sdk.PyRemoteSdkAdditionalDataMarker
+import com.jetbrains.python.sdk.PythonSdkAdditionalData
 import com.jetbrains.python.sdk.pythonSdk
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.mockkObject
 import works.szabope.plugins.common.test.sdk.PythonMockSdk
 import works.szabope.plugins.mypy.AbstractMypyHeavyPlatformTestCase
@@ -20,7 +19,7 @@ import java.nio.file.Path
 
 class MypyInitializationWithRemotePythonSdkTest : AbstractMypyHeavyPlatformTestCase() {
 
-    private interface RemoteSdkAdditionalData : SdkAdditionalData, PyRemoteSdkAdditionalDataMarker
+    private class RemoteSdkAdditionalData : PythonSdkAdditionalData(), PyRemoteSdkAdditionalDataMarker
 
     override fun tearDown() {
         val mockSdk = module.pythonSdk!!
@@ -36,9 +35,9 @@ class MypyInitializationWithRemotePythonSdkTest : AbstractMypyHeavyPlatformTestC
             "Remote Python 3.13.1 Docker (python:latest) (3)", "$PROJECT_PATH/MockSdk", LanguageLevel.PYTHON313
         )
         // let's lie about locality, see com.jetbrains.python.sdk.PythonSdkUtil#isRemote(Sdk)
-        val mockAdditionalData = mockk<RemoteSdkAdditionalData>()
+        val remoteSdkAdditionalData = RemoteSdkAdditionalData()
         mockkObject(mockSdk)
-        every { mockSdk.sdkAdditionalData } returns mockAdditionalData
+        every { mockSdk.sdkAdditionalData } returns remoteSdkAdditionalData
         runWriteActionAndWait {
             ProjectJdkTable.getInstance().addJdk(mockSdk)
         }
