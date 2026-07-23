@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [2.2.4] - 2026-07-23
+
+- Changelog update - `v2.2.3` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/170
+- Support 2026.2 by @szabope in https://github.com/szabope/mypy-pycharm-plugin/pull/173 Resolves [Could not determine the dependencies of task ':koverGenerateArtifactJvm'.](https://github.com/szabope/mypy-pycharm-plugin/issues/172)
+
 ## [2.2.3] - 2026-04-06
 
 - Changelog update - `v2.2.2` by @github-actions[bot] in https://github.com/szabope/mypy-pycharm-plugin/pull/167
@@ -270,7 +275,8 @@ Fix Naming collisions with old plugin
      - Severity filters: **removed**
      - Rescan: **added** - runs mypy scan on the latest target(s)
 
-[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.3...HEAD
+[Unreleased]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.4...HEAD
+[2.2.4]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/szabope/mypy-pycharm-plugin/compare/v2.2.0...v2.2.1
