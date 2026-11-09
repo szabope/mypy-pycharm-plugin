@@ -9,6 +9,9 @@ import com.intellij.testFramework.PlatformTestUtil
 import com.jetbrains.python.psi.LanguageLevel
 import com.jetbrains.python.sdk.PyRemoteSdkAdditionalDataMarker
 import com.jetbrains.python.sdk.PythonSdkAdditionalData
+import com.jetbrains.python.sdk.flavors.PyFlavorAndData
+import com.jetbrains.python.sdk.flavors.PyFlavorData
+import com.jetbrains.python.sdk.flavors.PythonSdkFlavor
 import com.jetbrains.python.sdk.pythonSdk
 import io.mockk.every
 import io.mockk.mockkObject
@@ -16,10 +19,16 @@ import works.szabope.plugins.common.test.sdk.PythonMockSdk
 import works.szabope.plugins.mypy.AbstractMypyHeavyPlatformTestCase
 import works.szabope.plugins.mypy.testutil.getMypyConfigurationNotCompleteNotification
 import java.nio.file.Path
+import java.nio.file.Paths
 
 class MypyInitializationWithRemotePythonSdkTest : AbstractMypyHeavyPlatformTestCase() {
 
-    private class RemoteSdkAdditionalData : PythonSdkAdditionalData(), PyRemoteSdkAdditionalDataMarker
+    private class RemoteSdkAdditionalData(workingDirectory: Path) : PythonSdkAdditionalData(
+        PyFlavorAndData(
+            PyFlavorData.Empty,
+            PythonSdkFlavor.UnknownFlavor.INSTANCE
+        ), workingDirectory
+    ), PyRemoteSdkAdditionalDataMarker
 
     override fun tearDown() {
         val mockSdk = module.pythonSdk!!
@@ -35,7 +44,7 @@ class MypyInitializationWithRemotePythonSdkTest : AbstractMypyHeavyPlatformTestC
             "Remote Python 3.13.1 Docker (python:latest) (3)", "$PROJECT_PATH/MockSdk", LanguageLevel.PYTHON313
         )
         // let's lie about locality, see com.jetbrains.python.sdk.PythonSdkUtil#isRemote(Sdk)
-        val remoteSdkAdditionalData = RemoteSdkAdditionalData()
+        val remoteSdkAdditionalData = RemoteSdkAdditionalData(Paths.get("$PROJECT_PATH/MockSdk"))
         mockkObject(mockSdk)
         every { mockSdk.sdkAdditionalData } returns remoteSdkAdditionalData
         runWriteActionAndWait {
