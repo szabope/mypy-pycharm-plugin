@@ -1,5 +1,6 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
@@ -12,6 +13,13 @@ plugins {
 
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
+
+// IDE to compile against, run and test with: PY (default) or IU, e.g. `./gradlew runIde -PtargetIde=IU`.
+// Not named `platformType`, because command-line properties also reach the included pycharm-plugin-base build.
+val targetIde = providers.gradleProperty("targetIde").orElse(providers.gradleProperty("platformType"))
+val targetsPyCharm = targetIde.get() == IntelliJPlatformType.PyCharm.code
+// PyCharm and IDEA minor releases are not in lockstep (e.g. there is a PyCharm 2026.3.0.1, but no such IDEA).
+val targetIdeVersion = providers.gradleProperty(if (targetsPyCharm) "platformVersion" else "ideaVersion")
 
 // Set the JVM language level used to build the project.
 kotlin {
@@ -39,12 +47,19 @@ dependencies {
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
-        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion")) {
+        create(targetIde, targetIdeVersion) {
             useInstaller.set(true)
         }
 
         // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+
+        // PyCharm bundles PythonCore. Other IDEs get the Marketplace version compatible with the target platform.
+        if (targetsPyCharm) {
+            bundledPlugin("PythonCore")
+        } else {
+            compatiblePlugin("PythonCore")
+        }
 
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
@@ -115,7 +130,8 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            recommended()
+            create(IntelliJPlatformType.PyCharm, providers.gradleProperty("platformVersion"))
+            create(IntelliJPlatformType.IntellijIdeaUltimate, providers.gradleProperty("ideaVersion"))
         }
     }
 }
