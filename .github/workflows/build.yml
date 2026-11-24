@@ -82,11 +82,15 @@ jobs:
           name: ${{ steps.artifact.outputs.filename }}
           path: ./build/distributions/content/*/*
 
-  # Run tests and upload a code coverage report
+  # Run tests on PyCharm (PY) and IntelliJ IDEA (IU)
   test:
-    name: Test
+    name: Test (${{ matrix.ide }})
     needs: [ build ]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        ide: [ PY, IU ]
     permissions:
       contents: read
     steps:
@@ -120,22 +124,15 @@ jobs:
         env:
           GPR_USERNAME: ${{secrets.GPR_USERNAME}}
           GPR_TOKEN: ${{secrets.GPR_TOKEN}}
-        run: ./gradlew check
+        run: ./gradlew check -PtargetIde=${{ matrix.ide }}
 
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
         if: ${{ failure() }}
         uses: actions/upload-artifact@v5
         with:
-          name: tests-result
+          name: tests-result-${{ matrix.ide }}
           path: ${{ github.workspace }}/build/reports/tests
-
-      # Upload the Kover report to CodeCov
-      - name: Upload Code Coverage Report
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
-        with:
-          files: ${{ github.workspace }}/build/reports/kover/report.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
 
   # Run plugin structure verification along with IntelliJ Plugin Verifier
   verify:
